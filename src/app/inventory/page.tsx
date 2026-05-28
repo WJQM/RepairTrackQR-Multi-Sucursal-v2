@@ -51,26 +51,72 @@ export default function InventoryPage() {
   };
 
   useEffect(() => {
-    fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings({ companyName: d.companyName, logo: d.logo }); }).catch(() => {});
+    fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings({ companyName: d.companyName, logo: d.logo }).catch(() => {}); }).catch(() => {});
     const token = sessionStorage.getItem("token");
     const userData = sessionStorage.getItem("user");
     if (!token || !userData) { router.push("/"); return; }
-    const parsed = JSON.parse(userData);
+    const parsed = (() => { try { return JSON.parse(userData); } catch { return null; } })();
     if (parsed.role !== "admin" && parsed.role !== "superadmin") { router.push("/dashboard"); return; }
     setUser(parsed);
     // Load branches for superadmin
     if (parsed.role === "superadmin") {
-      apiFetch("/api/branches").then(r => r.json()).then(b => { if (Array.isArray(b)) { setBranches(b); const ab = sessionStorage.getItem("activeBranchId"); if (ab) setActiveBranch(ab); else if (b.length > 0) { setActiveBranch(b[0].id); setActiveBranchId(b[0].id); } } }).catch(() => {});
+      apiFetch("/api/branches").then(r => r.ok ? r.json() : Promise.reject(r.status)).then(b => { if (Array.isArray(b)) { setBranches(b); const ab = sessionStorage.getItem("activeBranchId"); if (ab) setActiveBranch(ab); else if (b.length > 0) { setActiveBranch(b[0].id); setActiveBranchId(b[0].id); } } }).catch(() => {});
     } else { setActiveBranch(parsed.branchId || ""); }
 
     loadItems();
-    const saved = sessionStorage.getItem("inventoryCategories");
-    if (saved) try { setCategories(JSON.parse(saved)); } catch {}
+    // Load categories from API (persisted in DB)
+    apiFetch("/api/inventory/categories")
+      .then(r => r.json())
+      .then(d => {
+        if (d.categories?.length) {
+          setCategories(d.categories);
+        } else {
+          // API empty — check sessionStorage for migration
+          const saved = sessionStorage.getItem("inventoryCategories");
+          if (saved) {
+            try {
+              const cats = JSON.parse(saved);
+              if (Array.isArray(cats) && cats.length > 0) {
+                setCategories(cats);
+                // Migrate to DB
+                apiFetch("/api/inventory/categories", {
+                  method: "POST",
+                  body: JSON.stringify({ categories: cats }),
+                }).then(r=>r.json()).then(d=>{ console.log("Migrated to DB:", d); }).catch(e=>console.error("Migration error:", e));
+              }
+            } catch {}
+          }
+        }
+      })
+      .catch(() => {
+        const saved = sessionStorage.getItem("inventoryCategories");
+        if (saved) try { setCategories(JSON.parse(saved)); } catch {}
+      });
+
+    // Force sync: after 2s, if categories are loaded, save them to DB
+    setTimeout(() => {
+      const saved = sessionStorage.getItem("inventoryCategories");
+      if (saved) {
+        try {
+          const cats = JSON.parse(saved);
+          if (Array.isArray(cats) && cats.length > 0) {
+            console.log("Force syncing categories to DB:", cats.length, "items");
+            apiFetch("/api/inventory/categories", {
+              method: "POST",
+              body: JSON.stringify({ categories: cats }),
+            }).then(r=>r.json()).then(d=>{ 
+              if (d.ok) console.log("✓ Categories synced to DB. Key:", d.key);
+              else console.error("✗ Sync failed:", d);
+            }).catch(e=>console.error("✗ Sync error:", e));
+          }
+        } catch {}
+      }
+    }, 2000);
 
     const savedForm = sessionStorage.getItem("inventoryFormData");
     if (savedForm) {
       try {
-        const data = JSON.parse(savedForm);
+        const data = (() => { try { return JSON.parse(savedForm); } catch { return null; } })();
         setEditingId(data.editingId || null);
         setName(data.name || "");
         setCategory(data.category || "");
@@ -87,7 +133,7 @@ export default function InventoryPage() {
     const capturedData = sessionStorage.getItem("capturedImage");
     if (capturedData) {
       try {
-        const { url, preview } = JSON.parse(capturedData);
+        const { url, preview } = (() => { try { return JSON.parse(capturedData); } catch { return {}; } })();
         setImageUrls(prev => [...prev, url]);
         setImagePreviews(prev => [...prev, preview]);
         setShowForm(true);
@@ -97,7 +143,18 @@ export default function InventoryPage() {
     }
   }, []);
 
-  const saveCategories = (cats: string[]) => { setCategories(cats); sessionStorage.setItem("inventoryCategories", JSON.stringify(cats)); };
+  const saveCategories = (cats: string[]) => {
+    setCategories(cats);
+    // Persist to sessionStorage as cache
+    sessionStorage.setItem("inventoryCategories", JSON.stringify(cats));
+    // Persist to DB
+    apiFetch("/api/inventory/categories", {
+      method: "POST",
+      body: JSON.stringify({ categories: cats }),
+    }).then(r => r.json()).then(d => {
+      if (!d.ok) console.error("Save categories failed:", d);
+    }).catch(e => console.error("Save categories error:", e));
+  };
   const addCategory = () => { const t = newCategoryName.trim(); if (!t) return; if (categories.includes(t)) { sileo.error({ title: "Ya existe" }); return; } saveCategories([...categories, t]); setNewCategoryName(""); sileo.success({ title: `"${t}" creada` }); };
   const deleteCategory = (idx: number) => { const cat = categories[idx]; if (!confirm(`¿Eliminar "${cat}"?`)) return; saveCategories(categories.filter((_, i) => i !== idx)); if (filterCategory === cat) setFilterCategory("all"); sileo.success({ title: `"${cat}" eliminada` }); };
   const saveEditCategory = (idx: number) => { const t = editingCatName.trim(); if (!t || t === categories[idx]) { setEditingCatIdx(null); return; } if (categories.includes(t)) { sileo.error({ title: "Ya existe" }); return; } const old = categories[idx]; const u = [...categories]; u[idx] = t; saveCategories(u); if (filterCategory === old) setFilterCategory(t); setEditingCatIdx(null); sileo.success({ title: `Renombrada` }); };
@@ -178,11 +235,11 @@ export default function InventoryPage() {
   if (!user) return <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg-primary)", color: "var(--text-muted)", fontSize: 14 }}>Cargando...</div>;
 
   return (
-    <div className="main-content" style={{ minHeight: "100vh", background: "var(--bg-primary)", paddingLeft: 200, paddingTop: 0 }}>
+    <div className="main-content" style={{ minHeight: "100vh", background: "var(--bg-primary)", paddingLeft: 210, paddingTop: 0 }}>
 {viewImage && (
         <div onClick={() => setViewImage(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", backdropFilter: "blur(10px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 300, cursor: "pointer" }}>
           <div style={{ position: "relative", maxWidth: "90%", maxHeight: "90%" }}>
-            <img src={viewImage} alt="Producto" style={{ maxWidth: "100%", maxHeight: "85vh", borderRadius: 16, boxShadow: "0 20px 60px rgba(0,0,0,0.5)" }} />
+            <img src={viewImage} alt="Producto" style={{ maxWidth: "100%", maxHeight: "85vh", borderRadius: 12, boxShadow: "0 20px 60px rgba(26,29,46,0.40)" }} />
             <button onClick={() => setViewImage(null)} style={{ position: "absolute", top: -14, right: -14, width: 32, height: 32, borderRadius: "50%", background: "rgba(239,68,68,0.9)", border: "none", color: "#fff", fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
           </div>
         </div>
@@ -192,10 +249,10 @@ export default function InventoryPage() {
         @keyframes slideIn { from { opacity: 0; transform: translateX(80px) scale(0.95); } to { opacity: 1; transform: translateX(0) scale(1); } }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeScale { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
-        .sidebar-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 14px; border-radius: 10px; border: none; font-size: 12px; font-weight: 600; cursor: pointer; background: transparent; color: var(--text-muted); transition: all 0.15s; text-align: left; }
-        .sidebar-btn:hover { background: rgba(99,102,241,0.06); color: var(--text-secondary); }
-        .sidebar-btn.active { background: rgba(99,102,241,0.12); color: #818cf8; }
-        .sidebar-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+        .sidebar-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 14px; border-radius: 10px; border: none; font-size: 12px; font-weight: 600; cursor: pointer; background: transparent; color: var(--sidebar-text); transition: all 0.15s; text-align: left; }
+        .sidebar-btn:hover { background: rgba(26,184,196,0.05); color: var(--text-secondary); }
+        .sidebar-btn.active { background: rgba(26,184,196,0.07); color: #2dd4df; }
+        .sidebar-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; background: var(--sidebar-item); color: var(--sidebar-text); }
       
         @media(max-width:1024px){
           .sidebar-desktop{transform:translateX(-100%)!important}
@@ -225,8 +282,8 @@ export default function InventoryPage() {
             { label: "Stock Bajo", value: lowStock, icon: "⚠️", color: "#f59e0b" },
             
           ].map((s, i) => (
-            <div key={i} style={{ padding: "20px 18px", background: `linear-gradient(135deg, ${s.color}10, ${s.color}02)`, borderRadius: 16, border: `1px solid ${s.color}15`, animation: `fadeIn 0.4s ease-out ${i * 0.06}s both`, position: "relative", overflow: "hidden" }}>
-              <div style={{ position: "absolute", top: -10, right: -10, fontSize: 48, opacity: 0.06 }}>{s.icon}</div>
+            <div key={i} style={{ padding: "20px 18px", background: "#ffffff", borderRadius: 12, border: "1.5px solid #cbd5e8", borderTop: `4px solid ${s.color}`, boxShadow: "0 4px 18px rgba(30,42,58,0.10), 0 1px 3px rgba(30,42,58,0.05)", animation: `fadeIn 0.4s ease-out ${i * 0.06}s both`, position: "relative", overflow: "hidden" }}>
+              <div style={{ position: "absolute", top: 8, right: 12, fontSize: 28, opacity: 0.12 }}>{s.icon}</div>
               <div style={{ fontSize: 11, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.8px", fontWeight: 600 }}>{s.label}</div>
               <div style={{ fontSize: 28, fontWeight: 800, color: s.color, marginTop: 8, letterSpacing: "-0.5px" }}>{s.value}</div>
             </div>
@@ -241,11 +298,11 @@ export default function InventoryPage() {
             </div>
             <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)} style={{ padding: "10px 14px", background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 10, color: "var(--text-primary)", fontSize: 12, cursor: "pointer", outline: "none" }}>
               <option value="all">Todas las categorías</option>
-              {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+              {(categories || []).map(cat => <option key={cat} value={cat}>{cat}</option>)}
             </select>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
-            <button onClick={() => window.open("/inventory/print", "_blank")} style={{ padding: "8px 14px", background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.2)", borderRadius: 10, color: "#6366f1", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>🖨️ Extracto</button>
+            <button onClick={() => window.open("/inventory/print", "_blank")} style={{ padding: "8px 14px", background: "rgba(26,184,196,0.05)", border: "1px solid rgba(26,184,196,0.10)", borderRadius: 10, color: "#1ab8c4", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>🖨️ Extracto</button>
             <button onClick={() => setShowCategoryPanel(!showCategoryPanel)} style={{ padding: "8px 14px", background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.2)", borderRadius: 10, color: "#10b981", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>🏷️ Categorías</button>
             <button onClick={() => { resetForm(); setShowForm(true); }} style={{ padding: "8px 14px", background: "linear-gradient(135deg, #3b82f6, #2563eb)", border: "none", borderRadius: 10, color: "#fff", fontWeight: 700, fontSize: 12, cursor: "pointer" }}>＋ Nuevo</button>
           </div>
@@ -263,7 +320,7 @@ export default function InventoryPage() {
             </div>
             <div style={{ fontSize: 10, color: "var(--text-muted)", marginBottom: 10 }}>Clic en ✏️ para editar, ✕ para eliminar:</div>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              {categories.map((cat, idx) => (
+              {(categories || []).map((cat, idx) => (
                 <div key={idx} style={{ padding: "5px 8px", borderRadius: 8, background: "rgba(59,130,246,0.06)", border: "1px solid rgba(59,130,246,0.1)", fontSize: 11, fontWeight: 600, color: "#3b82f6", display: "flex", alignItems: "center", gap: 6 }}>
                   {editingCatIdx === idx ? (
                     <input value={editingCatName} onChange={(e) => setEditingCatName(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") saveEditCategory(idx); if (e.key === "Escape") setEditingCatIdx(null); }} onBlur={() => saveEditCategory(idx)} autoFocus style={{ width: 100, padding: "2px 6px", background: "var(--bg-tertiary)", border: "1px solid #3b82f6", borderRadius: 4, color: "var(--text-primary)", fontSize: 11, outline: "none" }} />
@@ -278,8 +335,8 @@ export default function InventoryPage() {
 
         {showForm && (
           <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 150, padding: 20 }}>
-            <div style={{ width: "100%", maxWidth: 560, maxHeight: "90vh", overflow: "auto", background: "var(--bg-card)", borderRadius: 20, border: "1px solid rgba(59,130,246,0.2)", boxShadow: "0 20px 60px rgba(0,0,0,0.5)", animation: "fadeScale 0.3s ease-out" }}>
-              <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ width: "100%", maxWidth: 560, maxHeight: "90vh", overflow: "auto", background: "var(--bg-card)", borderRadius: 12, border: "1px solid rgba(59,130,246,0.2)", boxShadow: "0 20px 60px rgba(26,29,46,0.40)", animation: "fadeScale 0.3s ease-out" }}>
+              <div style={{ padding: "16px 20px", borderBottom: "1.5px solid #cbd5e8", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <h3 style={{ fontSize: 15, fontWeight: 700, color: "#3b82f6" }}>{editingId ? "✏️ Editar Item" : "＋ Nuevo Item"}</h3>
                 <button onClick={resetForm} style={{ width: 28, height: 28, borderRadius: 6, background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", color: "#ef4444", fontSize: 12, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
               </div>
@@ -287,11 +344,11 @@ export default function InventoryPage() {
                 <div>
                   <label style={labelStyle}>📷 Imágenes del producto</label>
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                    {imagePreviews.map((preview, idx) => (
+                    {(imagePreviews || []).map((preview, idx) => (
                       <div key={idx} style={{ width: 100, height: 130, borderRadius: 10, overflow: "hidden", position: "relative", border: "2px solid #3b82f6", flexShrink: 0 }}>
                         <img src={preview} alt={`Foto ${idx + 1}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                         <button type="button" onClick={() => removeImage(idx)} style={{ position: "absolute", top: 4, right: 4, width: 20, height: 20, borderRadius: "50%", background: "rgba(239,68,68,0.9)", border: "none", color: "#fff", fontSize: 10, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
-                        {uploading && idx === imagePreviews.length - 1 && <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center" }}><div style={{ color: "#fff", fontSize: 10, fontWeight: 600 }}>...</div></div>}
+                        {uploading && idx === imagePreviews.length - 1 && <div style={{ position: "absolute", inset: 0, background: "rgba(26,29,46,0.45)", display: "flex", alignItems: "center", justifyContent: "center" }}><div style={{ color: "#fff", fontSize: 10, fontWeight: 600 }}>...</div></div>}
                       </div>
                     ))}
                     <div onClick={() => fileInputRef.current?.click()} style={{ width: 100, height: 130, borderRadius: 10, border: "2px dashed var(--border)", background: "var(--bg-tertiary)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, cursor: "pointer", flexShrink: 0 }}>
@@ -306,7 +363,7 @@ export default function InventoryPage() {
                 </div>
                 <div><label style={labelStyle}>Nombre *</label><input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ej: SSD Kingston 500GB" style={fieldStyle} /></div>
                 <div className="form-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                  <div><label style={labelStyle}>Categoría</label><select value={category} onChange={(e) => setCategory(e.target.value)} style={{ ...fieldStyle, cursor: "pointer" }}><option value="">Sin categoría</option>{categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}</select></div>
+                  <div><label style={labelStyle}>Categoría</label><select value={category} onChange={(e) => setCategory(e.target.value)} style={{ ...fieldStyle, cursor: "pointer" }}><option value="">Sin categoría</option>{(categories || []).map(cat => <option key={cat} value={cat}>{cat}</option>)}</select></div>
                   <div><label style={labelStyle}>Cantidad</label><input value={quantity} onChange={(e) => setQuantity(e.target.value)} placeholder="0" type="number" style={fieldStyle} /></div>
                   <div><label style={labelStyle}>Precio (Bs.)</label><input value={price} onChange={(e) => setPrice(e.target.value)} placeholder="0.00" type="number" style={fieldStyle} /></div>
                   <div><label style={labelStyle}>Stock mínimo</label><input value={minStock} onChange={(e) => setMinStock(e.target.value)} placeholder="5" type="number" style={fieldStyle} /></div>
@@ -323,7 +380,7 @@ export default function InventoryPage() {
         {loading ? (
           <div style={{ padding: 60, textAlign: "center", color: "var(--text-muted)" }}>Cargando...</div>
         ) : filteredItems.length === 0 ? (
-          <div style={{ padding: 60, textAlign: "center", background: "var(--bg-card)", borderRadius: 18, border: "1px solid var(--border)" }}>
+          <div style={{ padding: 60, textAlign: "center", background: "var(--bg-card)", borderRadius: 14, border: "1.5px solid #cbd5e8" }}>
             <div style={{ fontSize: 48, marginBottom: 16 }}>📦</div>
             <h3 style={{ fontSize: 17, fontWeight: 700, marginBottom: 6 }}>No hay items en el inventario</h3>
             <p style={{ color: "var(--text-muted)", fontSize: 13, marginBottom: 16 }}>Agrega tu primer producto</p>
@@ -331,12 +388,12 @@ export default function InventoryPage() {
           </div>
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 18 }}>
-            {filteredItems.map((item, i) => {
+            {(filteredItems || []).map((item, i) => {
               const isLow = item.quantity <= item.minStock;
               const imgs = parseImages(item.image);
               const firstImg = imgs[0] || null;
               return (
-                <div key={item.id} style={{ background: "var(--bg-card)", borderRadius: 16, border: `1px solid ${isLow ? "rgba(239,68,68,0.2)" : "var(--border)"}`, overflow: "hidden", animation: `fadeIn 0.3s ease-out ${i * 0.04}s both`, position: "relative" }}>
+                <div key={item.id} style={{ background: "var(--bg-card)", borderRadius: 12, border: `1px solid ${isLow ? "rgba(239,68,68,0.2)" : "var(--border)"}`, overflow: "hidden", animation: `fadeIn 0.3s ease-out ${i * 0.04}s both`, position: "relative" }}>
                   {isLow && <div style={{ position: "absolute", top: 10, left: 10, zIndex: 2, padding: "3px 8px", borderRadius: 6, background: "rgba(239,68,68,0.9)", color: "#fff", fontSize: 9, fontWeight: 800, textTransform: "uppercase" }}>⚠️ Stock Bajo</div>}
                   {item.category && <div style={{ position: "absolute", top: 10, right: 10, zIndex: 2, padding: "3px 8px", borderRadius: 6, background: "rgba(59,130,246,0.85)", color: "#fff", fontSize: 9, fontWeight: 700 }}>{item.category}</div>}
                   {imgs.length > 1 && <div style={{ position: "absolute", ...(item.category ? { top: 34 } : { top: 10 }), right: 10, zIndex: 2, padding: "2px 6px", borderRadius: 5, background: "rgba(0,0,0,0.7)", color: "#fff", fontSize: 9, fontWeight: 700 }}>📷 {imgs.length}</div>}
@@ -352,7 +409,7 @@ export default function InventoryPage() {
                       <button onClick={(e) => { e.stopPropagation(); updateQuantity(item.id, 1); }} style={{ width: 30, height: 30, borderRadius: 8, border: "1px solid var(--border)", background: "var(--bg-primary)", color: "var(--text-muted)", fontSize: 18, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700 }}>+</button>
                     </div>
                     <div style={{ display: "flex", gap: 6 }}>
-                      <button onClick={() => editItem(item)} style={{ flex: 1, padding: "8px", background: "rgba(99,102,241,0.06)", border: "1px solid rgba(99,102,241,0.15)", borderRadius: 8, color: "#6366f1", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>✏️ Editar</button>
+                      <button onClick={() => editItem(item)} style={{ flex: 1, padding: "8px", background: "rgba(26,184,196,0.05)", border: "1px solid rgba(26,184,196,0.08)", borderRadius: 8, color: "#1ab8c4", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>✏️ Editar</button>
                       <button onClick={() => deleteItem(item.id)} style={{ padding: "8px 12px", background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.15)", borderRadius: 8, color: "#ef4444", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>🗑️</button>
                     </div>
                   </div>

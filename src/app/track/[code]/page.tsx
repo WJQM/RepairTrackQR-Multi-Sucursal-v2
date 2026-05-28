@@ -51,7 +51,7 @@ export default function TrackPage() {
   const [showBranchPicker, setShowBranchPicker] = useState(false);
   const [settings, setSettings] = useState<{ companyName: string; slogan: string; logo: string | null }>({ companyName: "RepairTrackQR", slogan: "Servicio Técnico Especializado", logo: null });
 
-  useEffect(() => { setMounted(true); setFromScanner(new URLSearchParams(window.location.search).get("from") === "scanner"); fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings(d); }).catch(() => {}); }, []);
+  useEffect(() => { setMounted(true); setFromScanner(new URLSearchParams(window.location.search).get("from") === "scanner"); fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings(d).catch(() => {}); }).catch(() => {}); }, []);
   useEffect(() => { if (code) loadRepair(); }, [code]);
 
   const loadRepair = async () => {
@@ -87,16 +87,16 @@ export default function TrackPage() {
 
   if (showBranchPicker) {
     return (
-      <div style={{ minHeight: "100vh", background: "#050507", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
-        <div style={{ maxWidth: 420, width: "100%", background: "rgba(17,17,24,0.95)", borderRadius: 24, border: "1px solid rgba(99,102,241,0.15)", padding: "32px 24px", textAlign: "center" }}>
+      <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #0a1628 0%, #0f2040 40%, #0a1a30 100%)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+        <div style={{ maxWidth: 420, width: "100%", background: "rgba(17,17,24,0.95)", borderRadius: 14, border: "1px solid rgba(26,184,196,0.08)", padding: "32px 24px", textAlign: "center" }}>
           <div style={{ fontSize: 48, marginBottom: 16 }}>🏢</div>
-          <h2 style={{ fontSize: 20, fontWeight: 800, color: "#eeeef2", marginBottom: 8 }}>Selecciona la Sucursal</h2>
-          <p style={{ color: "#8888a0", fontSize: 13, marginBottom: 24 }}>La orden <strong style={{ color: "#818cf8" }}>{code}</strong> existe en varias sucursales</p>
+          <h2 style={{ fontSize: 20, fontWeight: 800, color: "#1a1d2e", marginBottom: 8 }}>Selecciona la Sucursal</h2>
+          <p style={{ color: "#4a5068", fontSize: 13, marginBottom: 24 }}>La orden <strong style={{ color: "#2dd4df" }}>{code}</strong> existe en varias sucursales</p>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {multipleResults.map((r: any) => (
-              <button key={r.id} onClick={() => selectBranch(r)} style={{ padding: "14px 18px", background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.2)", borderRadius: 14, color: "#eeeef2", fontSize: 14, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", transition: "all 0.2s" }}>
+              <button key={r.id} onClick={() => selectBranch(r)} style={{ padding: "14px 18px", background: "rgba(26,184,196,0.05)", border: "1px solid rgba(26,184,196,0.10)", borderRadius: 14, color: "#1a1d2e", fontSize: 14, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", transition: "all 0.2s" }}>
                 <span>🏢 {r.branch?.name || "Sucursal"}</span>
-                <span style={{ fontSize: 12, color: "#818cf8" }}>{r.device}</span>
+                <span style={{ fontSize: 12, color: "#2dd4df" }}>{r.device}</span>
               </button>
             ))}
           </div>
@@ -107,11 +107,11 @@ export default function TrackPage() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: "100vh", background: "#050507", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #0a1628 0%, #0f2040 40%, #0a1a30 100%)", display: "flex", alignItems: "center", justifyContent: "center" }}>
         <style>{`@keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.95); } }`}</style>
         <div style={{ textAlign: "center", animation: "pulse 1.5s ease-in-out infinite" }}>
           <div style={{ fontSize: 48, marginBottom: 16 }}>🔍</div>
-          <p style={{ color: "#8888a0", fontSize: 15, fontWeight: 500 }}>Buscando orden...</p>
+          <p style={{ color: "#4a5068", fontSize: 15, fontWeight: 500 }}>Buscando orden...</p>
         </div>
       </div>
     );
@@ -119,15 +119,15 @@ export default function TrackPage() {
 
   if (notFound || !repair) {
     return (
-      <div style={{ minHeight: "100vh", background: "#050507", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+      <div style={{ minHeight: "100vh", background: "linear-gradient(135deg, #0a1628 0%, #0f2040 40%, #0a1a30 100%)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
         <style>{`@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }`}</style>
-        <div style={{ textAlign: "center", padding: 48, background: "rgba(17,17,24,0.9)", borderRadius: 24, border: "1px solid rgba(239,68,68,0.15)", maxWidth: 420, animation: "fadeUp 0.5s ease-out", boxShadow: "0 0 60px rgba(239,68,68,0.05)" }}>
+        <div style={{ textAlign: "center", padding: 48, background: "rgba(17,17,24,0.9)", borderRadius: 14, border: "1px solid rgba(239,68,68,0.15)", maxWidth: 420, animation: "fadeUp 0.5s ease-out", boxShadow: "0 0 60px rgba(239,68,68,0.05)" }}>
           <div style={{ fontSize: 56, marginBottom: 20 }}>😔</div>
-          <h2 style={{ fontSize: 22, fontWeight: 800, color: "#eeeef2", marginBottom: 10 }}>No encontrada</h2>
-          <p style={{ color: "#8888a0", fontSize: 14, lineHeight: 1.6 }}>No existe ninguna orden con el código:</p>
+          <h2 style={{ fontSize: 22, fontWeight: 800, color: "#1a1d2e", marginBottom: 10 }}>No encontrada</h2>
+          <p style={{ color: "#4a5068", fontSize: 14, lineHeight: 1.6 }}>No existe ninguna orden con el código:</p>
           <div style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 700, color: "#ef4444", margin: "12px 0", padding: "10px 20px", background: "rgba(239,68,68,0.06)", borderRadius: 10, display: "inline-block" }}>{code}</div>
-          <p style={{ color: "#555568", fontSize: 13, marginTop: 12 }}>Verifica el código e intenta de nuevo</p>
-          <button onClick={handleClose} style={{ marginTop: 20, padding: "10px 24px", background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.2)", borderRadius: 12, color: "#818cf8", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>← {fromScanner ? "Volver al Escáner" : "Cerrar"}</button>
+          <p style={{ color: "#9298ae", fontSize: 13, marginTop: 12 }}>Verifica el código e intenta de nuevo</p>
+          <button onClick={handleClose} style={{ marginTop: 20, padding: "10px 24px", background: "rgba(26,184,196,0.06)", border: "1px solid rgba(26,184,196,0.10)", borderRadius: 12, color: "#2dd4df", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>← {fromScanner ? "Volver al Escáner" : "Cerrar"}</button>
         </div>
       </div>
     );
@@ -142,210 +142,217 @@ export default function TrackPage() {
   const { notes, services, software, videogames, repuestos, deliveryNotes, discount } = parseNotesData(repair.notes);
 
   return (
-    <div style={{ minHeight: "100vh", background: "#050507", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: 20, position: "relative", overflow: "hidden" }}>
-      <PortalTracker />
+    <div style={{ minHeight: "100vh", background: "#eef2f8", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-start", padding: "16px 0 48px", position: "relative", overflow: "hidden" }}>
       <style>{`
-        @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 0.7; } }
-        @keyframes progressFill { from { width: 0%; } to { width: ${progress}%; } }
-        @keyframes glowPulse { 0%, 100% { box-shadow: 0 0 20px ${status.color}20; } 50% { box-shadow: 0 0 40px ${status.color}35; } }
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
-        @media(max-width:480px) {
-          .track-grid { grid-template-columns: 1fr !important; }
-          .track-card { padding: 20px 16px !important; border-radius: 20px !important; }
-          .track-card h1 { font-size: 17px !important; }
-        }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0%,100%{opacity:0.7;transform:scale(1)} 50%{opacity:1;transform:scale(1.05)} }
+        @keyframes spin { to{transform:rotate(360deg)} }
+        @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+        .app-card { background:#ffffff; border-radius:18px; box-shadow:0 2px 12px rgba(30,42,58,0.08), 0 1px 3px rgba(30,42,58,0.05); border:1px solid #dde6f5; }
+        .info-row { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #f0f3f8; }
+        .info-row:last-child { border-bottom:none; }
+        .status-step { display:flex; align-items:center; gap:12px; padding:10px 14px; border-radius:14px; transition:all 0.2s; }
+        .status-step.active { background:var(--step-color-bg); }
+        .step-dot { width:32px; height:32px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; transition:all 0.3s; }
+        .tag-pill { padding:4px 10px; border-radius:99px; font-size:11px; font-weight:600; display:inline-flex; align-items:center; gap:4px; }
+        @media(max-width:640px){ .track-content{ padding:0 12px!important; } }
       `}</style>
 
-      <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
-        <div style={{ position: "absolute", top: "10%", left: "50%", width: 500, height: 500, borderRadius: "50%", background: `radial-gradient(circle, ${status.color}08, transparent 70%)`, transform: "translateX(-50%)", animation: "pulse 5s ease-in-out infinite" }} />
-        <div style={{ position: "absolute", inset: 0, opacity: 0.02, backgroundImage: "linear-gradient(rgba(99,102,241,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(99,102,241,0.5) 1px, transparent 1px)", backgroundSize: "50px 50px" }} />
+      {/* App-style header — white card matching the rest */}
+      <div style={{ width:"100%", maxWidth:520, opacity:mounted?1:0, transition:"opacity 0.5s ease", padding:"0 16px", marginBottom:12 }}>
+        <div style={{ background:"#ffffff", borderRadius:18, border:`2px solid ${status.color}`, boxShadow:`0 4px 20px ${status.color}20, 0 2px 8px rgba(30,42,58,0.08)`, overflow:"hidden", borderTop:`4px solid ${status.color}` }}>
+
+          {/* Top bar */}
+          <div style={{ padding:"14px 16px 0", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+            <button onClick={handleClose} style={{ width:34, height:34, borderRadius:10, background:"#f5f7fc", border:"1px solid #dde6f5", color:"#4a5878", fontSize:15, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", fontWeight:700 }}>←</button>
+            <div style={{ display:"flex", alignItems:"center", gap:6, padding:"4px 12px", background:`${status.color}10`, borderRadius:99, border:`1px solid ${status.color}30` }}>
+              <div style={{ width:6, height:6, borderRadius:"50%", background:status.color, boxShadow:`0 0 6px ${status.color}` }} />
+              <span style={{ fontSize:11, fontWeight:700, color:status.color, letterSpacing:"0.3px" }}>{settings.companyName}</span>
+            </div>
+            <div style={{ width:34 }} />
+          </div>
+
+          {/* Hero */}
+          <div style={{ padding:"18px 20px 16px", textAlign:"center" }}>
+            <div style={{ fontSize:48, marginBottom:10, filter:`drop-shadow(0 4px 12px ${status.color}40)`, animation:"pulse 2.5s ease-in-out infinite" }}>{status.icon}</div>
+            <div style={{ fontSize:24, fontWeight:800, color:status.color, marginBottom:6, letterSpacing:"-0.5px" }}>{status.label}</div>
+            <div style={{ fontSize:13, color:"#6b7a9a", lineHeight:1.6, maxWidth:320, margin:"0 auto 16px" }}>{status.desc}</div>
+
+            {/* Code badge */}
+            <div style={{ display:"inline-flex", alignItems:"center", gap:8, background:`${status.color}08`, border:`1.5px solid ${status.color}30`, borderRadius:12, padding:"9px 20px" }}>
+              <span style={{ fontSize:10, color:"#9298ae", textTransform:"uppercase", letterSpacing:"1px", fontWeight:700 }}>Código</span>
+              <span style={{ fontFamily:"monospace", fontSize:19, fontWeight:800, color:status.color, letterSpacing:"2px" }}>{repair.code}</span>
+            </div>
+          </div>
+
+          {/* Progress bar */}
+          <div style={{ padding:"0 16px 14px" }}>
+            <div style={{ height:7, background:"#f0f3f8", borderRadius:99, overflow:"hidden", border:"1px solid #e8ecf4" }}>
+              <div style={{ height:"100%", width:`${progress}%`, background:`linear-gradient(90deg, ${status.color}cc, ${status.color})`, borderRadius:99, transition:"width 1.2s cubic-bezier(0.16,1,0.3,1)" }} />
+            </div>
+            <div style={{ display:"flex", justifyContent:"space-between", marginTop:5 }}>
+              <span style={{ fontSize:10, color:"#9298ae", fontWeight:600, textTransform:"uppercase", letterSpacing:"0.5px" }}>Progreso</span>
+              <span style={{ fontSize:10, color:status.color, fontWeight:800 }}>{Math.round(progress)}%</span>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="track-card" style={{ width: "100%", maxWidth: 500, position: "relative", zIndex: 1, background: "linear-gradient(180deg, rgba(17,17,24,0.95), rgba(8,8,12,0.98))", borderRadius: 28, border: `1px solid ${status.color}15`, boxShadow: `0 0 80px ${status.color}06, 0 25px 60px rgba(0,0,0,0.5)`, overflow: "hidden", opacity: mounted ? 1 : 0, transform: mounted ? "translateY(0)" : "translateY(24px)", transition: "all 0.7s cubic-bezier(0.16, 1, 0.3, 1)" }}>
-        <div style={{ position: "absolute", top: 0, left: "15%", right: "15%", height: 1, background: `linear-gradient(90deg, transparent, ${status.color}50, transparent)` }} />
+      {/* Scrollable content */}
+      <div className="track-content" style={{ width:"100%", maxWidth:520, padding:"0 16px", opacity:mounted?1:0, animation:mounted?"slideUp 0.6s 0.2s ease-out both":"none" }}>
 
-        {/* Header */}
-        <div style={{ padding: "28px 28px 24px", textAlign: "center", background: `linear-gradient(180deg, ${status.color}08, transparent)`, position: "relative" }}>
-          <button onClick={handleClose} style={{ position: "absolute", top: 16, right: 16, width: 34, height: 34, borderRadius: 10, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", color: "#8888a0", fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 14px", background: "rgba(99,102,241,0.08)", borderRadius: 20, marginBottom: 14, border: "1px solid rgba(99,102,241,0.1)" }}>
-            {settings.logo ? <img src={settings.logo} alt="Logo" style={{ width: 18, height: 18, objectFit: "contain" }} /> : <span style={{ fontSize: 12 }}>🔧</span>}
-            <span style={{ fontSize: 12, fontWeight: 700, color: "#818cf8" }}>{settings.companyName}</span>
-          </div>
-          <h1 style={{ fontSize: 20, fontWeight: 800, letterSpacing: "-0.3px", color: "#eeeef2" }}>Seguimiento de Orden</h1>
-        </div>
-
-        {/* Status Banner */}
-        <div style={{ margin: "0 20px", padding: "24px", borderRadius: 18, textAlign: "center", background: `linear-gradient(135deg, ${status.color}10, ${status.color}04)`, border: `1px solid ${status.color}20`, animation: "glowPulse 3s ease-in-out infinite" }}>
-          <div style={{ fontSize: 44, marginBottom: 10, animation: "float 3s ease-in-out infinite" }}>{status.icon}</div>
-          <div style={{ fontSize: 22, fontWeight: 800, color: status.color, letterSpacing: "-0.3px" }}>{status.label}</div>
-          <p style={{ fontSize: 13, color: "#8888a0", marginTop: 8, lineHeight: 1.6, maxWidth: 320, margin: "8px auto 0" }}>{status.desc}</p>
-        </div>
-
-        {/* Progress */}
-        <div style={{ padding: "20px 28px 0" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-            <span style={{ fontSize: 11, color: "#555568", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.5px" }}>Progreso</span>
-            <span style={{ fontSize: 11, color: status.color, fontWeight: 700 }}>{Math.round(progress)}%</span>
-          </div>
-          <div style={{ height: 6, borderRadius: 3, background: "rgba(30,30,46,0.8)", overflow: "hidden" }}>
-            <div style={{ height: "100%", borderRadius: 3, background: `linear-gradient(90deg, ${status.color}, ${status.color}cc)`, width: `${progress}%`, animation: "progressFill 1s ease-out", boxShadow: `0 0 10px ${status.color}40` }} />
+        {/* Row 1: Cliente + Equipo */}
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:10 }}>
+          {repair.clientName && (
+            <div style={{ background:"#fff", borderRadius:14, padding:"14px 16px", border:"2px solid #1ab8c4", boxShadow:"0 2px 10px rgba(26,184,196,0.10)" }}>
+              <div style={{ fontSize:9, color:"#1ab8c4", textTransform:"uppercase", fontWeight:700, letterSpacing:"0.5px", marginBottom:5 }}>Cliente</div>
+              <div style={{ fontSize:14, fontWeight:800, color:"#1e2a3a", lineHeight:1.3 }}>{repair.clientName}</div>
+            </div>
+          )}
+          <div style={{ background:"#fff", borderRadius:14, padding:"14px 16px", border:"2px solid #8b5cf6", boxShadow:"0 2px 10px rgba(139,92,246,0.10)" }}>
+            <div style={{ fontSize:9, color:"#8b5cf6", textTransform:"uppercase", fontWeight:700, letterSpacing:"0.5px", marginBottom:5 }}>Equipo</div>
+            <div style={{ fontSize:13, fontWeight:800, color:"#1e2a3a", lineHeight:1.3 }}>{deviceName}</div>
           </div>
         </div>
 
-        {/* Details */}
-        <div style={{ padding: "20px 28px" }}>
-          {/* Code */}
-          <div style={{ textAlign: "center", padding: "14px", background: "rgba(22,22,31,0.6)", borderRadius: 14, marginBottom: 18, border: "1px solid rgba(30,30,46,0.5)" }}>
-            <div style={{ fontSize: 10, color: "#555568", textTransform: "uppercase", letterSpacing: "1px", fontWeight: 600, marginBottom: 6 }}>Código de Orden</div>
-            <div style={{ fontFamily: "monospace", fontSize: 20, fontWeight: 800, color: "#6366f1", letterSpacing: "2px" }}>{repair.code}</div>
+        {/* Row 2: Celular + Costo */}
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10, marginBottom:12 }}>
+          {repair.clientPhone && (
+            <div style={{ background:"#fff", borderRadius:14, padding:"14px 16px", border:"2px solid #3b82f6", boxShadow:"0 2px 10px rgba(59,130,246,0.10)" }}>
+              <div style={{ fontSize:9, color:"#3b82f6", textTransform:"uppercase", fontWeight:700, letterSpacing:"0.5px", marginBottom:5 }}>Celular</div>
+              <div style={{ fontSize:14, fontWeight:700, color:"#1e2a3a" }}>{repair.clientPhone}</div>
+            </div>
+          )}
+          <div style={{ background:"#fff", borderRadius:14, padding:"14px 16px", border:"2px solid #10b981", boxShadow:"0 2px 10px rgba(16,185,129,0.10)" }}>
+            <div style={{ fontSize:9, color:"#10b981", textTransform:"uppercase", fontWeight:700, letterSpacing:"0.5px", marginBottom:5 }}>Costo Estimado</div>
+            <div style={{ fontSize:16, fontWeight:800, color:"#1ab8c4", letterSpacing:"-0.3px" }}>Bs. {Math.round(repair.estimatedCost).toLocaleString()}</div>
           </div>
+        </div>
 
-          {/* Cliente */}
-          {(repair.clientName || repair.clientPhone) && (
-            <div className="track-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
-              {repair.clientName && (
-                <div style={{ padding: "14px", background: "rgba(99,102,241,0.04)", borderRadius: 12, border: "1px solid rgba(99,102,241,0.1)" }}>
-                  <div style={{ fontSize: 10, color: "#818cf8", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: 600, marginBottom: 6 }}>👤 Cliente</div>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: "#eeeef2" }}>{repair.clientName}</div>
+        {/* Dates */}
+        <div style={{ background:"#fff", borderRadius:14, padding:"14px 18px", marginBottom:12, border:"2px solid #64748b", boxShadow:"0 2px 10px rgba(100,116,139,0.10)" }}>
+          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:0 }}>
+            <div style={{ paddingRight:12, borderRight:"1px solid #f0f3f8" }}>
+              <div style={{ fontSize:9, color:"#9298ae", textTransform:"uppercase", fontWeight:700, letterSpacing:"0.5px", marginBottom:4 }}>Fecha ingreso</div>
+              <div style={{ fontSize:13, fontWeight:700, color:"#1e2a3a" }}>{new Date(repair.createdAt).toLocaleDateString("es-BO")}</div>
+            </div>
+            <div style={{ paddingLeft:12 }}>
+              <div style={{ fontSize:9, color:"#9298ae", textTransform:"uppercase", fontWeight:700, letterSpacing:"0.5px", marginBottom:4 }}>Última actualización</div>
+              <div style={{ fontSize:13, fontWeight:700, color:"#1e2a3a" }}>{new Date(repair.updatedAt).toLocaleDateString("es-BO")}</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Problema */}
+        <div style={{ background:"#fff", borderRadius:14, padding:"14px 18px", marginBottom:12, border:"2px solid #e11d48", boxShadow:"0 2px 10px rgba(225,29,72,0.08)" }}>
+          <div style={{ fontSize:9, color:"#e11d48", textTransform:"uppercase", fontWeight:700, letterSpacing:"0.5px", marginBottom:6 }}>Problema Reportado</div>
+          <div style={{ fontSize:14, fontWeight:600, color:"#1e2a3a", lineHeight:1.6 }}>{repair.issue}</div>
+        </div>
+
+        {/* Observaciones */}
+        {notes && (
+          <div style={{ background:"#fff", borderRadius:14, padding:"14px 18px", marginBottom:12, border:"2px solid #d97706", boxShadow:"0 2px 10px rgba(217,119,6,0.08)" }}>
+            <div style={{ fontSize:9, color:"#d97706", textTransform:"uppercase", fontWeight:700, letterSpacing:"0.5px", marginBottom:6 }}>Observaciones</div>
+            <div style={{ fontSize:13, color:"#4a5878", lineHeight:1.6 }}>{notes}</div>
+          </div>
+        )}
+
+        {/* Tags row: servicios, accesorios, etc */}
+        {(accessories.length > 0 || services.length > 0 || software.length > 0 || videogames.length > 0 || repuestos.length > 0) && (
+          <div style={{ background:"#fff", borderRadius:14, padding:"14px 18px", marginBottom:12, border:"2px solid #64748b", boxShadow:"0 2px 10px rgba(100,116,139,0.10)" }}>
+            {accessories.length > 0 && (
+              <div style={{ marginBottom:10 }}>
+                <div style={{ fontSize:9, color:"#10b981", textTransform:"uppercase", fontWeight:700, letterSpacing:"0.5px", marginBottom:7 }}>Accesorios Entregados</div>
+                <div style={{ display:"flex", gap:5, flexWrap:"wrap" }}>
+                  {accessories.map(a => <span key={a} className="tag-pill" style={{ background:"rgba(16,185,129,0.10)", color:"#059669", border:"1px solid rgba(16,185,129,0.25)" }}>✓ {a}</span>)}
                 </div>
-              )}
-              {repair.clientPhone && (
-                <div style={{ padding: "14px", background: "rgba(99,102,241,0.04)", borderRadius: 12, border: "1px solid rgba(99,102,241,0.1)" }}>
-                  <div style={{ fontSize: 10, color: "#818cf8", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: 600, marginBottom: 6 }}>📱 Celular</div>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: "#eeeef2" }}>{repair.clientPhone}</div>
+              </div>
+            )}
+            {services.length > 0 && (
+              <div style={{ marginBottom:10 }}>
+                <div style={{ fontSize:9, color:"#8b5cf6", textTransform:"uppercase", fontWeight:700, letterSpacing:"0.5px", marginBottom:7 }}>Servicios</div>
+                <div style={{ display:"flex", gap:5, flexWrap:"wrap" }}>
+                  {services.map(s => <span key={s} className="tag-pill" style={{ background:"rgba(139,92,246,0.10)", color:"#7c3aed", border:"1px solid rgba(139,92,246,0.25)" }}>{s}</span>)}
                 </div>
-              )}
-            </div>
-          )}
-
-          {/* Info Grid */}
-          <div className="track-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 18 }}>
-            {[
-              { label: "Dispositivo", value: deviceName, icon: "💻" },
-              { label: "Costo Estimado", value: `Bs. ${repair.estimatedCost}`, icon: "💰" },
-              { label: "Fecha Ingreso", value: new Date(repair.createdAt).toLocaleDateString("es-BO"), icon: "📅" },
-              { label: "Última Actualización", value: new Date(repair.updatedAt).toLocaleDateString("es-BO"), icon: "🔄" },
-            ].map((item) => (
-              <div key={item.label} style={{ padding: "14px", background: "rgba(22,22,31,0.5)", borderRadius: 12, border: "1px solid rgba(30,30,46,0.5)" }}>
-                <div style={{ fontSize: 10, color: "#555568", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: 600, marginBottom: 6 }}>{item.icon} {item.label}</div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: "#eeeef2" }}>{item.value}</div>
               </div>
-            ))}
+            )}
+            {software.length > 0 && (
+              <div style={{ marginBottom:10 }}>
+                <div style={{ fontSize:9, color:"#3b82f6", textTransform:"uppercase", fontWeight:700, letterSpacing:"0.5px", marginBottom:7 }}>Programas</div>
+                <div style={{ display:"flex", gap:5, flexWrap:"wrap" }}>
+                  {software.map(s => <span key={s} className="tag-pill" style={{ background:"rgba(59,130,246,0.10)", color:"#1d4ed8", border:"1px solid rgba(59,130,246,0.25)" }}>{s}</span>)}
+                </div>
+              </div>
+            )}
+            {videogames.length > 0 && (
+              <div style={{ marginBottom:10 }}>
+                <div style={{ fontSize:9, color:"#ef4444", textTransform:"uppercase", fontWeight:700, letterSpacing:"0.5px", marginBottom:7 }}>Videojuegos a Instalar</div>
+                <div style={{ display:"flex", gap:5, flexWrap:"wrap" }}>
+                  {videogames.map(v => <span key={v} className="tag-pill" style={{ background:"rgba(239,68,68,0.10)", color:"#dc2626", border:"1px solid rgba(239,68,68,0.25)" }}>🎮 {v}</span>)}
+                </div>
+              </div>
+            )}
+            {repuestos.length > 0 && (
+              <div>
+                <div style={{ fontSize:9, color:"#f59e0b", textTransform:"uppercase", fontWeight:700, letterSpacing:"0.5px", marginBottom:7 }}>Repuestos</div>
+                <div style={{ display:"flex", gap:5, flexWrap:"wrap" }}>
+                  {repuestos.map(r => <span key={r} className="tag-pill" style={{ background:"rgba(245,158,11,0.10)", color:"#d97706", border:"1px solid rgba(245,158,11,0.25)" }}>{r}</span>)}
+                </div>
+              </div>
+            )}
           </div>
+        )}
 
-          {/* Problema */}
-          <div style={{ padding: "14px 16px", background: "rgba(22,22,31,0.5)", borderRadius: 12, borderLeft: `3px solid ${status.color}`, marginBottom: 14 }}>
-            <div style={{ fontSize: 10, color: "#555568", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: 600, marginBottom: 6 }}>🔧 Problema Reportado</div>
-            <div style={{ fontSize: 13, lineHeight: 1.6, color: "#8888a0" }}>{repair.issue}</div>
+        {/* Descuento */}
+        {Number(discount) > 0 && (
+          <div className="app-card" style={{ padding:"12px 18px", marginBottom:12, background:"linear-gradient(135deg,rgba(239,68,68,0.05),rgba(239,68,68,0.02))", borderLeft:"3px solid #ef4444" }}>
+            <div style={{ fontSize:9, color:"#e11d48", textTransform:"uppercase", fontWeight:700, marginBottom:4 }}>Descuento Aplicado</div>
+            <div style={{ fontSize:18, fontWeight:800, color:"#e11d48" }}>- Bs. {discount}</div>
           </div>
+        )}
 
-          {/* Observaciones */}
-          {notes && (
-            <div style={{ padding: "14px 16px", background: "rgba(245,158,11,0.04)", borderRadius: 12, borderLeft: "3px solid #f59e0b", marginBottom: 14 }}>
-              <div style={{ fontSize: 10, color: "#f59e0b", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: 600, marginBottom: 6 }}>📋 Observaciones</div>
-              <div style={{ fontSize: 13, lineHeight: 1.6, color: "#8888a0" }}>{notes}</div>
-            </div>
-          )}
-
-          {/* Accesorios */}
-          {accessories.length > 0 && (
-            <div style={{ padding: "14px 16px", background: "rgba(16,185,129,0.04)", borderRadius: 12, borderLeft: "3px solid #10b981", marginBottom: 14 }}>
-              <div style={{ fontSize: 10, color: "#10b981", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: 600, marginBottom: 8 }}>🎒 Accesorios Entregados</div>
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                {accessories.map((a) => (<span key={a} style={{ padding: "4px 10px", background: "rgba(16,185,129,0.1)", borderRadius: 8, fontSize: 11, fontWeight: 600, color: "#10b981" }}>✓ {a}</span>))}
-              </div>
-            </div>
-          )}
-
-          {/* Servicios */}
-          {services.length > 0 && (
-            <div style={{ padding: "14px 16px", background: "rgba(168,85,247,0.04)", borderRadius: 12, borderLeft: "3px solid #a855f7", marginBottom: 14 }}>
-              <div style={{ fontSize: 10, color: "#a855f7", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: 600, marginBottom: 8 }}>🛠️ Servicios</div>
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                {services.map((name) => (<span key={name} style={{ padding: "4px 10px", background: "rgba(168,85,247,0.1)", borderRadius: 8, fontSize: 11, fontWeight: 600, color: "#a855f7" }}>{name}</span>))}
-              </div>
-            </div>
-          )}
-
-          {/* Programas */}
-          {software.length > 0 && (
-            <div style={{ padding: "14px 16px", background: "rgba(139,92,246,0.04)", borderRadius: 12, borderLeft: "3px solid #8b5cf6", marginBottom: 14 }}>
-              <div style={{ fontSize: 10, color: "#8b5cf6", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: 600, marginBottom: 8 }}>💿 Programas a Instalar</div>
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                {software.map((name) => (<span key={name} style={{ padding: "4px 10px", background: "rgba(139,92,246,0.1)", borderRadius: 8, fontSize: 11, fontWeight: 600, color: "#8b5cf6" }}>{name}</span>))}
-              </div>
-            </div>
-          )}
-
-          {/* Videojuegos */}
-          {videogames.length > 0 && (
-            <div style={{ padding: "14px 16px", background: "rgba(239,68,68,0.04)", borderRadius: 12, borderLeft: "3px solid #ef4444", marginBottom: 14 }}>
-              <div style={{ fontSize: 10, color: "#ef4444", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: 600, marginBottom: 8 }}>🎮 Videojuegos a Instalar</div>
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                {videogames.map((name) => (<span key={name} style={{ padding: "4px 10px", background: "rgba(239,68,68,0.1)", borderRadius: 8, fontSize: 11, fontWeight: 600, color: "#ef4444" }}>{name}</span>))}
-              </div>
-            </div>
-          )}
-
-          {/* Repuestos */}
-          {repuestos.length > 0 && (
-            <div style={{ padding: "14px 16px", background: "rgba(245,158,11,0.04)", borderRadius: 12, borderLeft: "3px solid #f59e0b", marginBottom: 14 }}>
-              <div style={{ fontSize: 10, color: "#f59e0b", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: 600, marginBottom: 8 }}>📦 Repuestos Utilizados</div>
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                {repuestos.map((name) => (<span key={name} style={{ padding: "4px 10px", background: "rgba(245,158,11,0.1)", borderRadius: 8, fontSize: 11, fontWeight: 600, color: "#f59e0b" }}>{name}</span>))}
-              </div>
-            </div>
-          )}
-
-          {/* Notas de Entrega */}
-          {deliveryNotes && (
-            <div style={{ padding: "14px 16px", background: "rgba(107,114,128,0.04)", borderRadius: 12, borderLeft: "3px solid #6b7280", marginBottom: 14 }}>
-              <div style={{ fontSize: 10, color: "#6b7280", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: 600, marginBottom: 6 }}>📋 Notas de Entrega</div>
-              <div style={{ fontSize: 13, lineHeight: 1.6, color: "#8888a0" }}>{deliveryNotes}</div>
-            </div>
-          )}
-
-          {/* Descuento */}
-          {Number(discount) > 0 && (
-            <div style={{ padding: "14px 16px", background: "rgba(239,68,68,0.04)", borderRadius: 12, borderLeft: "3px solid #ef4444", marginBottom: 14 }}>
-              <div style={{ fontSize: 10, color: "#ef4444", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: 600, marginBottom: 6 }}>🏷️ Descuento Aplicado</div>
-              <div style={{ fontSize: 16, fontWeight: 800, color: "#ef4444" }}>- Bs. {discount}</div>
-            </div>
-          )}
-
-          {/* Timeline */}
-          <div style={{ marginBottom: 20 }}>
-            <div style={{ fontSize: 10, color: "#555568", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: 600, marginBottom: 14 }}>Estado Detallado</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-              {Object.entries(STATUS).map(([key, val], i) => {
-                const done = i <= currentIndex;
-                const current = i === currentIndex;
-                return (
-                  <div key={key} style={{ display: "flex", alignItems: "center", gap: 14, padding: "10px 14px", borderRadius: 12, background: current ? `${val.color}08` : "transparent", border: current ? `1px solid ${val.color}15` : "1px solid transparent", transition: "all 0.3s" }}>
-                    <div style={{ width: 30, height: 30, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, flexShrink: 0, background: done ? `${val.color}15` : "rgba(22,22,31,0.5)", border: `2px solid ${done ? val.color : "rgba(30,30,46,0.5)"}`, boxShadow: current ? `0 0 12px ${val.color}25` : "none", opacity: done ? 1 : 0.3 }}>
-                      {done && i < currentIndex ? "✓" : val.icon}
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <span style={{ fontSize: 13, fontWeight: current ? 700 : 500, color: done ? "#eeeef2" : "#555568" }}>{val.label}</span>
-                    </div>
-                    {current && (<div style={{ width: 8, height: 8, borderRadius: "50%", background: val.color, boxShadow: `0 0 8px ${val.color}60`, animation: "pulse 2s ease-in-out infinite" }} />)}
+        {/* Timeline */}
+        <div style={{ background:"#fff", borderRadius:14, padding:"16px 18px", marginBottom:12, border:"2px solid #1ab8c4", boxShadow:"0 2px 10px rgba(26,184,196,0.10)" }}>
+          <div style={{ fontSize:11, fontWeight:700, color:"#1e2a3a", letterSpacing:"-0.2px", marginBottom:14, display:"flex", alignItems:"center", gap:6 }}>
+            <div style={{ width:3, height:14, borderRadius:2, background:"#1ab8c4" }} />
+            Estado Detallado
+          </div>
+          <div style={{ display:"flex", flexDirection:"column", gap:3 }}>
+            {Object.entries(STATUS).map(([key, val], i) => {
+              const done = i <= currentIndex;
+              const current = i === currentIndex;
+              return (
+                <div key={key} className={`status-step${current?" active":""}`} style={{ "--step-color-bg": `${val.color}10` } as any}>
+                  <div className="step-dot" style={{ background:done?`${val.color}18`:"#f0f3f8", border:`2px solid ${done?val.color:"#dde6f5"}`, fontSize:done&&i<currentIndex?13:14, boxShadow:current?`0 0 0 4px ${val.color}20`:"none" }}>
+                    {done && i < currentIndex ? "✓" : val.icon}
                   </div>
-                );
-              })}
-            </div>
+                  <div style={{ flex:1 }}>
+                    <div style={{ fontSize:13, fontWeight:current?800:500, color:done?"#1e2a3a":"#9298ae" }}>{val.label}</div>
+                    {current && <div style={{ fontSize:11, color:val.color, marginTop:1, fontWeight:500 }}>{val.desc}</div>}
+                  </div>
+                  {current && <div style={{ width:8, height:8, borderRadius:"50%", background:val.color, boxShadow:`0 0 8px ${val.color}`, animation:"pulse 2s ease-in-out infinite", flexShrink:0 }} />}
+                  {done && i < currentIndex && <div style={{ fontSize:11, color:val.color, fontWeight:700, flexShrink:0 }}>✓</div>}
+                </div>
+              );
+            })}
           </div>
         </div>
 
-        <div style={{ position: "absolute", bottom: 0, left: "25%", right: "25%", height: 1, background: `linear-gradient(90deg, transparent, ${status.color}30, transparent)` }} />
-      </div>
+        {/* Notas de entrega */}
+        {deliveryNotes && (
+          <div className="app-card" style={{ padding:"14px 18px", marginBottom:12, borderLeft:"3px solid #6b7280" }}>
+            <div style={{ fontSize:9, color:"#6b7280", textTransform:"uppercase", fontWeight:700, marginBottom:6 }}>Notas de Entrega</div>
+            <div style={{ fontSize:13, color:"#4a5878", lineHeight:1.6 }}>{deliveryNotes}</div>
+          </div>
+        )}
 
-      {/* Reseña del cliente — solo si OT entregada */}
-      {repair.status === "delivered" && (
-        <div style={{ width: "100%", maxWidth: 620, marginTop: 20, position: "relative", zIndex: 2 }}>
-          <ReviewForm repairCode={repair.code} clientName={repair.clientName} />
-        </div>
-      )}
+        {/* Review form */}
+        {repair.status === "delivered" && (
+          <div style={{ marginTop:8 }}>
+            <ReviewForm repairCode={repair.code} clientName={repair.clientName} />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

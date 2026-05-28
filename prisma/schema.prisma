@@ -382,3 +382,9 @@ model Review {
   @@index([branchId, createdAt])
   @@index([rating])
 }
+
+model KeyValue {
+  key       String   @id
+  value     String   @db.Text
+  updatedAt DateTime @updatedAt
+}

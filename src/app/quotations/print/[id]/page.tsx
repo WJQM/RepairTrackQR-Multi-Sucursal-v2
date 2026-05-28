@@ -14,7 +14,7 @@ export default function QuotationPrintPage() {
   const [settings, setSettings] = useState<{ companyName: string; slogan: string; logo: string | null; phone: string | null; email: string | null; address: string | null; website: string | null }>({ companyName: "RepairTrackQR", slogan: "Servicio Técnico Especializado", logo: null, phone: null, email: null, address: null, website: null });
 
   useEffect(() => {
-    fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings(d); }).catch(() => {});
+    fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings(d).catch(() => {}); }).catch(() => {});
     if (!code) return;
     const branchId = new URLSearchParams(window.location.search).get("branchId");
     const url = branchId ? `/api/quotations?code=${code}&branchId=${branchId}` : `/api/quotations?code=${code}`;
@@ -39,7 +39,7 @@ export default function QuotationPrintPage() {
   const qrBranch = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("branchId") : null;
   const qrUrl = typeof window !== "undefined" ? `${window.location.origin}/quotations/print/${q.code}${qrBranch ? `?branchId=${qrBranch}` : ""}` : "";
   const qrImg = qrUrl ? `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(qrUrl)}&color=000000` : "";
-  const total = q.total.toFixed(2);
+  const total = q.total;
   const totalQty = q.items.reduce((s, i) => s + i.qty, 0);
 
   return (
@@ -52,11 +52,11 @@ export default function QuotationPrintPage() {
         table { width: 100%; border-collapse: collapse; }
       `}</style>
 
-      <div className="no-print" style={{ position: "fixed", top: 0, left: 0, right: 0, padding: "12px 24px", background: "#111118", display: "flex", justifyContent: "space-between", alignItems: "center", zIndex: 100 }}>
+      <div className="no-print" style={{ position: "fixed", top: 0, left: 0, right: 0, padding: "12px 24px", background: "#ffffff", display: "flex", justifyContent: "space-between", alignItems: "center", zIndex: 100 }}>
         <span style={{ color: "#eee", fontSize: 14, fontWeight: 600 }}>{docIcon} {docTitle} — {q.code}</span>
         <div style={{ display: "flex", gap: 10 }}>
           <button onClick={() => window.print()} style={{ padding: "8px 20px", background: `linear-gradient(135deg, ${color}, ${colorDark})`, border: "none", borderRadius: 8, color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>🖨️ Imprimir</button>
-          <button onClick={() => window.close()} style={{ padding: "8px 20px", background: "#1e1e2e", border: "1px solid #2e2e3e", borderRadius: 8, color: "#888", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>✕ Cerrar</button>
+          <button onClick={() => window.close()} style={{ padding: "8px 20px", background: "#e8ebf2", border: "1px solid #2e2e3e", borderRadius: 8, color: "#888", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>✕ Cerrar</button>
         </div>
       </div>
 
@@ -76,7 +76,7 @@ export default function QuotationPrintPage() {
         {/* CLIENTE + QR */}
         <div style={{ display: "flex", gap: 20, marginBottom: 24 }}>
           <div style={{ flex: 1, border: "1px solid #e2e2e2", borderRadius: 8, overflow: "hidden" }}>
-            <div style={{ background: "#f0f0ff", padding: "10px 16px", borderBottom: "1px solid #d5d5ef" }}><h3 style={{ fontSize: 12, fontWeight: 700, color: "#6366f1", textTransform: "uppercase", margin: 0 }}>👤 Datos del Cliente</h3></div>
+            <div style={{ background: "#f0f0ff", padding: "10px 16px", borderBottom: "1px solid #d5d5ef" }}><h3 style={{ fontSize: 12, fontWeight: 700, color: "#1ab8c4", textTransform: "uppercase", margin: 0 }}>👤 Datos del Cliente</h3></div>
             <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: 6 }}>
               <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}><span style={{ fontSize: 9, color: "#888", fontWeight: 600, textTransform: "uppercase", width: 60, flexShrink: 0 }}>Nombre</span><span style={{ fontSize: 14, fontWeight: 700, color: "#111", flex: 1, borderBottom: "1px dotted #ddd", paddingBottom: 4 }}>{q.clientName || "—"}</span></div>
               <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}><span style={{ fontSize: 9, color: "#888", fontWeight: 600, textTransform: "uppercase", width: 60, flexShrink: 0 }}>Celular</span><span style={{ fontSize: 14, fontWeight: 700, color: "#111", flex: 1, borderBottom: "1px dotted #ddd", paddingBottom: 4 }}>{q.clientPhone || "—"}</span></div>
@@ -108,8 +108,8 @@ export default function QuotationPrintPage() {
                 <td style={{ padding: "10px 16px", fontSize: 12, color: "#888", borderBottom: "1px solid #f0f0f0" }}>{idx + 1}</td>
                 <td style={{ padding: "10px 16px", fontSize: 13, fontWeight: 600, borderBottom: "1px solid #f0f0f0" }}>{icon} {item.name}{isEq && <span style={{ fontSize: 9, padding: "1px 6px", borderRadius: 3, background: "#dbeafe", color: "#1e40af", fontWeight: 700, marginLeft: 6 }}>EQUIPO</span>}</td>
                 <td style={{ padding: "10px 16px", fontSize: 13, fontWeight: 700, textAlign: "center", borderBottom: "1px solid #f0f0f0" }}>{item.qty}</td>
-                <td style={{ padding: "10px 16px", fontSize: 12, textAlign: "right", color: "#555", borderBottom: "1px solid #f0f0f0" }}>{item.price.toFixed(2)}</td>
-                <td style={{ padding: "10px 16px", fontSize: 13, fontWeight: 700, textAlign: "right", color: color, borderBottom: "1px solid #f0f0f0" }}>{(item.price * item.qty).toFixed(2)}</td>
+                <td style={{ padding: "10px 16px", fontSize: 12, textAlign: "right", color: "#555", borderBottom: "1px solid #f0f0f0" }}>{Math.round(item.price || 0).toLocaleString()}</td>
+                <td style={{ padding: "10px 16px", fontSize: 13, fontWeight: 700, textAlign: "right", color: color, borderBottom: "1px solid #f0f0f0" }}>{(item.price * item.qty)}</td>
               </tr>
               );
             })}</tbody>

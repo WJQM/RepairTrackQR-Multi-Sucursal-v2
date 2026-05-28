@@ -22,7 +22,7 @@ interface Item {
 const KIND_LABEL: Record<Kind, { label: string; icon: string; color: string; prefix: string }> = {
   inventory: { label: "Productos", icon: "📦", color: "#a855f7", prefix: "INV" },
   consoles: { label: "Consolas", icon: "🕹️", color: "#f97316", prefix: "CN" },
-  equipment: { label: "Equipos", icon: "💻", color: "#06b6d4", prefix: "EQ" },
+  equipment: { label: "Equipos", icon: "💻", color: "#0891b2", prefix: "EQ" },
   software: { label: "Programas", icon: "💿", color: "#8b5cf6", prefix: "SW" },
   videogames: { label: "Videojuegos", icon: "🎮", color: "#ef4444", prefix: "VG" },
 };
@@ -45,9 +45,9 @@ export default function QrBatchPage() {
   useEffect(() => {
     const token = sessionStorage.getItem("token"); const userData = sessionStorage.getItem("user");
     if (!token || !userData) { router.push("/"); return; }
-    const u = JSON.parse(userData); setUser(u);
+    const u = (() => { try { return JSON.parse(userData); } catch { return null; } })(); setUser(u);
     if (u.role === "tech") { router.push("/asignaciones"); return; }
-    fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings({ companyName: d.companyName, logo: d.logo }); }).catch(() => {});
+    fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings({ companyName: d.companyName, logo: d.logo }).catch(() => {}); }).catch(() => {});
     if (u.role === "superadmin") {
       apiFetch("/api/branches").then(r => r.json()).then(b => { if (Array.isArray(b)) { setBranches(b); const ab = sessionStorage.getItem("activeBranchId"); if (ab) setActiveBranch(ab); else if (b.length) { setActiveBranch(b[0].id); setActiveBranchId(b[0].id); } } }).catch(() => {});
     } else { setActiveBranch(u.branchId || ""); }
@@ -114,10 +114,10 @@ export default function QrBatchPage() {
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg-primary)", color: "var(--text-primary)" }}>
       <style>{`
-        .sidebar-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 14px; border-radius: 10px; border: none; font-size: 12px; font-weight: 600; cursor: pointer; background: transparent; color: var(--text-muted); transition: all 0.15s; text-align: left; }
-        .sidebar-btn:hover { background: rgba(99,102,241,0.06); color: var(--text-secondary); }
-        .sidebar-btn.active { background: rgba(99,102,241,0.12); color: #818cf8; }
-        .sidebar-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+        .sidebar-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 14px; border-radius: 10px; border: none; font-size: 12px; font-weight: 600; cursor: pointer; background: transparent; color: var(--sidebar-text); transition: all 0.15s; text-align: left; }
+        .sidebar-btn:hover { background: rgba(26,184,196,0.05); color: var(--text-secondary); }
+        .sidebar-btn.active { background: rgba(26,184,196,0.07); color: #2dd4df; }
+        .sidebar-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; background: var(--sidebar-item); color: var(--sidebar-text); }
         @media(max-width:1024px){
           .sidebar-desktop{transform:translateX(-100%)!important}
           .sidebar-desktop.open{transform:translateX(0)!important}
@@ -129,7 +129,7 @@ export default function QrBatchPage() {
       <AppSidebar user={user} />
 
       {/* MAIN */}
-      <div className="main-content" style={{ marginLeft: 200, padding: "24px 28px 60px" }}>
+      <div className="main-content" style={{ marginLeft: 210, padding: "24px 28px 60px" }}>
         <div style={{ marginBottom: 20 }}>
           <h1 style={{ fontSize: 26, fontWeight: 800, marginBottom: 4 }}>🏷️ Imprimir QR múltiples</h1>
           <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Selecciona items y genera una hoja A4 con stickers QR listos para imprimir</p>
@@ -156,7 +156,7 @@ export default function QrBatchPage() {
           </button>
           <div style={{ display: "flex", gap: 4, padding: 4, background: "var(--bg-tertiary)", borderRadius: 8, border: "1px solid var(--border)" }}>
             {(["S", "M", "L"] as const).map(s => (
-              <button key={s} onClick={() => setSize(s)} style={{ padding: "5px 12px", borderRadius: 6, border: "none", background: size === s ? "#6366f1" : "transparent", color: size === s ? "#fff" : "var(--text-muted)", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>{s}</button>
+              <button key={s} onClick={() => setSize(s)} style={{ padding: "5px 12px", borderRadius: 6, border: "none", background: size === s ? "#1ab8c4" : "transparent", color: size === s ? "#fff" : "var(--text-muted)", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>{s}</button>
             ))}
           </div>
           <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: "var(--text-muted)", cursor: "pointer" }}>
@@ -166,12 +166,12 @@ export default function QrBatchPage() {
         </div>
 
         {/* Botón imprimir */}
-        <div style={{ position: "sticky", top: 8, zIndex: 10, marginBottom: 16, padding: "12px 16px", background: selectedCount > 0 ? "rgba(99,102,241,0.08)" : "var(--bg-card)", border: `1px solid ${selectedCount > 0 ? "rgba(99,102,241,0.3)" : "var(--border)"}`, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+        <div style={{ position: "sticky", top: 8, zIndex: 10, marginBottom: 16, padding: "12px 16px", background: selectedCount > 0 ? "rgba(26,184,196,0.05)" : "var(--bg-card)", border: `1px solid ${selectedCount > 0 ? "rgba(26,184,196,0.14)" : "var(--border)"}`, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
           <div style={{ fontSize: 13 }}>
-            <strong style={{ color: selectedCount > 0 ? "#818cf8" : "var(--text-muted)" }}>{selectedCount}</strong> items seleccionados
+            <strong style={{ color: selectedCount > 0 ? "#2dd4df" : "var(--text-muted)" }}>{selectedCount}</strong> items seleccionados
             {selectedCount > 0 && <span style={{ color: "var(--text-muted)", marginLeft: 8, fontSize: 11 }}>· ≈ {Math.ceil(selectedCount / (size === "S" ? 24 : size === "M" ? 12 : 6))} página{Math.ceil(selectedCount / (size === "S" ? 24 : size === "M" ? 12 : 6)) !== 1 ? "s" : ""}</span>}
           </div>
-          <button onClick={print} disabled={selectedCount === 0} style={{ padding: "10px 22px", background: selectedCount > 0 ? "linear-gradient(135deg,#6366f1,#8b5cf6)" : "var(--bg-tertiary)", border: "none", borderRadius: 10, color: selectedCount > 0 ? "#fff" : "var(--text-muted)", fontSize: 13, fontWeight: 800, cursor: selectedCount > 0 ? "pointer" : "not-allowed", opacity: selectedCount > 0 ? 1 : 0.5 }}>🖨️ Imprimir hoja A4</button>
+          <button onClick={print} disabled={selectedCount === 0} style={{ padding: "10px 22px", background: selectedCount > 0 ? "linear-gradient(135deg,#1ab8c4,#8b5cf6)" : "var(--bg-tertiary)", border: "none", borderRadius: 10, color: selectedCount > 0 ? "#fff" : "var(--text-muted)", fontSize: 13, fontWeight: 800, cursor: selectedCount > 0 ? "pointer" : "not-allowed", opacity: selectedCount > 0 ? 1 : 0.5 }}>🖨️ Imprimir hoja A4</button>
         </div>
 
         {/* Grid de items */}
@@ -181,7 +181,7 @@ export default function QrBatchPage() {
           <div style={{ textAlign: "center", padding: 80, color: "var(--text-muted)", fontSize: 13 }}>No hay {meta.label.toLowerCase()} disponibles</div>
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 10 }}>
-            {filteredItems.map(it => {
+            {(filteredItems || []).map(it => {
               const isSel = !!selected[it.id];
               return (
                 <div key={it.id} onClick={() => setSelected(s => ({ ...s, [it.id]: !s[it.id] }))} style={{ padding: 10, background: "var(--bg-card)", border: `2px solid ${isSel ? meta.color : "var(--border)"}`, borderRadius: 12, cursor: "pointer", display: "flex", alignItems: "center", gap: 10, transition: "all 0.15s" }}>

@@ -51,9 +51,9 @@ export function PwaSetup() {
   return (
     <div style={{
       position: "fixed", bottom: 20, right: 20, zIndex: 1000,
-      background: "linear-gradient(135deg, #6366f1, #7c3aed)",
+      background: "linear-gradient(135deg, #1ab8c4, #149aa5)",
       color: "#fff", padding: "14px 16px", borderRadius: 14,
-      boxShadow: "0 10px 30px rgba(99,102,241,0.4)", maxWidth: 320,
+      boxShadow: "0 10px 30px rgba(26,184,196,0.25)", maxWidth: 320,
       display: "flex", alignItems: "center", gap: 12, fontSize: 13,
     }}>
       <span style={{ fontSize: 28 }}>📱</span>
@@ -70,7 +70,7 @@ export function PwaSetup() {
           } catch {}
           setVisible(false);
         }}
-        style={{ padding: "7px 14px", background: "#fff", color: "#6366f1", border: "none", borderRadius: 8, fontWeight: 800, fontSize: 12, cursor: "pointer" }}
+        style={{ padding: "7px 14px", background: "#fff", color: "#1ab8c4", border: "none", borderRadius: 8, fontWeight: 800, fontSize: 12, cursor: "pointer" }}
       >
         Instalar
       </button>

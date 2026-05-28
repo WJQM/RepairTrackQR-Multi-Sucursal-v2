@@ -28,7 +28,7 @@ const INITIAL_CATEGORIES = ["Nintendo", "Sony", "Microsoft"];
 const STATES = ["", "Nueva", "Usada"];
 const CONDITIONS: Record<string, { label: string; icon: string; color: string }> = {
   disponible: { label: "Disponible", icon: "✅", color: "#10b981" },
-  vendida: { label: "Vendida", icon: "💰", color: "#6366f1" },
+  vendida: { label: "Vendida", icon: "💰", color: "#1ab8c4" },
   reservada: { label: "Reservada", icon: "🔖", color: "#f59e0b" },
 };
 
@@ -80,11 +80,11 @@ export default function ConsolesPage() {
   };
 
   useEffect(() => {
-    fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings({ companyName: d.companyName, logo: d.logo }); }).catch(() => {});
+    fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings({ companyName: d.companyName, logo: d.logo }).catch(() => {}); }).catch(() => {});
     const token = sessionStorage.getItem("token");
     const userData = sessionStorage.getItem("user");
     if (!token || !userData) { router.push("/"); return; }
-    const parsed = JSON.parse(userData);
+    const parsed = (() => { try { return JSON.parse(userData); } catch { return null; } })();
     if (parsed.role !== "admin" && parsed.role !== "superadmin") { router.push("/dashboard"); return; }
     setUser(parsed);
     if (parsed.role === "superadmin") {
@@ -99,13 +99,34 @@ export default function ConsolesPage() {
     } else { setActiveBranch(parsed.branchId || ""); }
 
     loadItems();
-    const saved = sessionStorage.getItem("consoleCategories");
-    if (saved) try { setCategories(JSON.parse(saved)); } catch {}
+    apiFetch("/api/consoles/categories")
+      .then(r => r.json())
+      .then(d => {
+        if (d.categories?.length) {
+          setCategories(d.categories);
+        } else {
+          const saved = sessionStorage.getItem("consoleCategories");
+          if (saved) try {
+            const cats = JSON.parse(saved);
+            if (Array.isArray(cats) && cats.length > 0) {
+              setCategories(cats);
+              apiFetch("/api/consoles/categories", {
+                method: "POST",
+                body: JSON.stringify({ categories: cats }),
+              }).catch(() => {});
+            }
+          } catch {}
+        }
+      })
+      .catch(() => {
+        const saved = sessionStorage.getItem("consoleCategories");
+        if (saved) try { setCategories(JSON.parse(saved)); } catch {}
+      });
 
     const savedForm = sessionStorage.getItem("consoleFormData");
     if (savedForm) {
       try {
-        const d = JSON.parse(savedForm);
+        const d = (() => { try { return JSON.parse(savedForm); } catch { return null; } })();
         setEditingId(d.editingId || null); setName(d.name || ""); setCategory(d.category || "");
         setState(d.state || ""); setBrand(d.brand || ""); setModel(d.model || "");
         setColor(d.color || ""); setStorage(d.storage || ""); setGeneration(d.generation || "");
@@ -120,7 +141,7 @@ export default function ConsolesPage() {
     const capturedData = sessionStorage.getItem("capturedImage");
     if (capturedData) {
       try {
-        const { url, preview } = JSON.parse(capturedData);
+        const { url, preview } = (() => { try { return JSON.parse(capturedData); } catch { return {}; } })();
         setImageUrls(prev => [...prev, url]); setImagePreviews(prev => [...prev, preview]);
         setShowForm(true);
         setTimeout(() => sileo.success({ title: "Foto capturada" }), 500);
@@ -129,7 +150,11 @@ export default function ConsolesPage() {
     }
   }, []);
 
-  const saveCategories = (cats: string[]) => { setCategories(cats); sessionStorage.setItem("consoleCategories", JSON.stringify(cats)); };
+  const saveCategories = (cats: string[]) => {
+    setCategories(cats);
+    sessionStorage.setItem("consoleCategories", JSON.stringify(cats));
+    apiFetch("/api/consoles/categories", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ categories: cats }) }).catch(() => {});
+  };
   const addCategory = () => {
     const t = newCategoryName.trim(); if (!t) return;
     if (categories.includes(t)) { sileo.error({ title: "Ya existe" }); return; }
@@ -264,7 +289,7 @@ export default function ConsolesPage() {
   const getCategoryColor = (cat: string | null): string => {
     if (!cat) return "#6b7280";
     const map: Record<string, string> = { "Nintendo": "#ef4444", "Sony": "#3b82f6", "Microsoft": "#10b981", "Sega": "#8b5cf6", "Retro": "#f59e0b", "Atari": "#ec4899" };
-    return map[cat] || "#6366f1";
+    return map[cat] || "#1ab8c4";
   };
 
   if (!user) return <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg-primary)", color: "var(--text-muted)", fontSize: 14 }}>Cargando...</div>;
@@ -273,11 +298,11 @@ export default function ConsolesPage() {
   const PRIMARY_DARK = "#ea580c";
 
   return (
-    <div className="main-content" style={{ minHeight: "100vh", background: "var(--bg-primary)", paddingLeft: 200, paddingTop: 0 }}>
+    <div className="main-content" style={{ minHeight: "100vh", background: "var(--bg-primary)", paddingLeft: 210, paddingTop: 0 }}>
       {viewImage && (
         <div onClick={() => setViewImage(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", backdropFilter: "blur(10px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 300, cursor: "pointer" }}>
           <div style={{ position: "relative", maxWidth: "90%", maxHeight: "90%" }}>
-            <img src={viewImage} alt="Consola" style={{ maxWidth: "100%", maxHeight: "85vh", borderRadius: 16, boxShadow: "0 20px 60px rgba(0,0,0,0.5)" }} />
+            <img src={viewImage} alt="Consola" style={{ maxWidth: "100%", maxHeight: "85vh", borderRadius: 12, boxShadow: "0 20px 60px rgba(26,29,46,0.40)" }} />
             <button onClick={() => setViewImage(null)} style={{ position: "absolute", top: -14, right: -14, width: 32, height: 32, borderRadius: "50%", background: "rgba(239,68,68,0.9)", border: "none", color: "#fff", fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
           </div>
         </div>
@@ -287,10 +312,10 @@ export default function ConsolesPage() {
         @keyframes slideIn { from { opacity: 0; transform: translateX(80px) scale(0.95); } to { opacity: 1; transform: translateX(0) scale(1); } }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeScale { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
-        .sidebar-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 14px; border-radius: 10px; border: none; font-size: 12px; font-weight: 600; cursor: pointer; background: transparent; color: var(--text-muted); transition: all 0.15s; text-align: left; }
-        .sidebar-btn:hover { background: rgba(99,102,241,0.06); color: var(--text-secondary); }
-        .sidebar-btn.active { background: rgba(99,102,241,0.12); color: #818cf8; }
-        .sidebar-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+        .sidebar-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 14px; border-radius: 10px; border: none; font-size: 12px; font-weight: 600; cursor: pointer; background: transparent; color: var(--sidebar-text); transition: all 0.15s; text-align: left; }
+        .sidebar-btn:hover { background: rgba(26,184,196,0.05); color: var(--text-secondary); }
+        .sidebar-btn.active { background: rgba(26,184,196,0.07); color: #2dd4df; }
+        .sidebar-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; background: var(--sidebar-item); color: var(--sidebar-text); }
         @media(max-width:1024px){
           .sidebar-desktop{transform:translateX(-100%)!important}
           .sidebar-desktop.open{transform:translateX(0)!important}
@@ -311,8 +336,8 @@ export default function ConsolesPage() {
             { label: "Disponibles", value: items.filter(i => i.condition === "disponible").length, icon: "✅", color: "#10b981" },
             { label: "Categorías", value: usedCategories.length, icon: "🏷️", color: "#8b5cf6" },
           ].map((s, i) => (
-            <div key={i} style={{ padding: "20px 18px", background: `linear-gradient(135deg, ${s.color}10, ${s.color}02)`, borderRadius: 16, border: `1px solid ${s.color}15`, animation: `fadeIn 0.4s ease-out ${i * 0.06}s both`, position: "relative", overflow: "hidden" }}>
-              <div style={{ position: "absolute", top: -10, right: -10, fontSize: 48, opacity: 0.06 }}>{s.icon}</div>
+            <div key={i} style={{ padding: "20px 18px", background: "#ffffff", borderRadius: 12, border: "1.5px solid #cbd5e8", borderTop: `4px solid ${s.color}`, boxShadow: "0 4px 18px rgba(30,42,58,0.10), 0 1px 3px rgba(30,42,58,0.05)", animation: `fadeIn 0.4s ease-out ${i * 0.06}s both`, position: "relative", overflow: "hidden" }}>
+              <div style={{ position: "absolute", top: 8, right: 12, fontSize: 28, opacity: 0.12 }}>{s.icon}</div>
               <div style={{ fontSize: 11, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.8px", fontWeight: 600 }}>{s.label}</div>
               <div style={{ fontSize: 28, fontWeight: 800, color: s.color, marginTop: 8, letterSpacing: "-0.5px" }}>{s.value}</div>
             </div>
@@ -327,7 +352,7 @@ export default function ConsolesPage() {
             </div>
             <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)} style={{ padding: "10px 14px", background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 10, color: "var(--text-primary)", fontSize: 12, cursor: "pointer", outline: "none" }}>
               <option value="all">Todas las categorías</option>
-              {categories.map(c => <option key={c} value={c}>{c}</option>)}
+              {(categories || []).map(c => <option key={c} value={c}>{c}</option>)}
             </select>
             <select value={filterCondition} onChange={(e) => setFilterCondition(e.target.value)} style={{ padding: "10px 14px", background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 10, color: "var(--text-primary)", fontSize: 12, cursor: "pointer", outline: "none" }}>
               <option value="all">Toda condición</option>
@@ -353,7 +378,7 @@ export default function ConsolesPage() {
               <button onClick={addCategory} style={{ padding: "9px 16px", background: "#8b5cf6", border: "none", borderRadius: 8, color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>＋ Crear</button>
             </div>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              {categories.map((cat, idx) => (
+              {(categories || []).map((cat, idx) => (
                 <div key={idx} style={{ padding: "5px 10px", borderRadius: 8, background: `${getCategoryColor(cat)}18`, border: `1px solid ${getCategoryColor(cat)}30`, color: getCategoryColor(cat), fontSize: 11, fontWeight: 700, display: "flex", alignItems: "center", gap: 8 }}>
                   {editingCatIdx === idx ? (
                     <input value={editingCatName} onChange={(e) => setEditingCatName(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") saveEditCategory(idx); if (e.key === "Escape") setEditingCatIdx(null); }} onBlur={() => saveEditCategory(idx)} autoFocus style={{ width: 110, padding: "2px 6px", background: "var(--bg-tertiary)", border: `1px solid ${getCategoryColor(cat)}`, borderRadius: 4, color: "var(--text-primary)", fontSize: 11, outline: "none" }} />
@@ -366,8 +391,8 @@ export default function ConsolesPage() {
 
         {showForm && (
           <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 150, padding: 20 }}>
-            <div style={{ width: "100%", maxWidth: 680, maxHeight: "92vh", overflow: "auto", background: "var(--bg-card)", borderRadius: 20, border: `1px solid ${PRIMARY}40`, boxShadow: "0 20px 60px rgba(0,0,0,0.5)", animation: "fadeScale 0.3s ease-out" }}>
-              <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ width: "100%", maxWidth: 680, maxHeight: "92vh", overflow: "auto", background: "var(--bg-card)", borderRadius: 12, border: `1px solid ${PRIMARY}40`, boxShadow: "0 20px 60px rgba(26,29,46,0.40)", animation: "fadeScale 0.3s ease-out" }}>
+              <div style={{ padding: "16px 20px", borderBottom: "1.5px solid #cbd5e8", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <h3 style={{ fontSize: 15, fontWeight: 700, color: PRIMARY }}>{editingId ? "✏️ Editar Consola" : "＋ Nueva Consola"}</h3>
                 <button onClick={resetForm} style={{ width: 28, height: 28, borderRadius: 6, background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", color: "#ef4444", fontSize: 12, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
               </div>
@@ -375,7 +400,7 @@ export default function ConsolesPage() {
                 <div>
                   <label style={labelStyle}>📷 Imágenes</label>
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                    {imagePreviews.map((preview, idx) => (
+                    {(imagePreviews || []).map((preview, idx) => (
                       <div key={idx} style={{ width: 100, height: 100, borderRadius: 10, overflow: "hidden", position: "relative", border: `2px solid ${PRIMARY}`, flexShrink: 0 }}>
                         <img src={preview} alt={`Foto ${idx + 1}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                         <button type="button" onClick={() => removeImage(idx)} style={{ position: "absolute", top: 4, right: 4, width: 20, height: 20, borderRadius: "50%", background: "rgba(239,68,68,0.9)", border: "none", color: "#fff", fontSize: 10, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
@@ -389,8 +414,8 @@ export default function ConsolesPage() {
 
                 <div className="form-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                   <div style={{ gridColumn: "1 / -1" }}><label style={labelStyle}>Nombre *</label><input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ej: Nintendo Switch OLED, PlayStation 5..." style={fieldStyle} /></div>
-                  <div><label style={labelStyle}>🏷️ Categoría</label><select value={category} onChange={(e) => setCategory(e.target.value)} style={{ ...fieldStyle, cursor: "pointer" }}><option value="">Sin categoría</option>{categories.map(c => <option key={c} value={c}>{c}</option>)}</select></div>
-                  <div><label style={labelStyle}>✨ Estado</label><select value={state} onChange={(e) => setState(e.target.value)} style={{ ...fieldStyle, cursor: "pointer" }}>{STATES.map(s => <option key={s} value={s}>{s || "Sin especificar"}</option>)}</select></div>
+                  <div><label style={labelStyle}>🏷️ Categoría</label><select value={category} onChange={(e) => setCategory(e.target.value)} style={{ ...fieldStyle, cursor: "pointer" }}><option value="">Sin categoría</option>{(categories || []).map(c => <option key={c} value={c}>{c}</option>)}</select></div>
+                  <div><label style={labelStyle}>✨ Estado</label><select value={state} onChange={(e) => setState(e.target.value)} style={{ ...fieldStyle, cursor: "pointer" }}>{(STATES || []).map(s => <option key={s} value={s}>{s || "Sin especificar"}</option>)}</select></div>
                   <div><label style={labelStyle}>🏢 Marca</label><input value={brand} onChange={(e) => setBrand(e.target.value)} placeholder="Nintendo, Sony, Microsoft..." style={fieldStyle} /></div>
                   <div><label style={labelStyle}>📦 Modelo</label><input value={model} onChange={(e) => setModel(e.target.value)} placeholder="Switch OLED, PS5 Slim..." style={fieldStyle} /></div>
                   <div><label style={labelStyle}>🎨 Color</label><input value={color} onChange={(e) => setColor(e.target.value)} placeholder="Negro, Blanco, Rojo..." style={fieldStyle} /></div>
@@ -414,7 +439,7 @@ export default function ConsolesPage() {
         {loading ? (
           <div style={{ padding: 60, textAlign: "center", color: "var(--text-muted)" }}>Cargando...</div>
         ) : filteredItems.length === 0 ? (
-          <div style={{ padding: 60, textAlign: "center", background: "var(--bg-card)", borderRadius: 18, border: "1px solid var(--border)" }}>
+          <div style={{ padding: 60, textAlign: "center", background: "var(--bg-card)", borderRadius: 14, border: "1.5px solid #cbd5e8" }}>
             <div style={{ fontSize: 48, marginBottom: 16 }}>🕹️</div>
             <h3 style={{ fontSize: 17, fontWeight: 700, marginBottom: 6 }}>No hay consolas</h3>
             <p style={{ color: "var(--text-muted)", fontSize: 13, marginBottom: 16 }}>Agrega consolas Nintendo, Sony, Microsoft y más</p>
@@ -422,13 +447,13 @@ export default function ConsolesPage() {
           </div>
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 18 }}>
-            {filteredItems.map((item, i) => {
+            {(filteredItems || []).map((item, i) => {
               const imgs = parseImages(item.image);
               const firstImg = imgs[0] || null;
               const catColor = getCategoryColor(item.category);
               const cond = CONDITIONS[item.condition] || CONDITIONS.disponible;
               return (
-                <div key={item.id} style={{ background: "var(--bg-card)", borderRadius: 16, border: "1px solid var(--border)", overflow: "hidden", animation: `fadeIn 0.3s ease-out ${i * 0.04}s both`, position: "relative" }}>
+                <div key={item.id} style={{ background: "var(--bg-card)", borderRadius: 12, border: "1.5px solid #cbd5e8", overflow: "hidden", animation: `fadeIn 0.3s ease-out ${i * 0.04}s both`, position: "relative" }}>
                   {item.category && <div style={{ position: "absolute", top: 10, left: 10, zIndex: 2, padding: "3px 8px", borderRadius: 6, background: `${catColor}dd`, color: "#fff", fontSize: 9, fontWeight: 700 }}>{item.category}</div>}
                   <div style={{ position: "absolute", top: 10, right: 10, zIndex: 2, padding: "3px 8px", borderRadius: 6, background: `${cond.color}dd`, color: "#fff", fontSize: 9, fontWeight: 700 }}>{cond.icon} {cond.label}</div>
                   {imgs.length > 1 && <div style={{ position: "absolute", top: 34, right: 10, zIndex: 2, padding: "2px 6px", borderRadius: 5, background: "rgba(0,0,0,0.7)", color: "#fff", fontSize: 9, fontWeight: 700 }}>📷 {imgs.length}</div>}
@@ -442,14 +467,14 @@ export default function ConsolesPage() {
                       <h3 style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)", lineHeight: 1.3, flex: 1 }}>{item.name}</h3>
                       {item.code && <span style={{ fontFamily: "monospace", fontSize: 10, fontWeight: 800, color: PRIMARY, padding: "2px 6px", borderRadius: 5, background: `${PRIMARY}14`, border: `1px solid ${PRIMARY}25`, flexShrink: 0 }}>{item.code}</span>}
                     </div>
-                    <div style={{ fontSize: 18, fontWeight: 800, color: "#10b981", marginBottom: 8 }}>Bs. {item.price.toFixed(2)}</div>
+                    <div style={{ fontSize: 18, fontWeight: 800, color: "#10b981", marginBottom: 8 }}>Bs. {Math.round(item.price || 0).toLocaleString()}</div>
                     <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginBottom: 8 }}>
                       {item.state && <span style={{ fontSize: 9, padding: "2px 6px", borderRadius: 5, background: item.state === "Nueva" ? "rgba(16,185,129,0.12)" : "rgba(245,158,11,0.12)", color: item.state === "Nueva" ? "#10b981" : "#f59e0b", fontWeight: 700 }}>{item.state === "Nueva" ? "✨" : "🔄"} {item.state}</span>}
-                      {item.storage && <span style={{ fontSize: 9, padding: "2px 6px", borderRadius: 5, background: "rgba(99,102,241,0.1)", color: "#818cf8", fontWeight: 700 }}>💾 {item.storage}</span>}
-                      {item.color && <span style={{ fontSize: 9, padding: "2px 6px", borderRadius: 5, background: "rgba(139,92,246,0.1)", color: "#a78bfa", fontWeight: 700 }}>🎨 {item.color}</span>}
+                      {item.storage && <span style={{ fontSize: 9, padding: "2px 6px", borderRadius: 5, background: "rgba(26,184,196,0.06)", color: "#2dd4df", fontWeight: 700 }}>💾 {item.storage}</span>}
+                      {item.color && <span style={{ fontSize: 9, padding: "2px 6px", borderRadius: 5, background: "rgba(139,92,246,0.1)", color: "#7c3aed", fontWeight: 700 }}>🎨 {item.color}</span>}
                     </div>
                     <div style={{ display: "flex", gap: 6 }}>
-                      <button onClick={() => printQR(item)} style={{ padding: "7px 10px", background: "rgba(6,182,212,0.08)", border: "1px solid rgba(6,182,212,0.2)", borderRadius: 8, color: "#06b6d4", fontSize: 11, fontWeight: 600, cursor: "pointer" }} title="Imprimir QR">📱 QR</button>
+                      <button onClick={() => printQR(item)} style={{ padding: "7px 10px", background: "rgba(6,182,212,0.08)", border: "1px solid rgba(6,182,212,0.2)", borderRadius: 8, color: "#0891b2", fontSize: 11, fontWeight: 600, cursor: "pointer" }} title="Imprimir QR">📱 QR</button>
                       <button onClick={() => editItem(item)} style={{ flex: 1, padding: "7px", background: `${PRIMARY}14`, border: `1px solid ${PRIMARY}25`, borderRadius: 8, color: PRIMARY, fontSize: 11, fontWeight: 600, cursor: "pointer" }}>✏️ Editar</button>
                       <button onClick={() => deleteItem(item.id)} style={{ padding: "7px 10px", background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.15)", borderRadius: 8, color: "#ef4444", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>🗑️</button>
                     </div>

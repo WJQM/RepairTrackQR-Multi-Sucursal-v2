@@ -20,7 +20,7 @@ export default function CertificateViewPage() {
   const [settings, setSettings] = useState<{ companyName: string; slogan: string; logo: string | null; phone: string | null; address: string | null; website: string | null }>({ companyName: "RepairTrackQR", slogan: "Servicio Técnico Especializado", logo: null, phone: null, address: null, website: null });
 
   useEffect(() => {
-    fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings(d); }).catch(() => {});
+    fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings(d).catch(() => {}); }).catch(() => {});
     if (!code) return;
     const branchId = new URLSearchParams(window.location.search).get("branchId");
     const url = branchId ? `/api/certificates?code=${code}&branchId=${branchId}` : `/api/certificates?code=${code}`;
@@ -42,17 +42,17 @@ export default function CertificateViewPage() {
   if (multiple.length > 0) {
     return (
       <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Segoe UI', Arial, sans-serif", background: "#f0f4f8", padding: 20 }}>
-        <div style={{ background: "#fff", borderRadius: 16, padding: 32, maxWidth: 500, width: "100%", boxShadow: "0 4px 24px rgba(0,0,0,0.08)", textAlign: "center" }}>
+        <div style={{ background: "#fff", borderRadius: 12, padding: 32, maxWidth: 500, width: "100%", boxShadow: "0 4px 24px rgba(0,0,0,0.08)", textAlign: "center" }}>
           <div style={{ fontSize: 40, marginBottom: 12 }}>🏅</div>
           <h2 style={{ fontSize: 20, fontWeight: 700, color: "#1e3a5f", marginBottom: 8 }}>{code}</h2>
           <p style={{ fontSize: 14, color: "#64748b", marginBottom: 20 }}>Este certificado existe en varias sucursales. Selecciona cuál deseas ver:</p>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {multiple.map(c => (
-              <a key={c.id} href={`/certificate-view/${code}?branchId=${c.branch?.id}`} style={{ padding: "14px 20px", background: "#f0f4ff", border: "2px solid #c7d2fe", borderRadius: 12, textDecoration: "none", color: "#1e3a5f", fontWeight: 600, fontSize: 14, display: "flex", justifyContent: "space-between", alignItems: "center", transition: "all 0.2s" }}
+            {(multiple || []).map(c => (
+              <a key={c.id} href={`/certificate-view/${code}?branchId=${c.branch?.id}`} style={{ padding: "14px 20px", background: "#f0f4ff", border: "2px solid #fde68a", borderRadius: 12, textDecoration: "none", color: "#1e3a5f", fontWeight: 600, fontSize: 14, display: "flex", justifyContent: "space-between", alignItems: "center", transition: "all 0.2s" }}
                 onMouseOver={(e) => { (e.target as any).style.background = "#e0e7ff"; }}
                 onMouseOut={(e) => { (e.target as any).style.background = "#f0f4ff"; }}>
                 <span>🏢 {c.branch?.name || "Sucursal"}</span>
-                <span style={{ fontSize: 12, color: "#6366f1" }}>{c.clientName} →</span>
+                <span style={{ fontSize: 12, color: "#1ab8c4" }}>{c.clientName} →</span>
               </a>
             ))}
           </div>
@@ -82,7 +82,7 @@ export default function CertificateViewPage() {
 
       {/* Action bar */}
       <div className="no-print cert-actions" style={{ maxWidth: "7.5in", margin: "0 auto 16px", display: "flex", justifyContent: "center", gap: 10, flexWrap: "wrap" }}>
-        <button onClick={handlePrint} style={{ padding: "10px 28px", borderRadius: 10, border: "none", background: "linear-gradient(135deg, #6366f1, #7c3aed)", color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 16px rgba(99,102,241,0.3)" }}>🖨️ Imprimir</button>
+        <button onClick={handlePrint} style={{ padding: "10px 28px", borderRadius: 10, border: "none", background: "linear-gradient(135deg, #1ab8c4, #149aa5)", color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 16px rgba(26,184,196,0.14)" }}>🖨️ Imprimir</button>
         <button onClick={() => window.close()} style={{ padding: "10px 22px", borderRadius: 10, border: "2px solid #cbd5e1", background: "#fff", color: "#475569", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>✕ Cerrar</button>
       </div>
 
@@ -105,7 +105,7 @@ export default function CertificateViewPage() {
           </div>
           <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: 26, fontWeight: 700, color: "#1e3a5f", letterSpacing: 3, textTransform: "uppercase", margin: "4px 0" }}>Certificado de Autenticidad</h1>
           <div style={{ display: "inline-block", fontSize: 11, fontWeight: 700, color: "#1e3a5f", background: "#e8f0fe", border: "1px solid #b0c4de", borderRadius: 6, padding: "3px 12px", letterSpacing: 1.5, marginTop: 4 }}>{cert.code}</div>
-          {cert.branch && <div style={{ fontSize: 10, color: "#6366f1", marginTop: 4, fontWeight: 600 }}>🏢 {cert.branch.name}</div>}
+          {cert.branch && <div style={{ fontSize: 10, color: "#1ab8c4", marginTop: 4, fontWeight: 600 }}>🏢 {cert.branch.name}</div>}
           <div style={{ fontSize: 10, color: "#94a3b8", marginTop: 6 }}>{contactInfo}</div>
         </div>
 
@@ -147,7 +147,7 @@ export default function CertificateViewPage() {
         {/* Footer */}
         <div style={{ marginTop: 28, paddingTop: 16, borderTop: "2px solid #e2e8f0", display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
           <div style={{ textAlign: "center", width: 220 }}><div style={{ borderTop: "1px solid #1a1a2e", marginBottom: 4 }} /><div style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: 1.5, color: "#94a3b8" }}>Firma del Técnico</div></div>
-          <div style={{ width: 80, height: 80, borderRadius: "50%", background: "conic-gradient(from 180deg, #00bfff, #7c3aed, #ec4899, #f59e0b, #10b981, #00bfff)", display: "flex", alignItems: "center", justifyContent: "center", opacity: 0.6 }}><div style={{ width: 60, height: 60, borderRadius: "50%", background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Playfair Display', serif", fontSize: 10, fontWeight: 700, color: "#1e3a5f", textAlign: "center", lineHeight: 1.2 }}>SELLO DE<br/>GARANTÍA</div></div>
+          <div style={{ width: 80, height: 80, borderRadius: "50%", background: "conic-gradient(from 180deg, #00bfff, #149aa5, #ec4899, #f59e0b, #10b981, #00bfff)", display: "flex", alignItems: "center", justifyContent: "center", opacity: 0.6 }}><div style={{ width: 60, height: 60, borderRadius: "50%", background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Playfair Display', serif", fontSize: 10, fontWeight: 700, color: "#1e3a5f", textAlign: "center", lineHeight: 1.2 }}>SELLO DE<br/>GARANTÍA</div></div>
           <div style={{ textAlign: "center", width: 220 }}><div style={{ borderTop: "1px solid #1a1a2e", marginBottom: 4 }} /><div style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: 1.5, color: "#94a3b8" }}>Firma del Cliente</div></div>
         </div>
         <p style={{ textAlign: "center", fontSize: 9, color: "#94a3b8", marginTop: 14, lineHeight: 1.5 }}>Este certificado garantiza que las licencias de software indicadas son productos originales y legítimos.<br/>El uso de las claves de producto está sujeto a los términos y condiciones de Microsoft Corporation.</p>

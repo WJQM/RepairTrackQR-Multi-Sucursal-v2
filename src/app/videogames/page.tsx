@@ -68,11 +68,11 @@ export default function VideogamesPage() {
   };
 
   useEffect(() => {
-    fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings({ companyName: d.companyName, logo: d.logo }); }).catch(() => {});
+    fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings({ companyName: d.companyName, logo: d.logo }).catch(() => {}); }).catch(() => {});
     const token = sessionStorage.getItem("token");
     const userData = sessionStorage.getItem("user");
     if (!token || !userData) { router.push("/"); return; }
-    const parsed = JSON.parse(userData);
+    const parsed = (() => { try { return JSON.parse(userData); } catch { return null; } })();
     if (parsed.role !== "admin" && parsed.role !== "superadmin") { router.push("/dashboard"); return; }
     setUser(parsed);
     if (parsed.role === "superadmin") {
@@ -87,13 +87,34 @@ export default function VideogamesPage() {
     } else { setActiveBranch(parsed.branchId || ""); }
 
     loadItems();
-    const saved = sessionStorage.getItem("videogamePlatforms");
-    if (saved) try { setPlatforms(JSON.parse(saved)); } catch {}
+    apiFetch("/api/videogames/categories")
+      .then(r => r.json())
+      .then(d => {
+        if (d.categories?.length) {
+          setPlatforms(d.categories);
+        } else {
+          const saved = sessionStorage.getItem("videogamePlatforms");
+          if (saved) try {
+            const cats = JSON.parse(saved);
+            if (Array.isArray(cats) && cats.length > 0) {
+              setPlatforms(cats);
+              apiFetch("/api/videogames/categories", {
+                method: "POST",
+                body: JSON.stringify({ categories: cats }),
+              }).catch(() => {});
+            }
+          } catch {}
+        }
+      })
+      .catch(() => {
+        const saved = sessionStorage.getItem("videogamePlatforms");
+        if (saved) try { setPlatforms(JSON.parse(saved)); } catch {}
+      });
 
     const savedForm = sessionStorage.getItem("videogameFormData");
     if (savedForm) {
       try {
-        const data = JSON.parse(savedForm);
+        const data = (() => { try { return JSON.parse(savedForm); } catch { return null; } })();
         setEditingId(data.editingId || null);
         setName(data.name || "");
         setPlatform(data.platform || "");
@@ -114,7 +135,7 @@ export default function VideogamesPage() {
     const capturedData = sessionStorage.getItem("capturedImage");
     if (capturedData) {
       try {
-        const { url, preview } = JSON.parse(capturedData);
+        const { url, preview } = (() => { try { return JSON.parse(capturedData); } catch { return {}; } })();
         setImageUrls(prev => [...prev, url]);
         setImagePreviews(prev => [...prev, preview]);
         setShowForm(true);
@@ -124,7 +145,11 @@ export default function VideogamesPage() {
     }
   }, []);
 
-  const savePlatforms = (pls: string[]) => { setPlatforms(pls); sessionStorage.setItem("videogamePlatforms", JSON.stringify(pls)); };
+  const savePlatforms = (pls: string[]) => {
+    setPlatforms(pls);
+    sessionStorage.setItem("videogamePlatforms", JSON.stringify(pls));
+    apiFetch("/api/videogames/categories", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ categories: pls }) }).catch(() => {});
+  };
   const addPlatform = () => {
     const t = newPlatformName.trim();
     if (!t) return;
@@ -257,17 +282,17 @@ export default function VideogamesPage() {
       "PC": "#3b82f6",
       "Nintendo Switch": "#ef4444",
       "Nintendo Wii": "#f59e0b",
-      "PSP": "#06b6d4",
+      "PSP": "#0891b2",
       "PS Vita": "#8b5cf6",
       "PlayStation 4": "#0ea5e9",
       "PlayStation 5": "#2563eb",
       "Xbox 360": "#10b981",
-      "Xbox One": "#22c55e",
+      "Xbox One": "#16a34a",
       "Xbox Series X": "#16a34a",
       "Nintendo 3DS": "#f97316",
-      "Nintendo DS": "#fb923c",
+      "Nintendo DS": "#ea580c",
     };
-    return map[p] || "#6366f1";
+    return map[p] || "#1ab8c4";
   };
 
   const getPlatformIcon = (p: string | null): string => {
@@ -289,11 +314,11 @@ export default function VideogamesPage() {
   const PRIMARY_DARK = "#dc2626";
 
   return (
-    <div className="main-content" style={{ minHeight: "100vh", background: "var(--bg-primary)", paddingLeft: 200, paddingTop: 0 }}>
+    <div className="main-content" style={{ minHeight: "100vh", background: "var(--bg-primary)", paddingLeft: 210, paddingTop: 0 }}>
       {viewImage && (
         <div onClick={() => setViewImage(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", backdropFilter: "blur(10px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 300, cursor: "pointer" }}>
           <div style={{ position: "relative", maxWidth: "90%", maxHeight: "90%" }}>
-            <img src={viewImage} alt="Videojuego" style={{ maxWidth: "100%", maxHeight: "85vh", borderRadius: 16, boxShadow: "0 20px 60px rgba(0,0,0,0.5)" }} />
+            <img src={viewImage} alt="Videojuego" style={{ maxWidth: "100%", maxHeight: "85vh", borderRadius: 12, boxShadow: "0 20px 60px rgba(26,29,46,0.40)" }} />
             <button onClick={() => setViewImage(null)} style={{ position: "absolute", top: -14, right: -14, width: 32, height: 32, borderRadius: "50%", background: "rgba(239,68,68,0.9)", border: "none", color: "#fff", fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
           </div>
         </div>
@@ -303,10 +328,10 @@ export default function VideogamesPage() {
         @keyframes slideIn { from { opacity: 0; transform: translateX(80px) scale(0.95); } to { opacity: 1; transform: translateX(0) scale(1); } }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeScale { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
-        .sidebar-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 14px; border-radius: 10px; border: none; font-size: 12px; font-weight: 600; cursor: pointer; background: transparent; color: var(--text-muted); transition: all 0.15s; text-align: left; }
-        .sidebar-btn:hover { background: rgba(99,102,241,0.06); color: var(--text-secondary); }
-        .sidebar-btn.active { background: rgba(99,102,241,0.12); color: #818cf8; }
-        .sidebar-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+        .sidebar-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 14px; border-radius: 10px; border: none; font-size: 12px; font-weight: 600; cursor: pointer; background: transparent; color: var(--sidebar-text); transition: all 0.15s; text-align: left; }
+        .sidebar-btn:hover { background: rgba(26,184,196,0.05); color: var(--text-secondary); }
+        .sidebar-btn.active { background: rgba(26,184,196,0.07); color: #2dd4df; }
+        .sidebar-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; background: var(--sidebar-item); color: var(--sidebar-text); }
         @media(max-width:1024px){
           .sidebar-desktop{transform:translateX(-100%)!important}
           .sidebar-desktop.open{transform:translateX(0)!important}
@@ -326,8 +351,8 @@ export default function VideogamesPage() {
             { label: "Total Videojuegos", value: items.length, icon: "🎮", color: PRIMARY },
             { label: "Plataformas", value: usedPlatforms.length, icon: "🕹️", color: "#f59e0b" },
           ].map((s, i) => (
-            <div key={i} style={{ padding: "20px 18px", background: `linear-gradient(135deg, ${s.color}10, ${s.color}02)`, borderRadius: 16, border: `1px solid ${s.color}15`, animation: `fadeIn 0.4s ease-out ${i * 0.06}s both`, position: "relative", overflow: "hidden" }}>
-              <div style={{ position: "absolute", top: -10, right: -10, fontSize: 48, opacity: 0.06 }}>{s.icon}</div>
+            <div key={i} style={{ padding: "20px 18px", background: "#ffffff", borderRadius: 12, border: "1.5px solid #cbd5e8", borderTop: `4px solid ${s.color}`, boxShadow: "0 4px 18px rgba(30,42,58,0.10), 0 1px 3px rgba(30,42,58,0.05)", animation: `fadeIn 0.4s ease-out ${i * 0.06}s both`, position: "relative", overflow: "hidden" }}>
+              <div style={{ position: "absolute", top: 8, right: 12, fontSize: 28, opacity: 0.12 }}>{s.icon}</div>
               <div style={{ fontSize: 11, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.8px", fontWeight: 600 }}>{s.label}</div>
               <div style={{ fontSize: 28, fontWeight: 800, color: s.color, marginTop: 8, letterSpacing: "-0.5px" }}>{s.value}</div>
             </div>
@@ -342,7 +367,7 @@ export default function VideogamesPage() {
             </div>
             <select value={filterPlatform} onChange={(e) => setFilterPlatform(e.target.value)} style={{ padding: "10px 14px", background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 10, color: "var(--text-primary)", fontSize: 12, cursor: "pointer", outline: "none" }}>
               <option value="all">Todas las plataformas</option>
-              {platforms.map(p => <option key={p} value={p}>{p}</option>)}
+              {(platforms || []).map(p => <option key={p} value={p}>{p}</option>)}
             </select>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
@@ -362,7 +387,7 @@ export default function VideogamesPage() {
               <button onClick={addPlatform} style={{ padding: "9px 16px", background: "#f59e0b", border: "none", borderRadius: 8, color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>＋ Crear</button>
             </div>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              {platforms.map((p, idx) => (
+              {(platforms || []).map((p, idx) => (
                 <div key={idx} style={{ padding: "5px 10px", borderRadius: 8, background: `${getPlatformColor(p)}18`, border: `1px solid ${getPlatformColor(p)}30`, color: getPlatformColor(p), fontSize: 11, fontWeight: 700, display: "flex", alignItems: "center", gap: 8 }}>
                   {editingPlatIdx === idx ? (
                     <input value={editingPlatName} onChange={(e) => setEditingPlatName(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") saveEditPlatform(idx); if (e.key === "Escape") setEditingPlatIdx(null); }} onBlur={() => saveEditPlatform(idx)} autoFocus style={{ width: 120, padding: "2px 6px", background: "var(--bg-tertiary)", border: `1px solid ${getPlatformColor(p)}`, borderRadius: 4, color: "var(--text-primary)", fontSize: 11, outline: "none" }} />
@@ -375,8 +400,8 @@ export default function VideogamesPage() {
 
         {showForm && (
           <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 150, padding: 20 }}>
-            <div style={{ width: "100%", maxWidth: 660, maxHeight: "92vh", overflow: "auto", background: "var(--bg-card)", borderRadius: 20, border: `1px solid ${PRIMARY}40`, boxShadow: "0 20px 60px rgba(0,0,0,0.5)", animation: "fadeScale 0.3s ease-out" }}>
-              <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ width: "100%", maxWidth: 660, maxHeight: "92vh", overflow: "auto", background: "var(--bg-card)", borderRadius: 12, border: `1px solid ${PRIMARY}40`, boxShadow: "0 20px 60px rgba(26,29,46,0.40)", animation: "fadeScale 0.3s ease-out" }}>
+              <div style={{ padding: "16px 20px", borderBottom: "1.5px solid #cbd5e8", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <h3 style={{ fontSize: 15, fontWeight: 700, color: PRIMARY }}>{editingId ? "✏️ Editar Videojuego" : "＋ Nuevo Videojuego"}</h3>
                 <button onClick={resetForm} style={{ width: 28, height: 28, borderRadius: 6, background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", color: "#ef4444", fontSize: 12, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
               </div>
@@ -384,11 +409,11 @@ export default function VideogamesPage() {
                 <div>
                   <label style={labelStyle}>📷 Imágenes / Portada</label>
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                    {imagePreviews.map((preview, idx) => (
+                    {(imagePreviews || []).map((preview, idx) => (
                       <div key={idx} style={{ width: 100, height: 130, borderRadius: 10, overflow: "hidden", position: "relative", border: `2px solid ${PRIMARY}`, flexShrink: 0 }}>
                         <img src={preview} alt={`Foto ${idx + 1}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                         <button type="button" onClick={() => removeImage(idx)} style={{ position: "absolute", top: 4, right: 4, width: 20, height: 20, borderRadius: "50%", background: "rgba(239,68,68,0.9)", border: "none", color: "#fff", fontSize: 10, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
-                        {uploading && idx === imagePreviews.length - 1 && <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center" }}><div style={{ color: "#fff", fontSize: 10, fontWeight: 600 }}>...</div></div>}
+                        {uploading && idx === imagePreviews.length - 1 && <div style={{ position: "absolute", inset: 0, background: "rgba(26,29,46,0.45)", display: "flex", alignItems: "center", justifyContent: "center" }}><div style={{ color: "#fff", fontSize: 10, fontWeight: 600 }}>...</div></div>}
                       </div>
                     ))}
                     <div onClick={() => fileInputRef.current?.click()} style={{ width: 100, height: 130, borderRadius: 10, border: "2px dashed var(--border)", background: "var(--bg-tertiary)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6, cursor: "pointer", flexShrink: 0 }}><span style={{ fontSize: 24 }}>📷</span><span style={{ fontSize: 9, color: "var(--text-muted)" }}>Subir</span></div>
@@ -399,11 +424,11 @@ export default function VideogamesPage() {
 
                 <div className="form-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                   <div style={{ gridColumn: "1 / -1" }}><label style={labelStyle}>Nombre *</label><input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ej: The Legend of Zelda, GTA V..." style={fieldStyle} /></div>
-                  <div><label style={labelStyle}>🕹️ Plataforma</label><select value={platform} onChange={(e) => setPlatform(e.target.value)} style={{ ...fieldStyle, cursor: "pointer" }}><option value="">Sin plataforma</option>{platforms.map(p => <option key={p} value={p}>{p}</option>)}</select></div>
+                  <div><label style={labelStyle}>🕹️ Plataforma</label><select value={platform} onChange={(e) => setPlatform(e.target.value)} style={{ ...fieldStyle, cursor: "pointer" }}><option value="">Sin plataforma</option>{(platforms || []).map(p => <option key={p} value={p}>{p}</option>)}</select></div>
                   <div><label style={labelStyle}>🎭 Género</label><input value={genre} onChange={(e) => setGenre(e.target.value)} placeholder="Acción, RPG, Deportes..." style={fieldStyle} /></div>
                   <div><label style={labelStyle}>💾 Peso</label><input value={size} onChange={(e) => setSize(e.target.value)} placeholder="50 GB, 1.2 GB..." style={fieldStyle} /></div>
                   <div><label style={labelStyle}>🌐 Idioma</label><input value={language} onChange={(e) => setLanguage(e.target.value)} placeholder="Español, Inglés, Multi..." style={fieldStyle} /></div>
-                  <div style={{ gridColumn: "1 / -1" }}><label style={labelStyle}>🔞 Clasificación (PEGI / ESRB)</label><select value={rating} onChange={(e) => setRating(e.target.value)} style={{ ...fieldStyle, cursor: "pointer" }}>{RATINGS.map(r => <option key={r} value={r}>{r || "Sin clasificar"}</option>)}</select></div>
+                  <div style={{ gridColumn: "1 / -1" }}><label style={labelStyle}>🔞 Clasificación (PEGI / ESRB)</label><select value={rating} onChange={(e) => setRating(e.target.value)} style={{ ...fieldStyle, cursor: "pointer" }}>{(RATINGS || []).map(r => <option key={r} value={r}>{r || "Sin clasificar"}</option>)}</select></div>
                   <div style={{ gridColumn: "1 / -1" }}><label style={labelStyle}>📝 Descripción</label><textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Breve descripción del juego..." rows={3} style={{ ...fieldStyle, resize: "vertical", fontFamily: "inherit" }} /></div>
                   {platform === "PC" && (<>
                     <div style={{ gridColumn: "1 / -1" }}><label style={labelStyle}>⚙️ Requisitos mínimos (PC)</label><textarea value={minRequirements} onChange={(e) => setMinRequirements(e.target.value)} placeholder="CPU: Intel i3 | RAM: 4GB | GPU: GTX 650..." rows={2} style={{ ...fieldStyle, resize: "vertical", fontFamily: "inherit" }} /></div>
@@ -423,7 +448,7 @@ export default function VideogamesPage() {
         {loading ? (
           <div style={{ padding: 60, textAlign: "center", color: "var(--text-muted)" }}>Cargando...</div>
         ) : filteredItems.length === 0 ? (
-          <div style={{ padding: 60, textAlign: "center", background: "var(--bg-card)", borderRadius: 18, border: "1px solid var(--border)" }}>
+          <div style={{ padding: 60, textAlign: "center", background: "var(--bg-card)", borderRadius: 14, border: "1.5px solid #cbd5e8" }}>
             <div style={{ fontSize: 48, marginBottom: 16 }}>🎮</div>
             <h3 style={{ fontSize: 17, fontWeight: 700, marginBottom: 6 }}>No hay videojuegos agregados</h3>
             <p style={{ color: "var(--text-muted)", fontSize: 13, marginBottom: 16 }}>Agrega videojuegos de PC, Switch, PSP y más consolas</p>
@@ -431,12 +456,12 @@ export default function VideogamesPage() {
           </div>
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 18 }}>
-            {filteredItems.map((item, i) => {
+            {(filteredItems || []).map((item, i) => {
               const imgs = parseImages(item.image);
               const firstImg = imgs[0] || null;
               const platColor = getPlatformColor(item.platform);
               return (
-                <div key={item.id} onClick={() => setExpandedId(expandedId === item.id ? null : item.id)} style={{ background: "var(--bg-card)", borderRadius: 16, border: "1px solid var(--border)", overflow: "hidden", animation: `fadeIn 0.3s ease-out ${i * 0.04}s both`, position: "relative", cursor: "pointer" }}>
+                <div key={item.id} onClick={() => setExpandedId(expandedId === item.id ? null : item.id)} style={{ background: "var(--bg-card)", borderRadius: 12, border: "1.5px solid #cbd5e8", overflow: "hidden", animation: `fadeIn 0.3s ease-out ${i * 0.04}s both`, position: "relative", cursor: "pointer" }}>
                   {item.platform && <div style={{ position: "absolute", top: 10, left: 10, zIndex: 2, padding: "3px 8px", borderRadius: 6, background: `${platColor}dd`, color: "#fff", fontSize: 9, fontWeight: 700 }}>{getPlatformIcon(item.platform)} {item.platform}</div>}
                   {item.rating && <div style={{ position: "absolute", top: 10, right: 10, zIndex: 2, padding: "3px 8px", borderRadius: 6, background: "rgba(239,68,68,0.9)", color: "#fff", fontSize: 9, fontWeight: 700 }}>🔞 {item.rating}</div>}
                   {imgs.length > 1 && <div style={{ position: "absolute", ...(item.rating ? { top: 34 } : { top: 10 }), right: 10, zIndex: 2, padding: "2px 6px", borderRadius: 5, background: "rgba(0,0,0,0.7)", color: "#fff", fontSize: 9, fontWeight: 700 }}>📷 {imgs.length}</div>}
@@ -448,9 +473,9 @@ export default function VideogamesPage() {
                   <div style={{ padding: "14px 16px" }}>
                     <h3 style={{ fontSize: 14, fontWeight: 700, color: "var(--text-primary)", marginBottom: 6, lineHeight: 1.3 }}>{item.name}</h3>
                     <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
-                      {item.genre && <span style={{ fontSize: 9, padding: "2px 8px", borderRadius: 6, background: "rgba(139,92,246,0.1)", color: "#a78bfa", fontWeight: 700 }}>🎭 {item.genre}</span>}
-                      {item.size && <span style={{ fontSize: 9, padding: "2px 8px", borderRadius: 6, background: "rgba(99,102,241,0.1)", color: "#818cf8", fontWeight: 700 }}>💾 {item.size}</span>}
-                      {item.language && <span style={{ fontSize: 9, padding: "2px 8px", borderRadius: 6, background: "rgba(6,182,212,0.1)", color: "#06b6d4", fontWeight: 700 }}>🌐 {item.language}</span>}
+                      {item.genre && <span style={{ fontSize: 9, padding: "2px 8px", borderRadius: 6, background: "rgba(139,92,246,0.1)", color: "#7c3aed", fontWeight: 700 }}>🎭 {item.genre}</span>}
+                      {item.size && <span style={{ fontSize: 9, padding: "2px 8px", borderRadius: 6, background: "rgba(26,184,196,0.06)", color: "#2dd4df", fontWeight: 700 }}>💾 {item.size}</span>}
+                      {item.language && <span style={{ fontSize: 9, padding: "2px 8px", borderRadius: 6, background: "rgba(6,182,212,0.1)", color: "#0891b2", fontWeight: 700 }}>🌐 {item.language}</span>}
                     </div>
                     <div style={{ display: "flex", gap: 6 }}>
                       <button onClick={(e) => { e.stopPropagation(); editItem(item); }} style={{ flex: 1, padding: "8px", background: `${PRIMARY}14`, border: `1px solid ${PRIMARY}25`, borderRadius: 8, color: PRIMARY, fontSize: 11, fontWeight: 600, cursor: "pointer" }}>✏️ Editar</button>

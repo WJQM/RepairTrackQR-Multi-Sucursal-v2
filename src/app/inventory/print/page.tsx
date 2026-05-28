@@ -13,11 +13,11 @@ export default function InventoryPrintPage() {
   const [settings, setSettings] = useState<{ companyName: string; logo: string | null; phone: string | null; email: string | null; address: string | null }>({ companyName: "RepairTrackQR", logo: null, phone: null, email: null, address: null });
 
   useEffect(() => {
-    fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings(d); }).catch(() => {});
+    fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings(d).catch(() => {}); }).catch(() => {});
     apiFetch("/api/inventory").then(r => r.json()).then(d => { if (Array.isArray(d)) setItems(d); setLoading(false); }).catch(() => setLoading(false));
     // Get branch name
     try {
-      const user = JSON.parse(sessionStorage.getItem("user") || "{}");
+      const user = ((() => { try { return JSON.parse(sessionStorage.getItem("user") || "{}"); } catch { return {}; } })());
       if (user.branchName) setBranchName(user.branchName);
       else if (user.role === "superadmin") {
         apiFetch("/api/branches").then(r => r.json()).then(branches => {
@@ -60,16 +60,16 @@ export default function InventoryPrintPage() {
       `}</style>
 
       {/* BARRA DE ACCIONES */}
-      <div className="no-print" style={{ position: "fixed", top: 0, left: 0, right: 0, padding: "12px 24px", background: "#111118", display: "flex", justifyContent: "space-between", alignItems: "center", zIndex: 100 }}>
+      <div className="no-print" style={{ position: "fixed", top: 0, left: 0, right: 0, padding: "12px 24px", background: "#ffffff", display: "flex", justifyContent: "space-between", alignItems: "center", zIndex: 100 }}>
         <span style={{ color: "#eee", fontSize: 14, fontWeight: 600 }}>📦 Extracto de Inventario</span>
         <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar..." style={{ padding: "7px 12px", background: "#1e1e2e", border: "1px solid #333", borderRadius: 6, color: "#eee", fontSize: 12, outline: "none", width: 180 }} />
-          <select value={filterCat} onChange={e => setFilterCat(e.target.value)} style={{ padding: "7px 10px", background: "#1e1e2e", border: "1px solid #333", borderRadius: 6, color: "#eee", fontSize: 12, cursor: "pointer", outline: "none" }}>
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar..." style={{ padding: "7px 12px", background: "#e8ebf2", border: "1px solid #333", borderRadius: 6, color: "#eee", fontSize: 12, outline: "none", width: 180 }} />
+          <select value={filterCat} onChange={e => setFilterCat(e.target.value)} style={{ padding: "7px 10px", background: "#e8ebf2", border: "1px solid #333", borderRadius: 6, color: "#eee", fontSize: 12, cursor: "pointer", outline: "none" }}>
             <option value="all">Todas</option>
             {categories.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
           <button onClick={() => window.print()} style={{ padding: "7px 18px", background: "#3b82f6", border: "none", borderRadius: 6, color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>🖨️ Imprimir</button>
-          <button onClick={() => window.close()} style={{ padding: "7px 14px", background: "#1e1e2e", border: "1px solid #333", borderRadius: 6, color: "#888", fontSize: 12, cursor: "pointer" }}>✕</button>
+          <button onClick={() => window.close()} style={{ padding: "7px 14px", background: "#e8ebf2", border: "1px solid #333", borderRadius: 6, color: "#888", fontSize: 12, cursor: "pointer" }}>✕</button>
         </div>
       </div>
 
@@ -80,7 +80,7 @@ export default function InventoryPrintPage() {
           <div>
             <h1 style={{ fontSize: 24, fontWeight: 800 }}>{settings.companyName}</h1>
             <p style={{ fontSize: 10, color: "#888", marginTop: 3 }}>SERVICIO TÉCNICO ESPECIALIZADO</p>
-            {branchName && <p style={{ fontSize: 11, fontWeight: 700, color: "#6366f1", marginTop: 4 }}>🏢 {branchName}</p>}
+            {branchName && <p style={{ fontSize: 11, fontWeight: 700, color: "#1ab8c4", marginTop: 4 }}>🏢 {branchName}</p>}
             {(settings.phone || settings.email || settings.address) && (
               <div style={{ display: "flex", gap: 12, fontSize: 9, color: "#888", marginTop: 6, flexWrap: "wrap" }}>
                 {settings.phone && <span>📞 {settings.phone}</span>}
@@ -102,7 +102,7 @@ export default function InventoryPrintPage() {
           {[
             { label: "Productos", value: totalItems, color: "#3b82f6", icon: "📦" },
             { label: "Unidades", value: totalUnits, color: "#10b981", icon: "🔢" },
-            { label: "Valor Total", value: `Bs. ${totalValue.toFixed(2)}`, color: "#f59e0b", icon: "💰" },
+            { label: "Valor Total", value: `Bs. ${totalValue}`, color: "#f59e0b", icon: "💰" },
             { label: "Stock Bajo", value: lowStock, color: "#ef4444", icon: "⚠️" },
           ].map((s, i) => (
             <div key={i} style={{ padding: "14px 18px", background: `${s.color}08`, borderRadius: 10, border: `1.5px solid ${s.color}25`, position: "relative", overflow: "hidden" }}>
@@ -140,8 +140,8 @@ export default function InventoryPrintPage() {
                       <td style={{ padding: "10px 14px", fontSize: 11, color: "#555" }}>{item.category || "—"}</td>
                       <td style={{ padding: "10px 14px", fontSize: 14, fontWeight: 800, textAlign: "center", color: isLow ? "#ef4444" : "#10b981" }}>{item.quantity}</td>
                       <td style={{ padding: "10px 14px", fontSize: 11, textAlign: "center", color: "#888" }}>{item.minStock}</td>
-                      <td style={{ padding: "10px 14px", fontSize: 12, textAlign: "right", fontFamily: "monospace", fontWeight: 600 }}>{item.price.toFixed(2)}</td>
-                      <td style={{ padding: "10px 14px", fontSize: 12, textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: "#3b82f6" }}>{(item.price * item.quantity).toFixed(2)}</td>
+                      <td style={{ padding: "10px 14px", fontSize: 12, textAlign: "right", fontFamily: "monospace", fontWeight: 600 }}>{Math.round(item.price || 0).toLocaleString()}</td>
+                      <td style={{ padding: "10px 14px", fontSize: 12, textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: "#3b82f6" }}>{(item.price * item.quantity)}</td>
                       <td style={{ padding: "10px 14px", textAlign: "center" }}>
                         {isLow ? (
                           <span style={{ padding: "2px 8px", borderRadius: 4, fontSize: 8, fontWeight: 700, color: "#ef4444", background: "#fef2f2", border: "1px solid #fecaca" }}>BAJO</span>
@@ -162,7 +162,7 @@ export default function InventoryPrintPage() {
 <span></span>
             <div style={{ textAlign: "right" }}>
               <span style={{ fontSize: 11, color: "#888", marginRight: 10 }}>VALOR TOTAL INVENTARIO</span>
-              <span style={{ fontSize: 22, fontWeight: 800, color: "#3b82f6" }}>Bs. {totalValue.toFixed(2)}</span>
+              <span style={{ fontSize: 22, fontWeight: 800, color: "#3b82f6" }}>Bs. {totalValue}</span>
             </div>
           </div>
         </div>
@@ -192,7 +192,7 @@ export default function InventoryPrintPage() {
                       <td style={{ padding: "8px 14px", fontSize: 12, fontWeight: 600, borderBottom: "1px solid #f0f0f0" }}>🏷️ {cat}</td>
                       <td style={{ padding: "8px 14px", fontSize: 12, fontWeight: 700, textAlign: "center", borderBottom: "1px solid #f0f0f0" }}>{catItems.length}</td>
                       <td style={{ padding: "8px 14px", fontSize: 12, fontWeight: 700, textAlign: "center", color: "#10b981", borderBottom: "1px solid #f0f0f0" }}>{catUnits}</td>
-                      <td style={{ padding: "8px 14px", fontSize: 12, fontWeight: 700, textAlign: "right", color: "#3b82f6", fontFamily: "monospace", borderBottom: "1px solid #f0f0f0" }}>Bs. {catValue.toFixed(2)}</td>
+                      <td style={{ padding: "8px 14px", fontSize: 12, fontWeight: 700, textAlign: "right", color: "#3b82f6", fontFamily: "monospace", borderBottom: "1px solid #f0f0f0" }}>Bs. {catValue}</td>
                     </tr>
                   );
                 })}

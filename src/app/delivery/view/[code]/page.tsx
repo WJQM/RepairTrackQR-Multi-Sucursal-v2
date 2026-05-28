@@ -31,7 +31,7 @@ export default function DeliveryFullPage() {
   const [settings, setSettings] = useState<{ companyName: string; slogan: string; logo: string | null; phone: string | null; email: string | null; address: string | null; website: string | null }>({ companyName: "RepairTrackQR", slogan: "Servicio Técnico Especializado", logo: null, phone: null, email: null, address: null, website: null });
   const [branchParam, setBranchParam] = useState("");
 
-  useEffect(() => { setBaseUrl(window.location.origin); const bp = new URLSearchParams(window.location.search).get("branchId") || ""; setBranchParam(bp); fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings(d); }).catch(() => {}); }, []);
+  useEffect(() => { setBaseUrl(window.location.origin); const bp = new URLSearchParams(window.location.search).get("branchId") || ""; setBranchParam(bp); fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings(d).catch(() => {}); }).catch(() => {}); }, []);
   useEffect(() => {
     if (code) {
       (() => { const bp = new URLSearchParams(window.location.search).get("branchId"); return fetch(`/api/track/${code}${bp ? `?branchId=${bp}` : ""}`); })().then(r => r.ok ? r.json() : null).then(d => { if (d && d.multiple) setRepair(d.repairs[0]); else if (d) setRepair(d); setLoading(false); }).catch(() => setLoading(false));
@@ -65,9 +65,9 @@ export default function DeliveryFullPage() {
       <div className="no-print" style={{ position: "fixed", top: 0, left: 0, right: 0, padding: "10px 24px", background: "#0a0a12", display: "flex", justifyContent: "space-between", alignItems: "center", zIndex: 100 }}>
         <span style={{ color: "#eee", fontSize: 14, fontWeight: 600 }}>📄 Comprobante de Entrega — {ceCode} — Plana Completa</span>
         <div style={{ display: "flex", gap: 10 }}>
-          <button onClick={() => window.open(`/delivery/${repair.code}${branchParam ? `?branchId=${branchParam}` : ""}`, "_blank")} style={{ padding: "8px 20px", background: "#6366f1", border: "none", borderRadius: 8, color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>📋 Ver Doble Copia</button>
+          <button onClick={() => window.open(`/delivery/${repair.code}${branchParam ? `?branchId=${branchParam}` : ""}`, "_blank")} style={{ padding: "8px 20px", background: "#1ab8c4", border: "none", borderRadius: 8, color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>📋 Ver Doble Copia</button>
           <button onClick={() => window.print()} style={{ padding: "8px 20px", background: accent, border: "none", borderRadius: 8, color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>🖨️ Imprimir</button>
-          <button onClick={() => window.close()} style={{ padding: "8px 20px", background: "#1e1e2e", border: "1px solid #2e2e3e", borderRadius: 8, color: "#888", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>✕ Cerrar</button>
+          <button onClick={() => window.close()} style={{ padding: "8px 20px", background: "#e8ebf2", border: "1px solid #2e2e3e", borderRadius: 8, color: "#888", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>✕ Cerrar</button>
         </div>
       </div>
 
@@ -121,7 +121,7 @@ export default function DeliveryFullPage() {
           <div style={{ flex: 1, display: "flex", gap: 14 }}>
             <div style={{ flex: 1, border: "1px solid #e2e2e2", borderRadius: 10, overflow: "hidden" }}>
               <div style={{ background: "#f0f0ff", padding: "10px 18px", borderBottom: "1px solid #d5d5ef" }}>
-                <span style={{ fontSize: 12, fontWeight: 700, color: "#6366f1", textTransform: "uppercase" }}>👤 Cliente</span>
+                <span style={{ fontSize: 12, fontWeight: 700, color: "#1ab8c4", textTransform: "uppercase" }}>👤 Cliente</span>
               </div>
               <div style={{ padding: "14px 18px", display: "flex", flexDirection: "column", gap: 8 }}>
                 <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}><span style={{ fontSize: 11, color: "#888", fontWeight: 600, textTransform: "uppercase", width: 70, flexShrink: 0 }}>Nombre</span><span style={{ fontSize: 15, fontWeight: 700, flex: 1, borderBottom: "1px dotted #ddd", paddingBottom: 2 }}>{repair.clientName || "—"}</span></div>
@@ -149,7 +149,7 @@ export default function DeliveryFullPage() {
           <div style={{ padding: "12px 18px" }}>
             {checkedAcc.length > 0 ? (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 8 }}>
-                {checkedAcc.map((a, i) => { const { name, detail } = parseAccWithDetail(a); return (
+                {(checkedAcc || []).map((a, i) => { const { name, detail } = parseAccWithDetail(a); return (
                   <div key={a} style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 10px", background: i % 2 === 0 ? "#f0fdf4" : "#fff", borderRadius: 6, border: "1px solid #d1fae5" }}>
                     <span style={{ width: 18, height: 18, borderRadius: 4, background: accent, display: "inline-flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 10, fontWeight: 800, flexShrink: 0 }}>✓</span>
                     <span style={{ fontSize: 12, fontWeight: 600, color: "#111" }}>{name}{detail && <span style={{ color: accent, fontSize: 11 }}> ({detail})</span>}</span>
@@ -163,11 +163,11 @@ export default function DeliveryFullPage() {
         {/* ═══ RESUMEN DE COSTOS ═══ */}
         <div style={{ marginBottom: 22, border: "1px solid #e2e2e2", borderRadius: 10, overflow: "hidden" }}>
           <div style={{ background: "#f0f0ff", padding: "10px 18px", borderBottom: "1px solid #d5d5ef" }}>
-            <span style={{ fontSize: 12, fontWeight: 700, color: "#6366f1", textTransform: "uppercase" }}>💰 Resumen de Costos</span>
+            <span style={{ fontSize: 12, fontWeight: 700, color: "#1ab8c4", textTransform: "uppercase" }}>💰 Resumen de Costos</span>
           </div>
           <div style={{ padding: "12px 18px" }}>
             {parsed.services.map(name => { const svc = servicesList.find(s => s.name === name); return (
-              <div key={name} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", fontSize: 13, color: "#7c3aed", borderBottom: "1px dashed #f0f0f0" }}>
+              <div key={name} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", fontSize: 13, color: "#149aa5", borderBottom: "1px dashed #f0f0f0" }}>
                 <span style={{ fontWeight: 600 }}>🛠️ {name}</span>
                 <span style={{ fontWeight: 700 }}>Bs. {svc?.price || "—"}</span>
               </div>
@@ -183,7 +183,7 @@ export default function DeliveryFullPage() {
               {Number(parsed.discount || 0) > 0 && <div style={{ display: "flex", justifyContent: "space-between", padding: "4px 0", fontSize: 13, color: "#ef4444" }}><span>🏷️ Descuento</span><span style={{ fontWeight: 700 }}>- Bs. {parsed.discount}</span></div>}
               <div style={{ display: "flex", justifyContent: "space-between", padding: "10px 0 0", marginTop: 6, borderTop: "3px solid #e5e7eb" }}>
                 <span style={{ fontSize: 16, fontWeight: 800 }}>TOTAL COBRADO</span>
-                <span style={{ fontSize: 24, fontWeight: 800, color: accent }}>Bs. {repair.estimatedCost}</span>
+                <span style={{ fontSize: 24, fontWeight: 800, color: accent }}>Bs. {Math.round(repair.estimatedCost || 0).toLocaleString()}</span>
               </div>
             </div>
           </div>

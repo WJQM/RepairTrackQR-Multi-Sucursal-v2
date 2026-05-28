@@ -52,7 +52,7 @@ function getEqDisplayName(eq: Equipment): string {
 
 const EQ_CONDITIONS: Record<string, { label: string; icon: string; color: string }> = {
   disponible: { label: "Disponible", icon: "✅", color: "#10b981" },
-  vendido: { label: "Vendido", icon: "💰", color: "#6366f1" },
+  vendido: { label: "Vendido", icon: "💰", color: "#1ab8c4" },
   en_reparacion: { label: "En reparación", icon: "🔧", color: "#f59e0b" },
 };
 
@@ -60,17 +60,17 @@ const PLATFORM_COLORS: Record<string, string> = {
   "PC": "#3b82f6",
   "Nintendo Switch": "#ef4444",
   "Nintendo Wii": "#f59e0b",
-  "PSP": "#06b6d4",
+  "PSP": "#0891b2",
   "PS Vita": "#8b5cf6",
   "PlayStation 4": "#0ea5e9",
   "PlayStation 5": "#2563eb",
   "Xbox 360": "#10b981",
-  "Xbox One": "#22c55e",
+  "Xbox One": "#16a34a",
   "Xbox Series X": "#16a34a",
   "Nintendo 3DS": "#f97316",
-  "Nintendo DS": "#fb923c",
+  "Nintendo DS": "#ea580c",
 };
-const getPlatformColor = (p: string | null) => (p && PLATFORM_COLORS[p]) || "#6366f1";
+const getPlatformColor = (p: string | null) => (p && PLATFORM_COLORS[p]) || "#1ab8c4";
 
 const CONSOLE_CAT_COLORS: Record<string, string> = {
   "Nintendo": "#ef4444",
@@ -80,7 +80,7 @@ const CONSOLE_CAT_COLORS: Record<string, string> = {
   "Retro": "#f59e0b",
   "Atari": "#ec4899",
 };
-const getConsoleCatColor = (c: string | null) => (c && CONSOLE_CAT_COLORS[c]) || "#6366f1";
+const getConsoleCatColor = (c: string | null) => (c && CONSOLE_CAT_COLORS[c]) || "#1ab8c4";
 
 function getConsoleDisplayName(cn: { name: string; brand: string | null; model: string | null }): string {
   return [cn.brand, cn.name, cn.model].filter(Boolean).join(" ").trim() || cn.name;
@@ -88,7 +88,7 @@ function getConsoleDisplayName(cn: { name: string; brand: string | null; model: 
 
 const CONSOLE_CONDITIONS: Record<string, { label: string; icon: string; color: string }> = {
   disponible: { label: "Disponible", icon: "✅", color: "#10b981" },
-  vendida: { label: "Vendida", icon: "💰", color: "#6366f1" },
+  vendida: { label: "Vendida", icon: "💰", color: "#1ab8c4" },
   reservada: { label: "Reservada", icon: "🔖", color: "#f59e0b" },
 };
 
@@ -125,7 +125,7 @@ export default function PortalPage() {
   const scannerDivId = "portal-qr-reader";
   const [settings, setSettings] = useState<{ companyName: string; logo: string | null; slogan: string }>({ companyName: "RepairTrackQR", logo: null, slogan: "" });
 
-  useEffect(() => { setMounted(true); loadData(); fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings({ companyName: d.companyName, logo: d.logo, slogan: d.slogan }); }).catch(() => {}); }, []);
+  useEffect(() => { setMounted(true); loadData(); fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings({ companyName: d.companyName, logo: d.logo, slogan: d.slogan }).catch(() => {}); }).catch(() => {}); }, []);
   useEffect(() => { const interval = setInterval(() => loadData(true), 15000); return () => clearInterval(interval); }, []);
 
   // Deep link: ?eq={id} opens equipment modal automatically once data is loaded
@@ -547,21 +547,25 @@ export default function PortalPage() {
   const pagedEquipment = filteredEquipment.slice((pageEq - 1) * PAGE_SIZE, pageEq * PAGE_SIZE);
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--bg-primary)", position: "relative", overflow: "hidden" }}>
+    <div style={{ minHeight: "100vh", background: "linear-gradient(180deg, #eef2fa 0%, #f0f3f8 100%)", position: "relative", overflow: "hidden" }}>
       <PortalTracker />
       <PortalControls />
       <style>{`
         @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes pulse { 0%, 100% { opacity: 0.4; transform: scale(1); } 50% { opacity: 1; transform: scale(1.05); } }
         @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
-        .portal-card { transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); cursor: default; }
-        .portal-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.4); border-color: rgba(99,102,241,0.3) !important; }
+        .portal-card { transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1); cursor: default; border-radius: 14px !important; }
+        .portal-card:active { transform: scale(0.98); }
+        .portal-card .card-img-wrap { position: relative; overflow: hidden; aspect-ratio: 4/3; background: linear-gradient(135deg, #f0f3f8, #e8ecf4); }
+        .portal-card .card-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; display: block; }
+        .portal-card:hover .card-img-wrap img { transform: scale(1.05); }
+        .portal-card:hover { transform: translateY(-4px); box-shadow: 0 12px 36px rgba(30,42,58,0.16), 0 0 0 2px #1ab8c4; border-color: #1ab8c4 !important; }
         .tab-btn { padding: 10px 24px; border-radius: 12px; border: 1px solid transparent; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s; background: transparent; color: var(--text-muted); }
         .tab-btn:hover { color: var(--text-secondary); background: var(--bg-hover); }
-        .tab-btn.active { background: rgba(99,102,241,0.12); color: #818cf8; border-color: rgba(99,102,241,0.2); }
+        .tab-btn.active { background: rgba(26,184,196,0.12); color: #1ab8c4; border-color: rgba(26,184,196,0.35); font-weight: 700; }
         .cat-chip { padding: 6px 16px; border-radius: 20px; border: 1px solid var(--border); font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; background: transparent; color: var(--text-muted); white-space: nowrap; }
-        .cat-chip:hover { border-color: rgba(99,102,241,0.3); color: var(--text-secondary); }
-        .cat-chip.active { background: rgba(99,102,241,0.12); color: #818cf8; border-color: rgba(99,102,241,0.3); }
+        .cat-chip:hover { border-color: rgba(26,184,196,0.14); color: var(--text-secondary); }
+        .cat-chip.active { background: rgba(26,184,196,0.12); color: #1ab8c4; border-color: rgba(26,184,196,0.35); font-weight: 700; }
         .skeleton { background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--bg-hover) 50%, var(--bg-tertiary) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 12px; }
         @media(max-width:768px) {
           .portal-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
@@ -586,14 +590,14 @@ export default function PortalPage() {
       `}</style>
 
       {/* Background effects */}
-      <div style={{ position: "absolute", top: "5%", left: "50%", width: 600, height: 600, borderRadius: "50%", background: "radial-gradient(circle, rgba(99,102,241,0.06), transparent 70%)", transform: "translateX(-50%)", animation: "pulse 8s ease-in-out infinite", pointerEvents: "none" }} />
+      <div style={{ position: "absolute", top: "5%", left: "50%", width: 600, height: 600, borderRadius: "50%", background: "radial-gradient(circle, rgba(26,184,196,0.08), transparent 70%)", transform: "translateX(-50%)", animation: "pulse 8s ease-in-out infinite", pointerEvents: "none" }} />
       <div style={{ position: "absolute", top: "50%", right: "10%", width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle, rgba(16,185,129,0.04), transparent 70%)", animation: "pulse 10s ease-in-out infinite 2s", pointerEvents: "none" }} />
 
       {/* Image viewer modal */}
       {viewImage && (
         <div onClick={() => setViewImage(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.9)", backdropFilter: "blur(12px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 400, padding: 20 }}>
           <div style={{ position: "relative", maxWidth: "90%", maxHeight: "90%" }}>
-            <img src={viewImage} alt="Producto" style={{ maxWidth: "100%", maxHeight: "85vh", borderRadius: 16, boxShadow: "0 20px 60px rgba(0,0,0,0.5)", display: "block" }} />
+            <img src={viewImage} alt="Producto" style={{ maxWidth: "100%", maxHeight: "85vh", borderRadius: 12, boxShadow: "0 20px 60px rgba(26,29,46,0.40)", display: "block" }} />
             <button onClick={() => setViewImage(null)} style={{ position: "absolute", top: -12, right: -12, width: 32, height: 32, borderRadius: "50%", background: "rgba(239,68,68,0.9)", border: "none", color: "#fff", fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
           </div>
         </div>
@@ -605,18 +609,18 @@ export default function PortalPage() {
       <div style={{ position: "relative", zIndex: 1, maxWidth: 1200, margin: "0 auto", padding: "40px 20px 60px", opacity: mounted ? 1 : 0, transition: "opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1)" }}>
 
         {/* Welcome Hero */}
-        <div style={{ borderRadius: 24, border: "1px solid rgba(99,102,241,0.15)", background: "linear-gradient(135deg, rgba(99,102,241,0.07) 0%, rgba(139,92,246,0.04) 50%, rgba(16,185,129,0.04) 100%)", padding: "36px 32px", marginBottom: 28, position: "relative", overflow: "hidden" }}>
+        <div style={{ borderRadius: 16, border: "1px solid var(--border)", background: "#ffffff", boxShadow: "0 4px 20px rgba(30,42,58,0.10), 0 1px 4px rgba(30,42,58,0.06)", padding: "36px 32px", marginBottom: 28, position: "relative", overflow: "hidden" }}>
           {/* decorative circles */}
-          <div style={{ position: "absolute", top: -40, right: -40, width: 160, height: 160, borderRadius: "50%", background: "rgba(99,102,241,0.06)", pointerEvents: "none" }} />
+          <div style={{ position: "absolute", top: -40, right: -40, width: 160, height: 160, borderRadius: "50%", background: "rgba(26,184,196,0.05)", pointerEvents: "none" }} />
           <div style={{ position: "absolute", bottom: -30, left: "40%", width: 100, height: 100, borderRadius: "50%", background: "rgba(16,185,129,0.05)", pointerEvents: "none" }} />
 
           <div className="portal-header-content" style={{ display: "flex", alignItems: "center", gap: 20, marginBottom: 24, position: "relative" }}>
             {settings.logo
-              ? <img src={settings.logo} alt="Logo" style={{ width: 64, height: 64, borderRadius: 18, objectFit: "contain", flexShrink: 0, boxShadow: "0 8px 30px rgba(99,102,241,0.25)" }} />
-              : <div style={{ width: 64, height: 64, borderRadius: 18, background: "linear-gradient(135deg, #6366f1, #8b5cf6)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 30, boxShadow: "0 8px 30px rgba(99,102,241,0.3)", flexShrink: 0 }}>🛠️</div>}
+              ? <img src={settings.logo} alt="Logo" style={{ width: 64, height: 64, borderRadius: 14, objectFit: "contain", flexShrink: 0, boxShadow: "0 8px 30px rgba(26,184,196,0.11)" }} />
+              : <div style={{ width: 64, height: 64, borderRadius: 14, background: "linear-gradient(135deg, #1ab8c4, #8b5cf6)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 30, boxShadow: "0 8px 30px rgba(26,184,196,0.14)", flexShrink: 0 }}>🛠️</div>}
             <div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: "#6366f1", textTransform: "uppercase", letterSpacing: "1px", marginBottom: 4 }}>{t("hero.welcome")}</div>
-              <h1 style={{ fontSize: 26, fontWeight: 800, margin: 0, background: "linear-gradient(135deg, #eeeef2 30%, #a5b4fc)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>{settings.companyName}</h1>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "#1ab8c4", textTransform: "uppercase", letterSpacing: "1px", marginBottom: 4 }}>{t("hero.welcome")}</div>
+              <h1 style={{ fontSize: 26, fontWeight: 800, margin: 0, color: "#1e2a3a", WebkitTextFillColor: "unset" }}>{settings.companyName}</h1>
               <p style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 5, lineHeight: 1.5 }}>{settings.slogan || t("hero.slogan")}</p>
             </div>
           </div>
@@ -624,16 +628,16 @@ export default function PortalPage() {
           {/* Feature pills */}
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", position: "relative" }}>
             {[
-              { icon: "📋", label: t("features.tracking"), color: "#6366f1", bg: "rgba(99,102,241,0.1)", border: "rgba(99,102,241,0.2)" },
+              { icon: "📋", label: t("features.tracking"), color: "#1ab8c4", bg: "rgba(26,184,196,0.12)", border: "rgba(26,184,196,0.30)" },
               { icon: "📄", label: t("features.documents"), color: "#10b981", bg: "rgba(16,185,129,0.08)", border: "rgba(16,185,129,0.2)" },
               { icon: "🧾", label: t("features.quotes"), color: "#f59e0b", bg: "rgba(245,158,11,0.08)", border: "rgba(245,158,11,0.2)" },
               { icon: "📦", label: t("features.catalog"), color: "#a855f7", bg: "rgba(168,85,247,0.08)", border: "rgba(168,85,247,0.2)" },
               { icon: "💿", label: t("features.software"), color: "#8b5cf6", bg: "rgba(139,92,246,0.08)", border: "rgba(139,92,246,0.2)" },
               { icon: "🎮", label: t("features.games"), color: "#ef4444", bg: "rgba(239,68,68,0.08)", border: "rgba(239,68,68,0.2)" },
               { icon: "🕹️", label: t("features.consoles"), color: "#f97316", bg: "rgba(249,115,22,0.08)", border: "rgba(249,115,22,0.2)" },
-              { icon: "💻", label: t("features.laptops"), color: "#06b6d4", bg: "rgba(6,182,212,0.08)", border: "rgba(6,182,212,0.2)" },
+              { icon: "💻", label: t("features.laptops"), color: "#0891b2", bg: "rgba(6,182,212,0.08)", border: "rgba(6,182,212,0.2)" },
             ].map(f => (
-              <div key={f.label} style={{ display: "flex", alignItems: "center", gap: 7, padding: "7px 14px", borderRadius: 10, background: f.bg, border: `1px solid ${f.border}` }}>
+              <div key={f.label} style={{ display: "flex", alignItems: "center", gap: 7, padding: "8px 14px", borderRadius: 10, background: f.bg, border: `1.5px solid ${f.border}`, boxShadow: "0 1px 4px rgba(30,42,58,0.06)" }}>
                 <span style={{ fontSize: 14 }}>{f.icon}</span>
                 <span style={{ fontSize: 11, fontWeight: 600, color: f.color }}>{f.label}</span>
               </div>
@@ -642,7 +646,7 @@ export default function PortalPage() {
         </div>
 
         {/* Track order section */}
-        <div style={{ padding: "18px 20px", background: "rgba(16,185,129,0.06)", borderRadius: 16, border: "1px solid rgba(16,185,129,0.15)", marginBottom: 28 }}>
+        <div style={{ padding: "20px 22px", background: "#ffffff", borderRadius: 14, border: "1.5px solid #cbd5e8", boxShadow: "0 2px 12px rgba(30,42,58,0.07)", marginBottom: 28 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
             <span style={{ fontSize: 22 }}>📍</span>
             <div>
@@ -654,35 +658,35 @@ export default function PortalPage() {
           {/* Codes reference */}
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 14 }} className="portal-codes-ref">
             {[
-              { prefix: "OT-#", label: "Seguimiento", color: "#6366f1", icon: "📋" },
+              { prefix: "OT-#", label: "Seguimiento", color: "#1ab8c4", icon: "📋" },
               { prefix: "CE-#", label: "Entrega", color: "#10b981", icon: "📄" },
               { prefix: "COT-#", label: "Cotización", color: "#f59e0b", icon: "🧾" },
               { prefix: "NV-#", label: "Nota de Venta", color: "#a855f7", icon: "💰" },
               { prefix: "CL-#", label: "Licencia", color: "#ec4899", icon: "🏅" },
-              { prefix: "EQ-#", label: "Equipo", color: "#06b6d4", icon: "💻" },
+              { prefix: "EQ-#", label: "Equipo", color: "#0891b2", icon: "💻" },
               { prefix: "CN-#", label: "Consola", color: "#f97316", icon: "🕹️" },
             ].map(doc => (
-              <span key={doc.prefix} style={{ fontSize: 11, fontWeight: 700, padding: "4px 10px", borderRadius: 8, background: `${doc.color}12`, color: doc.color, border: `1px solid ${doc.color}20`, display: "inline-flex", alignItems: "center", gap: 4 }}>
+              <span key={doc.prefix} style={{ fontSize: 11, fontWeight: 700, padding: "4px 10px", borderRadius: 8, background: `${doc.color}14`, color: doc.color, border: `1.5px solid ${doc.color}35`, display: "inline-flex", alignItems: "center", gap: 4 }}>
                 {doc.icon} {doc.prefix}
               </span>
             ))}
           </div>
 
           <div className="portal-track-actions" style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-            <button onClick={startScanner} style={{ padding: "12px 22px", background: "linear-gradient(135deg, #6366f1, #8b5cf6)", border: "none", borderRadius: 12, color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 8, flex: "1 1 auto", justifyContent: "center" }}>
+            <button onClick={startScanner} style={{ padding: "12px 22px", background: "linear-gradient(135deg, #1ab8c4, #8b5cf6)", border: "none", borderRadius: 12, color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 8, flex: "1 1 auto", justifyContent: "center" }}>
               📷 {t("consult.scan")}
             </button>
             <div style={{ display: "flex", flex: "1 1 auto", gap: 8 }}>
               <input
                 id="trackInput"
                 placeholder={t("consult.placeholder")}
-                style={{ flex: 1, padding: "12px 16px", background: "var(--bg-tertiary)", border: "1px solid var(--border)", borderRadius: 12, color: "var(--text-primary)", fontSize: 14, outline: "none", minWidth: 120, fontFamily: "monospace", fontWeight: 600 }}
+                style={{ flex: 1, padding: "12px 16px", background: "#ffffff", border: "1.5px solid var(--border)", borderRadius: 12, color: "var(--text-primary)", fontSize: 14, outline: "none", minWidth: 120, fontFamily: "monospace", fontWeight: 600 }}
                 onKeyDown={(e) => { if (e.key === "Enter") { const v = (e.target as HTMLInputElement).value.trim(); if (v) handleQrResult(v); } }}
               />
               <button
                 onClick={() => { const el = document.getElementById("trackInput") as HTMLInputElement; if (el?.value.trim()) handleQrResult(el.value.trim()); }}
                 disabled={navigating}
-                style={{ padding: "12px 20px", background: "linear-gradient(135deg, #10b981, #059669)", border: "none", borderRadius: 12, color: "#fff", fontSize: 14, fontWeight: 700, cursor: navigating ? "wait" : "pointer", whiteSpace: "nowrap", opacity: navigating ? 0.7 : 1 }}
+                style={{ padding: "12px 20px", background: "linear-gradient(135deg, #059669, #10b981)", boxShadow: "0 4px 12px rgba(16,185,129,0.30)", border: "none", borderRadius: 12, color: "#fff", fontSize: 14, fontWeight: 700, cursor: navigating ? "wait" : "pointer", whiteSpace: "nowrap", opacity: navigating ? 0.7 : 1 }}
               >{navigating ? "..." : t("consult.search")}</button>
             </div>
           </div>
@@ -702,8 +706,8 @@ export default function PortalPage() {
         {/* QR Scanner Modal */}
         {showScanner && (
           <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", backdropFilter: "blur(12px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 200, padding: 20 }}>
-            <div style={{ width: "100%", maxWidth: 400, background: "var(--bg-card)", borderRadius: 20, border: "1px solid rgba(99,102,241,0.2)", overflow: "hidden", animation: "fadeUp 0.3s ease-out" }}>
-              <div style={{ padding: "18px 20px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid var(--border)" }}>
+            <div style={{ width: "100%", maxWidth: 400, background: "var(--bg-card)", borderRadius: 12, border: "1px solid rgba(26,184,196,0.10)", overflow: "hidden", animation: "fadeUp 0.3s ease-out" }}>
+              <div style={{ padding: "18px 20px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1.5px solid #cbd5e8" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <span style={{ fontSize: 20 }}>📷</span>
                   <div>
@@ -728,10 +732,10 @@ export default function PortalPage() {
                     <p style={{ fontSize: 13, color: "#f59e0b", lineHeight: 1.6, marginBottom: 20 }}>{scannerError}</p>
                     <input ref={fileInputRef} type="file" accept="image/*" capture="environment" onChange={handleFileUpload} style={{ display: "none" }} />
                     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                      <button onClick={() => fileInputRef.current?.click()} style={{ width: "100%", padding: "14px", background: "linear-gradient(135deg, #6366f1, #8b5cf6)", border: "none", borderRadius: 12, color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+                      <button onClick={() => fileInputRef.current?.click()} style={{ width: "100%", padding: "14px", background: "linear-gradient(135deg, #1ab8c4, #8b5cf6)", border: "none", borderRadius: 12, color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
                         🖼️ Subir foto del QR
                       </button>
-                      <button onClick={() => { stopScanner(); setTimeout(startScanner, 300); }} style={{ width: "100%", padding: "12px", background: "var(--bg-tertiary)", border: "1px solid var(--border)", borderRadius: 12, color: "var(--text-secondary)", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
+                      <button onClick={() => { stopScanner(); setTimeout(startScanner, 300); }} style={{ width: "100%", padding: "12px", background: "var(--bg-tertiary)", border: "1.5px solid #cbd5e8", borderRadius: 12, color: "var(--text-secondary)", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
                         🔄 Reintentar cámara
                       </button>
                     </div>
@@ -741,10 +745,10 @@ export default function PortalPage() {
               {!scannerError && (
                 <div style={{ padding: "0 16px 16px", display: "flex", gap: 8 }}>
                   <input ref={fileInputRef} type="file" accept="image/*" capture="environment" onChange={handleFileUpload} style={{ display: "none" }} />
-                  <button onClick={() => fileInputRef.current?.click()} style={{ flex: 1, padding: "12px", background: "var(--bg-tertiary)", border: "1px solid var(--border)", borderRadius: 12, color: "var(--text-secondary)", fontSize: 13, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+                  <button onClick={() => fileInputRef.current?.click()} style={{ flex: 1, padding: "12px", background: "var(--bg-tertiary)", border: "1.5px solid #cbd5e8", borderRadius: 12, color: "var(--text-secondary)", fontSize: 13, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
                     🖼️ Subir foto
                   </button>
-                  <button onClick={stopScanner} style={{ flex: 1, padding: "12px", background: "var(--bg-tertiary)", border: "1px solid var(--border)", borderRadius: 12, color: "var(--text-secondary)", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>Cancelar</button>
+                  <button onClick={stopScanner} style={{ flex: 1, padding: "12px", background: "var(--bg-tertiary)", border: "1.5px solid #cbd5e8", borderRadius: 12, color: "var(--text-secondary)", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>Cancelar</button>
                 </div>
               )}
             </div>
@@ -770,7 +774,7 @@ export default function PortalPage() {
               💻 {t("tabs.equipment")} <span style={{ fontSize: 11, opacity: 0.7, marginLeft: 4 }}>({equipment.filter(e => e.condition === "disponible").length})</span>
             </button>
           </div>
-          <div className="portal-search" style={{ display: "flex", alignItems: "center", gap: 8, background: "var(--bg-tertiary)", borderRadius: 12, padding: "0 14px", border: "1px solid var(--border)", width: 300 }}>
+          <div className="portal-search" style={{ display: "flex", alignItems: "center", gap: 8, background: "#ffffff", borderRadius: 12, padding: "0 14px", border: "1.5px solid var(--border)", width: 300, boxShadow: "0 1px 4px rgba(30,42,58,0.05)" }}>
             <span style={{ fontSize: 14, color: "var(--text-muted)" }}>🔍</span>
             <input
               value={search} onChange={(e) => { setSearch(e.target.value); setPageInv(1); setPageSw(1); setPageVg(1); setPageCn(1); setPageEq(1); }}
@@ -784,7 +788,7 @@ export default function PortalPage() {
         {/* Category filters */}
         {categories.length > 2 && (
           <div className="cat-scroll" style={{ display: "flex", gap: 8, marginBottom: 10, paddingBottom: 4 }}>
-            {categories.map(cat => (
+            {(categories || []).map(cat => (
               <button key={cat} className={`cat-chip${categoryFilter === cat ? " active" : ""}`} onClick={() => { setCategoryFilter(cat); setPageInv(1); setPageSw(1); setPageVg(1); setPageCn(1); setPageEq(1); }}>
                 {cat === "all" ? "Todos" : cat === "laptop" ? "💻 Laptops" : cat === "desktop" ? "🖥️ Escritorio" : cat}
               </button>
@@ -795,9 +799,9 @@ export default function PortalPage() {
         {/* Branch filters */}
         {allBranches.length > 2 && (
           <div className="cat-scroll" style={{ display: "flex", gap: 8, marginBottom: 20, paddingBottom: 4 }}>
-            <span style={{ fontSize: 11, fontWeight: 700, color: "#818cf8", padding: "6px 0", whiteSpace: "nowrap" }}>🏢</span>
-            {allBranches.map(b => (
-              <button key={b} className={`cat-chip${branchFilter === b ? " active" : ""}`} onClick={() => { setBranchFilter(b); setPageInv(1); setPageSw(1); setPageVg(1); setPageCn(1); setPageEq(1); }} style={branchFilter === b ? { borderColor: "#818cf8", background: "rgba(99,102,241,0.15)", color: "#818cf8" } : {}}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: "#2dd4df", padding: "6px 0", whiteSpace: "nowrap" }}>🏢</span>
+            {(allBranches || []).map(b => (
+              <button key={b} className={`cat-chip${branchFilter === b ? " active" : ""}`} onClick={() => { setBranchFilter(b); setPageInv(1); setPageSw(1); setPageVg(1); setPageCn(1); setPageEq(1); }} style={branchFilter === b ? { borderColor: "#2dd4df", background: "rgba(26,184,196,0.08)", color: "#2dd4df" } : {}}>
                 {b === "all" ? "Todas" : b}
               </button>
             ))}
@@ -824,34 +828,34 @@ export default function PortalPage() {
               </div>
             ) : (
               <div className="portal-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 18 }}>
-                {pagedInventory.map((item, i) => (
-                  <div key={item.id} className="portal-card" style={{ background: "var(--bg-card)", borderRadius: 16, border: "1px solid var(--border)", overflow: "hidden", animation: `fadeUp 0.4s ease-out ${i * 0.05}s both` }}>
+                {(pagedInventory || []).map((item, i) => (
+                  <div key={item.id} className="portal-card" style={{ background: "#ffffff", borderRadius: 14, border: "1.5px solid #cbd5e8", boxShadow: "0 4px 16px rgba(30,42,58,0.10)", overflow: "hidden", animation: `fadeUp 0.4s ease-out ${i * 0.05}s both` }}>
                     {item.image ? (
                       <div onClick={() => setViewImage(item.image)} style={{ width: "100%", aspectRatio: "1/1", overflow: "hidden", cursor: "pointer", position: "relative", background: "var(--bg-tertiary)", display: "flex", alignItems: "center", justifyContent: "center" }}>
                         <img src={item.image} alt={item.name} style={{ width: "100%", height: "100%", objectFit: "contain", padding: 8, transition: "transform 0.3s" }}
                           onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
                           onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
                         />
-                        <div style={{ position: "absolute", top: 10, right: 10, padding: "4px 10px", borderRadius: 8, background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)", fontSize: 11, fontWeight: 700, color: item.quantity <= 5 ? "#ef4444" : "#10b981" }}>
+                        <div style={{ position: "absolute", top: 10, right: 10, padding: "4px 10px", borderRadius: 8, background: "rgba(30,42,58,0.80)", fontSize: 11, fontWeight: 700, color: item.quantity <= 5 ? "#ef4444" : "#10b981" }}>
                           Stock: {item.quantity}
                         </div>
                       </div>
                     ) : (
-                      <div style={{ width: "100%", aspectRatio: "1/1", background: "linear-gradient(135deg, var(--bg-tertiary), var(--bg-hover))", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
+                      <div style={{ width: "100%", aspectRatio: "1/1", background: "linear-gradient(135deg, #eef2fa, #e8ecf4)", display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
                         <span style={{ fontSize: 48, opacity: 0.3 }}>📦</span>
-                        <div style={{ position: "absolute", top: 10, right: 10, padding: "4px 10px", borderRadius: 8, background: "rgba(0,0,0,0.4)", fontSize: 11, fontWeight: 700, color: item.quantity <= 5 ? "#ef4444" : "#10b981" }}>
+                        <div style={{ position: "absolute", top: 10, right: 10, padding: "4px 10px", borderRadius: 8, background: "rgba(30,42,58,0.80)", fontSize: 11, fontWeight: 700, color: item.quantity <= 5 ? "#ef4444" : "#10b981" }}>
                           Stock: {item.quantity}
                         </div>
                       </div>
                     )}
                     <div style={{ padding: "14px 16px" }}>
                       <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 4 }}>
-                        {item.category && <span style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px" }}>{item.category}</span>}
-                        {item.branch && <span style={{ fontSize: 9, fontWeight: 700, color: "#818cf8", padding: "2px 8px", borderRadius: 6, background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.15)" }}>🏢 {item.branch.name}</span>}
+                        {item.category && <span style={{ fontSize: 9, fontWeight: 700, color: "#9298ae", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 3, letterSpacing: "0.5px" }}>{item.category}</span>}
+                        {item.branch && <span style={{ fontSize: 9, fontWeight: 700, color: "#1ab8c4", padding: "2px 8px", borderRadius: 99, background: "rgba(26,184,196,0.08)", border: "1px solid rgba(26,184,196,0.20)" }}>🏢 {item.branch.name}</span>}
                       </div>
                       <h3 style={{ fontSize: 15, fontWeight: 700, marginTop: 4, color: "var(--text-primary)", lineHeight: 1.3 }}>{item.name}</h3>
                       <div style={{ marginTop: 10, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                        <span style={{ fontSize: 20, fontWeight: 800, color: "#10b981" }}>Bs. {item.price}</span>
+                        <span style={{ fontSize: 20, fontWeight: 800, color: "#10b981" }}>Bs. {Math.round(item.price || 0).toLocaleString()}</span>
                         <span style={{ fontSize: 11, color: item.quantity <= 5 ? "#ef4444" : "var(--text-muted)", fontWeight: 600 }}>
                           {item.quantity <= 5 ? "⚠️ Pocas unidades" : "✅ Disponible"}
                         </span>
@@ -865,7 +869,7 @@ export default function PortalPage() {
               <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 6, marginTop: 28 }}>
                 <button onClick={() => { setPageInv(p => Math.max(1, p - 1)); window.scrollTo({ top: 500, behavior: "smooth" }); }} disabled={pageInv === 1} style={{ padding: "8px 14px", borderRadius: 8, border: "1px solid var(--border)", background: pageInv === 1 ? "transparent" : "var(--bg-card)", color: pageInv === 1 ? "var(--text-muted)" : "var(--text-secondary)", fontSize: 13, fontWeight: 600, cursor: pageInv === 1 ? "not-allowed" : "pointer", opacity: pageInv === 1 ? 0.4 : 1 }}>← Anterior</button>
                 {Array.from({ length: totalPagesInv }, (_, i) => i + 1).map(p => (
-                  <button key={p} onClick={() => { setPageInv(p); window.scrollTo({ top: 500, behavior: "smooth" }); }} style={{ width: 36, height: 36, borderRadius: 8, border: p === pageInv ? "1.5px solid #6366f1" : "1px solid var(--border)", background: p === pageInv ? "rgba(99,102,241,0.15)" : "var(--bg-card)", color: p === pageInv ? "#818cf8" : "var(--text-secondary)", fontSize: 13, fontWeight: p === pageInv ? 800 : 600, cursor: "pointer" }}>{p}</button>
+                  <button key={p} onClick={() => { setPageInv(p); window.scrollTo({ top: 500, behavior: "smooth" }); }} style={{ width: 36, height: 36, borderRadius: 8, border: p === pageInv ? "1.5px solid #1ab8c4" : "1px solid var(--border)", background: p === pageInv ? "rgba(26,184,196,0.08)" : "var(--bg-card)", color: p === pageInv ? "#2dd4df" : "var(--text-secondary)", fontSize: 13, fontWeight: p === pageInv ? 800 : 600, cursor: "pointer" }}>{p}</button>
                 ))}
                 <button onClick={() => { setPageInv(p => Math.min(totalPagesInv, p + 1)); window.scrollTo({ top: 500, behavior: "smooth" }); }} disabled={pageInv === totalPagesInv} style={{ padding: "8px 14px", borderRadius: 8, border: "1px solid var(--border)", background: pageInv === totalPagesInv ? "transparent" : "var(--bg-card)", color: pageInv === totalPagesInv ? "var(--text-muted)" : "var(--text-secondary)", fontSize: 13, fontWeight: 600, cursor: pageInv === totalPagesInv ? "not-allowed" : "pointer", opacity: pageInv === totalPagesInv ? 0.4 : 1 }}>Siguiente →</button>
               </div>
@@ -884,11 +888,11 @@ export default function PortalPage() {
               </div>
             ) : (
               <div className="portal-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 18 }}>
-                {pagedSoftware.map((sw, i) => {
+                {(pagedSoftware || []).map((sw, i) => {
                   const imgs = parseEqImages(sw.image);
                   const firstImg = imgs[0] || null;
                   return (
-                    <div key={sw.id} onClick={() => { setSelectedSw(sw); setCarouselIdx(0); }} className="portal-card" style={{ background: "var(--bg-card)", borderRadius: 16, border: "1px solid var(--border)", overflow: "hidden", animation: `fadeUp 0.4s ease-out ${i * 0.05}s both`, cursor: "pointer", position: "relative" }}>
+                    <div key={sw.id} onClick={() => { setSelectedSw(sw); setCarouselIdx(0); }} className="portal-card" style={{ background: "#ffffff", borderRadius: 14, border: "1.5px solid #cbd5e8", boxShadow: "0 4px 16px rgba(30,42,58,0.10)", overflow: "hidden", animation: `fadeUp 0.4s ease-out ${i * 0.05}s both`, cursor: "pointer", position: "relative" }}>
                       {sw.category && <div style={{ position: "absolute", top: 10, left: 10, zIndex: 2, padding: "3px 10px", borderRadius: 6, background: "rgba(139,92,246,0.9)", color: "#fff", fontSize: 10, fontWeight: 700 }}>💿 {sw.category}</div>}
                       {sw.rating && <div style={{ position: "absolute", top: 10, right: 10, zIndex: 2, padding: "3px 8px", borderRadius: 6, background: "rgba(239,68,68,0.9)", color: "#fff", fontSize: 9, fontWeight: 700 }}>🔞 {sw.rating}</div>}
                       {firstImg ? (
@@ -905,12 +909,12 @@ export default function PortalPage() {
                       )}
                       <div style={{ padding: "14px 16px" }}>
                         <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 4 }}>
-                          {sw.branch && <span style={{ fontSize: 9, fontWeight: 700, color: "#818cf8", padding: "2px 8px", borderRadius: 6, background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.15)" }}>🏢 {sw.branch.name}</span>}
+                          {sw.branch && <span style={{ fontSize: 9, fontWeight: 700, color: "#1ab8c4", padding: "2px 8px", borderRadius: 99, background: "rgba(26,184,196,0.08)", border: "1px solid rgba(26,184,196,0.20)" }}>🏢 {sw.branch.name}</span>}
                         </div>
                         <h3 style={{ fontSize: 15, fontWeight: 700, marginTop: 4, color: "var(--text-primary)", lineHeight: 1.3 }}>{sw.name}</h3>
                         <div style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                          {sw.size && <span style={{ fontSize: 10, padding: "3px 8px", borderRadius: 6, background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.15)", color: "#818cf8", fontWeight: 600 }}>💾 {sw.size}</span>}
-                          {sw.language && <span style={{ fontSize: 10, padding: "3px 8px", borderRadius: 6, background: "rgba(6,182,212,0.08)", border: "1px solid rgba(6,182,212,0.15)", color: "#06b6d4", fontWeight: 600 }}>🌐 {sw.language}</span>}
+                          {sw.size && <span style={{ fontSize: 10, padding: "3px 8px", borderRadius: 6, background: "rgba(26,184,196,0.05)", border: "1px solid rgba(26,184,196,0.08)", color: "#2dd4df", fontWeight: 600 }}>💾 {sw.size}</span>}
+                          {sw.language && <span style={{ fontSize: 10, padding: "3px 8px", borderRadius: 6, background: "rgba(6,182,212,0.08)", border: "1px solid rgba(6,182,212,0.15)", color: "#0891b2", fontWeight: 600 }}>🌐 {sw.language}</span>}
                         </div>
                       </div>
                     </div>
@@ -922,7 +926,7 @@ export default function PortalPage() {
               <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 6, marginTop: 28 }}>
                 <button onClick={() => { setPageSw(p => Math.max(1, p - 1)); window.scrollTo({ top: 500, behavior: "smooth" }); }} disabled={pageSw === 1} style={{ padding: "8px 14px", borderRadius: 8, border: "1px solid var(--border)", background: pageSw === 1 ? "transparent" : "var(--bg-card)", color: pageSw === 1 ? "var(--text-muted)" : "var(--text-secondary)", fontSize: 13, fontWeight: 600, cursor: pageSw === 1 ? "not-allowed" : "pointer", opacity: pageSw === 1 ? 0.4 : 1 }}>← Anterior</button>
                 {Array.from({ length: totalPagesSw }, (_, i) => i + 1).map(p => (
-                  <button key={p} onClick={() => { setPageSw(p); window.scrollTo({ top: 500, behavior: "smooth" }); }} style={{ width: 36, height: 36, borderRadius: 8, border: p === pageSw ? "1.5px solid #6366f1" : "1px solid var(--border)", background: p === pageSw ? "rgba(99,102,241,0.15)" : "var(--bg-card)", color: p === pageSw ? "#818cf8" : "var(--text-secondary)", fontSize: 13, fontWeight: p === pageSw ? 800 : 600, cursor: "pointer" }}>{p}</button>
+                  <button key={p} onClick={() => { setPageSw(p); window.scrollTo({ top: 500, behavior: "smooth" }); }} style={{ width: 36, height: 36, borderRadius: 8, border: p === pageSw ? "1.5px solid #1ab8c4" : "1px solid var(--border)", background: p === pageSw ? "rgba(26,184,196,0.08)" : "var(--bg-card)", color: p === pageSw ? "#2dd4df" : "var(--text-secondary)", fontSize: 13, fontWeight: p === pageSw ? 800 : 600, cursor: "pointer" }}>{p}</button>
                 ))}
                 <button onClick={() => { setPageSw(p => Math.min(totalPagesSw, p + 1)); window.scrollTo({ top: 500, behavior: "smooth" }); }} disabled={pageSw === totalPagesSw} style={{ padding: "8px 14px", borderRadius: 8, border: "1px solid var(--border)", background: pageSw === totalPagesSw ? "transparent" : "var(--bg-card)", color: pageSw === totalPagesSw ? "var(--text-muted)" : "var(--text-secondary)", fontSize: 13, fontWeight: 600, cursor: pageSw === totalPagesSw ? "not-allowed" : "pointer", opacity: pageSw === totalPagesSw ? 0.4 : 1 }}>Siguiente →</button>
               </div>
@@ -941,12 +945,12 @@ export default function PortalPage() {
               </div>
             ) : (
               <div className="portal-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 18 }}>
-                {pagedVideogames.map((vg, i) => {
+                {(pagedVideogames || []).map((vg, i) => {
                   const imgs = parseEqImages(vg.image);
                   const firstImg = imgs[0] || null;
                   const platColor = getPlatformColor(vg.platform);
                   return (
-                    <div key={vg.id} onClick={() => { setSelectedVg(vg); setCarouselIdx(0); }} className="portal-card" style={{ background: "var(--bg-card)", borderRadius: 16, border: "1px solid var(--border)", overflow: "hidden", animation: `fadeUp 0.4s ease-out ${i * 0.05}s both`, cursor: "pointer", position: "relative" }}>
+                    <div key={vg.id} onClick={() => { setSelectedVg(vg); setCarouselIdx(0); }} className="portal-card" style={{ background: "#ffffff", borderRadius: 14, border: "1.5px solid #cbd5e8", boxShadow: "0 4px 16px rgba(30,42,58,0.10)", overflow: "hidden", animation: `fadeUp 0.4s ease-out ${i * 0.05}s both`, cursor: "pointer", position: "relative" }}>
                       {vg.platform && <div style={{ position: "absolute", top: 10, left: 10, zIndex: 2, padding: "3px 10px", borderRadius: 6, background: `${platColor}dd`, color: "#fff", fontSize: 10, fontWeight: 700 }}>🎮 {vg.platform}</div>}
                       {vg.rating && <div style={{ position: "absolute", top: 10, right: 10, zIndex: 2, padding: "3px 8px", borderRadius: 6, background: "rgba(239,68,68,0.9)", color: "#fff", fontSize: 9, fontWeight: 700 }}>🔞 {vg.rating}</div>}
                       {firstImg ? (
@@ -963,13 +967,13 @@ export default function PortalPage() {
                       )}
                       <div style={{ padding: "14px 16px" }}>
                         <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 4 }}>
-                          {vg.genre && <span style={{ fontSize: 10, fontWeight: 700, color: "#a78bfa", textTransform: "uppercase", letterSpacing: "0.5px" }}>{vg.genre}</span>}
-                          {vg.branch && <span style={{ fontSize: 9, fontWeight: 700, color: "#818cf8", padding: "2px 8px", borderRadius: 6, background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.15)" }}>🏢 {vg.branch.name}</span>}
+                          {vg.genre && <span style={{ fontSize: 10, fontWeight: 700, color: "#7c3aed", textTransform: "uppercase", letterSpacing: "0.5px" }}>{vg.genre}</span>}
+                          {vg.branch && <span style={{ fontSize: 9, fontWeight: 700, color: "#1ab8c4", padding: "2px 8px", borderRadius: 99, background: "rgba(26,184,196,0.08)", border: "1px solid rgba(26,184,196,0.20)" }}>🏢 {vg.branch.name}</span>}
                         </div>
                         <h3 style={{ fontSize: 15, fontWeight: 700, marginTop: 4, color: "var(--text-primary)", lineHeight: 1.3 }}>{vg.name}</h3>
                         <div style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                          {vg.size && <span style={{ fontSize: 10, padding: "3px 8px", borderRadius: 6, background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.15)", color: "#818cf8", fontWeight: 600 }}>💾 {vg.size}</span>}
-                          {vg.language && <span style={{ fontSize: 10, padding: "3px 8px", borderRadius: 6, background: "rgba(6,182,212,0.08)", border: "1px solid rgba(6,182,212,0.15)", color: "#06b6d4", fontWeight: 600 }}>🌐 {vg.language}</span>}
+                          {vg.size && <span style={{ fontSize: 10, padding: "3px 8px", borderRadius: 6, background: "rgba(26,184,196,0.05)", border: "1px solid rgba(26,184,196,0.08)", color: "#2dd4df", fontWeight: 600 }}>💾 {vg.size}</span>}
+                          {vg.language && <span style={{ fontSize: 10, padding: "3px 8px", borderRadius: 6, background: "rgba(6,182,212,0.08)", border: "1px solid rgba(6,182,212,0.15)", color: "#0891b2", fontWeight: 600 }}>🌐 {vg.language}</span>}
                         </div>
                       </div>
                     </div>
@@ -981,7 +985,7 @@ export default function PortalPage() {
               <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 6, marginTop: 28 }}>
                 <button onClick={() => { setPageVg(p => Math.max(1, p - 1)); window.scrollTo({ top: 500, behavior: "smooth" }); }} disabled={pageVg === 1} style={{ padding: "8px 14px", borderRadius: 8, border: "1px solid var(--border)", background: pageVg === 1 ? "transparent" : "var(--bg-card)", color: pageVg === 1 ? "var(--text-muted)" : "var(--text-secondary)", fontSize: 13, fontWeight: 600, cursor: pageVg === 1 ? "not-allowed" : "pointer", opacity: pageVg === 1 ? 0.4 : 1 }}>← Anterior</button>
                 {Array.from({ length: totalPagesVg }, (_, i) => i + 1).map(p => (
-                  <button key={p} onClick={() => { setPageVg(p); window.scrollTo({ top: 500, behavior: "smooth" }); }} style={{ width: 36, height: 36, borderRadius: 8, border: p === pageVg ? "1.5px solid #6366f1" : "1px solid var(--border)", background: p === pageVg ? "rgba(99,102,241,0.15)" : "var(--bg-card)", color: p === pageVg ? "#818cf8" : "var(--text-secondary)", fontSize: 13, fontWeight: p === pageVg ? 800 : 600, cursor: "pointer" }}>{p}</button>
+                  <button key={p} onClick={() => { setPageVg(p); window.scrollTo({ top: 500, behavior: "smooth" }); }} style={{ width: 36, height: 36, borderRadius: 8, border: p === pageVg ? "1.5px solid #1ab8c4" : "1px solid var(--border)", background: p === pageVg ? "rgba(26,184,196,0.08)" : "var(--bg-card)", color: p === pageVg ? "#2dd4df" : "var(--text-secondary)", fontSize: 13, fontWeight: p === pageVg ? 800 : 600, cursor: "pointer" }}>{p}</button>
                 ))}
                 <button onClick={() => { setPageVg(p => Math.min(totalPagesVg, p + 1)); window.scrollTo({ top: 500, behavior: "smooth" }); }} disabled={pageVg === totalPagesVg} style={{ padding: "8px 14px", borderRadius: 8, border: "1px solid var(--border)", background: pageVg === totalPagesVg ? "transparent" : "var(--bg-card)", color: pageVg === totalPagesVg ? "var(--text-muted)" : "var(--text-secondary)", fontSize: 13, fontWeight: 600, cursor: pageVg === totalPagesVg ? "not-allowed" : "pointer", opacity: pageVg === totalPagesVg ? 0.4 : 1 }}>Siguiente →</button>
               </div>
@@ -997,8 +1001,8 @@ export default function PortalPage() {
           const currentImg = imgs[carouselIdx] || null;
           return (
             <div onClick={() => setSelectedVg(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", backdropFilter: "blur(10px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 200, padding: 20, overflowY: "auto" }}>
-              <div onClick={(e) => e.stopPropagation()} style={{ width: "100%", maxWidth: 620, maxHeight: "92vh", overflowY: "auto", background: "var(--bg-card)", borderRadius: 20, border: `1px solid ${platColor}40`, boxShadow: "0 20px 60px rgba(0,0,0,0.5)", animation: "fadeUp 0.3s ease-out" }}>
-                <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center", position: "sticky", top: 0, background: "var(--bg-card)", zIndex: 2 }}>
+              <div onClick={(e) => e.stopPropagation()} style={{ width: "100%", maxWidth: 620, maxHeight: "92vh", overflowY: "auto", background: "var(--bg-card)", borderRadius: 12, border: `1px solid ${platColor}40`, boxShadow: "0 20px 60px rgba(26,29,46,0.40)", animation: "fadeUp 0.3s ease-out" }}>
+                <div style={{ padding: "16px 20px", borderBottom: "1.5px solid #cbd5e8", display: "flex", justifyContent: "space-between", alignItems: "center", position: "sticky", top: 0, background: "var(--bg-card)", zIndex: 2 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <span style={{ fontSize: 22 }}>🎮</span>
                     <div>
@@ -1015,9 +1019,9 @@ export default function PortalPage() {
                       {currentImg && <img src={currentImg} alt={vg.name} style={{ width: "100%", height: "100%", objectFit: "contain", cursor: "zoom-in" }} onClick={() => setViewImage(currentImg)} />}
                       {imgs.length > 1 && (
                         <>
-                          <button onClick={() => setCarouselIdx(i => (i - 1 + imgs.length) % imgs.length)} style={{ position: "absolute", top: "50%", left: 10, transform: "translateY(-50%)", width: 36, height: 36, borderRadius: "50%", background: "rgba(17,17,24,0.85)", border: "1px solid rgba(255,255,255,0.12)", color: "#eeeef2", fontSize: 16, fontWeight: 700, cursor: "pointer" }}>‹</button>
-                          <button onClick={() => setCarouselIdx(i => (i + 1) % imgs.length)} style={{ position: "absolute", top: "50%", right: 10, transform: "translateY(-50%)", width: 36, height: 36, borderRadius: "50%", background: "rgba(17,17,24,0.85)", border: "1px solid rgba(255,255,255,0.12)", color: "#eeeef2", fontSize: 16, fontWeight: 700, cursor: "pointer" }}>›</button>
-                          <div style={{ position: "absolute", bottom: 10, left: "50%", transform: "translateX(-50%)", padding: "3px 10px", borderRadius: 12, background: "rgba(0,0,0,0.6)", color: "#fff", fontSize: 11, fontWeight: 700 }}>{carouselIdx + 1} / {imgs.length}</div>
+                          <button onClick={() => setCarouselIdx(i => (i - 1 + imgs.length) % imgs.length)} style={{ position: "absolute", top: "50%", left: 10, transform: "translateY(-50%)", width: 36, height: 36, borderRadius: "50%", background: "rgba(17,17,24,0.85)", border: "1px solid rgba(255,255,255,0.12)", color: "#1a1d2e", fontSize: 16, fontWeight: 700, cursor: "pointer" }}>‹</button>
+                          <button onClick={() => setCarouselIdx(i => (i + 1) % imgs.length)} style={{ position: "absolute", top: "50%", right: 10, transform: "translateY(-50%)", width: 36, height: 36, borderRadius: "50%", background: "rgba(17,17,24,0.85)", border: "1px solid rgba(255,255,255,0.12)", color: "#1a1d2e", fontSize: 16, fontWeight: 700, cursor: "pointer" }}>›</button>
+                          <div style={{ position: "absolute", bottom: 10, left: "50%", transform: "translateX(-50%)", padding: "3px 10px", borderRadius: 12, background: "rgba(26,29,46,0.45)", color: "#fff", fontSize: 11, fontWeight: 700 }}>{carouselIdx + 1} / {imgs.length}</div>
                         </>
                       )}
                     </div>
@@ -1032,23 +1036,23 @@ export default function PortalPage() {
 
                 <div style={{ padding: "12px 20px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                    {vg.platform && <span style={{ padding: "5px 14px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: `${platColor}18`, color: platColor, border: `1px solid ${platColor}30` }}>🎮 {vg.platform}</span>}
-                    {vg.genre && <span style={{ padding: "5px 14px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: "rgba(139,92,246,0.12)", color: "#a78bfa", border: "1px solid rgba(139,92,246,0.25)" }}>🎭 {vg.genre}</span>}
-                    {vg.rating && <span style={{ padding: "5px 14px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: "rgba(239,68,68,0.12)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.25)" }}>🔞 {vg.rating}</span>}
-                    {vg.language && <span style={{ padding: "5px 14px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: "rgba(6,182,212,0.12)", color: "#06b6d4", border: "1px solid rgba(6,182,212,0.25)" }}>🌐 {vg.language}</span>}
-                    {vg.size && <span style={{ padding: "5px 14px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: "rgba(99,102,241,0.12)", color: "#818cf8", border: "1px solid rgba(99,102,241,0.25)" }}>💾 {vg.size}</span>}
-                    {vg.branch && <span style={{ padding: "5px 14px", borderRadius: 20, fontSize: 11, fontWeight: 700, color: "#818cf8", background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.2)" }}>🏢 {vg.branch.name}</span>}
+                    {vg.platform && <span style={{ padding: "5px 14px", borderRadius: 12, fontSize: 11, fontWeight: 700, background: `${platColor}18`, color: platColor, border: `1px solid ${platColor}30` }}>🎮 {vg.platform}</span>}
+                    {vg.genre && <span style={{ padding: "5px 14px", borderRadius: 12, fontSize: 11, fontWeight: 700, background: "rgba(139,92,246,0.12)", color: "#7c3aed", border: "1px solid rgba(139,92,246,0.25)" }}>🎭 {vg.genre}</span>}
+                    {vg.rating && <span style={{ padding: "5px 14px", borderRadius: 12, fontSize: 11, fontWeight: 700, background: "rgba(239,68,68,0.12)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.25)" }}>🔞 {vg.rating}</span>}
+                    {vg.language && <span style={{ padding: "5px 14px", borderRadius: 12, fontSize: 11, fontWeight: 700, background: "rgba(6,182,212,0.12)", color: "#0891b2", border: "1px solid rgba(6,182,212,0.25)" }}>🌐 {vg.language}</span>}
+                    {vg.size && <span style={{ padding: "5px 14px", borderRadius: 12, fontSize: 11, fontWeight: 700, background: "rgba(26,184,196,0.07)", color: "#2dd4df", border: "1px solid rgba(26,184,196,0.11)" }}>💾 {vg.size}</span>}
+                    {vg.branch && <span style={{ padding: "5px 14px", borderRadius: 12, fontSize: 11, fontWeight: 700, color: "#2dd4df", background: "rgba(26,184,196,0.06)", border: "1px solid rgba(26,184,196,0.10)" }}>🏢 {vg.branch.name}</span>}
                   </div>
 
                   {vg.description && (
-                    <div style={{ padding: "12px 16px", background: "var(--bg-tertiary)", borderRadius: 12, border: "1px solid var(--border)" }}>
-                      <div style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 4 }}>📝 Descripción</div>
+                    <div style={{ padding: "12px 16px", background: "var(--bg-tertiary)", borderRadius: 12, border: "1.5px solid #cbd5e8" }}>
+                      <div style={{ fontSize: 9, fontWeight: 700, color: "#9298ae", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 3, letterSpacing: "0.5px", marginBottom: 4 }}>📝 Descripción</div>
                       <div style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.6 }}>{vg.description}</div>
                     </div>
                   )}
 
                   {vg.platform === "PC" && vg.minRequirements && (
-                    <div style={{ padding: "12px 16px", background: "rgba(245,158,11,0.06)", borderRadius: 12, border: "1px solid rgba(245,158,11,0.15)" }}>
+                    <div style={{ padding: "14px 16px", background: "#fffbeb", borderRadius: 12, border: "1.5px solid #fde68a" }}>
                       <div style={{ fontSize: 10, fontWeight: 700, color: "#f59e0b", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 4 }}>⚙️ Requisitos mínimos</div>
                       <div style={{ fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{vg.minRequirements}</div>
                     </div>
@@ -1061,9 +1065,9 @@ export default function PortalPage() {
                     </div>
                   )}
 
-                  <div style={{ padding: "14px 16px", background: "rgba(99,102,241,0.06)", borderRadius: 12, border: "1px solid rgba(99,102,241,0.15)", textAlign: "center" }}>
-                    <div style={{ fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.5 }}>
-                      📞 ¿Te interesa este videojuego? Contáctanos {vg.branch ? <>en <strong style={{ color: "#818cf8" }}>{vg.branch.name}</strong></> : "en nuestra tienda"} para más información.
+                  <div style={{ padding: "16px 18px", background: "rgba(26,184,196,0.06)", borderRadius: 12, border: "1.5px solid rgba(26,184,196,0.25)", textAlign: "center" }}>
+                    <div style={{ fontSize: 13, color: "#4a5878", lineHeight: 1.6, fontWeight: 500 }}>
+                      📞 ¿Te interesa este videojuego? Contáctanos {vg.branch ? <>en <strong style={{ color: "#2dd4df" }}>{vg.branch.name}</strong></> : "en nuestra tienda"} para más información.
                     </div>
                   </div>
                 </div>
@@ -1083,13 +1087,13 @@ export default function PortalPage() {
               </div>
             ) : (
               <div className="portal-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 18 }}>
-                {pagedConsoles.map((cn, i) => {
+                {(pagedConsoles || []).map((cn, i) => {
                   const imgs = parseEqImages(cn.image);
                   const firstImg = imgs[0] || null;
                   const catColor = getConsoleCatColor(cn.category);
                   const dName = getConsoleDisplayName(cn);
                   return (
-                    <div key={cn.id} onClick={() => { setSelectedCn(cn); setCarouselIdx(0); }} className="portal-card" style={{ background: "var(--bg-card)", borderRadius: 16, border: "1px solid var(--border)", overflow: "hidden", animation: `fadeUp 0.4s ease-out ${i * 0.05}s both`, cursor: "pointer", position: "relative" }}>
+                    <div key={cn.id} onClick={() => { setSelectedCn(cn); setCarouselIdx(0); }} className="portal-card" style={{ background: "#ffffff", borderRadius: 14, border: "1.5px solid #cbd5e8", boxShadow: "0 4px 16px rgba(30,42,58,0.10)", overflow: "hidden", animation: `fadeUp 0.4s ease-out ${i * 0.05}s both`, cursor: "pointer", position: "relative" }}>
                       {cn.category && <div style={{ position: "absolute", top: 10, left: 10, zIndex: 2, padding: "3px 10px", borderRadius: 6, background: `${catColor}dd`, color: "#fff", fontSize: 10, fontWeight: 700 }}>{cn.category}</div>}
                       {cn.state && <div style={{ position: "absolute", top: 10, right: 10, zIndex: 2, padding: "3px 8px", borderRadius: 6, background: cn.state === "Nueva" ? "rgba(16,185,129,0.85)" : "rgba(245,158,11,0.85)", color: "#fff", fontSize: 10, fontWeight: 700 }}>{cn.state === "Nueva" ? "✨" : "🔄"} {cn.state}</div>}
                       {imgs.length > 1 && <div style={{ position: "absolute", ...(cn.state ? { top: 38 } : { top: 10 }), right: 10, zIndex: 2, padding: "2px 8px", borderRadius: 6, background: "rgba(0,0,0,0.7)", color: "#fff", fontSize: 10, fontWeight: 700 }}>📷 {imgs.length}</div>}
@@ -1107,11 +1111,11 @@ export default function PortalPage() {
                       )}
                       <div style={{ padding: "14px 16px" }}>
                         <h3 style={{ fontSize: 15, fontWeight: 700, color: "var(--text-primary)", lineHeight: 1.3, marginBottom: 6 }}>{dName}</h3>
-                        <div style={{ fontSize: 20, fontWeight: 800, color: "#10b981", marginBottom: 8 }}>Bs. {cn.price.toFixed(2)}</div>
+                        <div style={{ fontSize: 20, fontWeight: 800, color: "#10b981", marginBottom: 8 }}>Bs. {Math.round(cn.price).toLocaleString()}</div>
                         <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                          {cn.storage && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 6, background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.15)", color: "#818cf8", fontWeight: 600 }}>💾 {cn.storage}</span>}
-                          {cn.color && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 6, background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.15)", color: "#a78bfa", fontWeight: 600 }}>🎨 {cn.color}</span>}
-                          {cn.branch && <span style={{ fontSize: 9, fontWeight: 700, color: "#818cf8", padding: "2px 8px", borderRadius: 6, background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.15)" }}>🏢 {cn.branch.name}</span>}
+                          {cn.storage && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 6, background: "rgba(26,184,196,0.05)", border: "1px solid rgba(26,184,196,0.08)", color: "#2dd4df", fontWeight: 600 }}>💾 {cn.storage}</span>}
+                          {cn.color && <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 6, background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.15)", color: "#7c3aed", fontWeight: 600 }}>🎨 {cn.color}</span>}
+                          {cn.branch && <span style={{ fontSize: 9, fontWeight: 700, color: "#1ab8c4", padding: "2px 8px", borderRadius: 99, background: "rgba(26,184,196,0.08)", border: "1px solid rgba(26,184,196,0.20)" }}>🏢 {cn.branch.name}</span>}
                         </div>
                       </div>
                     </div>
@@ -1123,7 +1127,7 @@ export default function PortalPage() {
               <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 6, marginTop: 28 }}>
                 <button onClick={() => { setPageCn(p => Math.max(1, p - 1)); window.scrollTo({ top: 500, behavior: "smooth" }); }} disabled={pageCn === 1} style={{ padding: "8px 14px", borderRadius: 8, border: "1px solid var(--border)", background: pageCn === 1 ? "transparent" : "var(--bg-card)", color: pageCn === 1 ? "var(--text-muted)" : "var(--text-secondary)", fontSize: 13, fontWeight: 600, cursor: pageCn === 1 ? "not-allowed" : "pointer", opacity: pageCn === 1 ? 0.4 : 1 }}>← Anterior</button>
                 {Array.from({ length: totalPagesCn }, (_, i) => i + 1).map(p => (
-                  <button key={p} onClick={() => { setPageCn(p); window.scrollTo({ top: 500, behavior: "smooth" }); }} style={{ width: 36, height: 36, borderRadius: 8, border: p === pageCn ? "1.5px solid #6366f1" : "1px solid var(--border)", background: p === pageCn ? "rgba(99,102,241,0.15)" : "var(--bg-card)", color: p === pageCn ? "#818cf8" : "var(--text-secondary)", fontSize: 13, fontWeight: p === pageCn ? 800 : 600, cursor: "pointer" }}>{p}</button>
+                  <button key={p} onClick={() => { setPageCn(p); window.scrollTo({ top: 500, behavior: "smooth" }); }} style={{ width: 36, height: 36, borderRadius: 8, border: p === pageCn ? "1.5px solid #1ab8c4" : "1px solid var(--border)", background: p === pageCn ? "rgba(26,184,196,0.08)" : "var(--bg-card)", color: p === pageCn ? "#2dd4df" : "var(--text-secondary)", fontSize: 13, fontWeight: p === pageCn ? 800 : 600, cursor: "pointer" }}>{p}</button>
                 ))}
                 <button onClick={() => { setPageCn(p => Math.min(totalPagesCn, p + 1)); window.scrollTo({ top: 500, behavior: "smooth" }); }} disabled={pageCn === totalPagesCn} style={{ padding: "8px 14px", borderRadius: 8, border: "1px solid var(--border)", background: pageCn === totalPagesCn ? "transparent" : "var(--bg-card)", color: pageCn === totalPagesCn ? "var(--text-muted)" : "var(--text-secondary)", fontSize: 13, fontWeight: 600, cursor: pageCn === totalPagesCn ? "not-allowed" : "pointer", opacity: pageCn === totalPagesCn ? 0.4 : 1 }}>Siguiente →</button>
               </div>
@@ -1141,8 +1145,8 @@ export default function PortalPage() {
           const dName = getConsoleDisplayName(cn);
           return (
             <div onClick={() => setSelectedCn(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", backdropFilter: "blur(10px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 200, padding: 20, overflowY: "auto" }}>
-              <div onClick={(e) => e.stopPropagation()} style={{ width: "100%", maxWidth: 640, maxHeight: "92vh", overflowY: "auto", background: "var(--bg-card)", borderRadius: 20, border: `1px solid ${catColor}40`, boxShadow: "0 20px 60px rgba(0,0,0,0.5)", animation: "fadeUp 0.3s ease-out" }}>
-                <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center", position: "sticky", top: 0, background: "var(--bg-card)", zIndex: 2 }}>
+              <div onClick={(e) => e.stopPropagation()} style={{ width: "100%", maxWidth: 640, maxHeight: "92vh", overflowY: "auto", background: "var(--bg-card)", borderRadius: 12, border: `1px solid ${catColor}40`, boxShadow: "0 20px 60px rgba(26,29,46,0.40)", animation: "fadeUp 0.3s ease-out" }}>
+                <div style={{ padding: "16px 20px", borderBottom: "1.5px solid #cbd5e8", display: "flex", justifyContent: "space-between", alignItems: "center", position: "sticky", top: 0, background: "var(--bg-card)", zIndex: 2 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <span style={{ fontSize: 22 }}>🕹️</span>
                     <div>
@@ -1159,9 +1163,9 @@ export default function PortalPage() {
                       {currentImg && <img src={currentImg} alt={dName} style={{ width: "100%", height: "100%", objectFit: "contain", cursor: "zoom-in" }} onClick={() => setViewImage(currentImg)} />}
                       {imgs.length > 1 && (
                         <>
-                          <button onClick={() => setCarouselIdx(i => (i - 1 + imgs.length) % imgs.length)} style={{ position: "absolute", top: "50%", left: 10, transform: "translateY(-50%)", width: 36, height: 36, borderRadius: "50%", background: "rgba(17,17,24,0.85)", border: "1px solid rgba(255,255,255,0.12)", color: "#eeeef2", fontSize: 16, fontWeight: 700, cursor: "pointer" }}>‹</button>
-                          <button onClick={() => setCarouselIdx(i => (i + 1) % imgs.length)} style={{ position: "absolute", top: "50%", right: 10, transform: "translateY(-50%)", width: 36, height: 36, borderRadius: "50%", background: "rgba(17,17,24,0.85)", border: "1px solid rgba(255,255,255,0.12)", color: "#eeeef2", fontSize: 16, fontWeight: 700, cursor: "pointer" }}>›</button>
-                          <div style={{ position: "absolute", bottom: 10, left: "50%", transform: "translateX(-50%)", padding: "3px 10px", borderRadius: 12, background: "rgba(0,0,0,0.6)", color: "#fff", fontSize: 11, fontWeight: 700 }}>{carouselIdx + 1} / {imgs.length}</div>
+                          <button onClick={() => setCarouselIdx(i => (i - 1 + imgs.length) % imgs.length)} style={{ position: "absolute", top: "50%", left: 10, transform: "translateY(-50%)", width: 36, height: 36, borderRadius: "50%", background: "rgba(17,17,24,0.85)", border: "1px solid rgba(255,255,255,0.12)", color: "#1a1d2e", fontSize: 16, fontWeight: 700, cursor: "pointer" }}>‹</button>
+                          <button onClick={() => setCarouselIdx(i => (i + 1) % imgs.length)} style={{ position: "absolute", top: "50%", right: 10, transform: "translateY(-50%)", width: 36, height: 36, borderRadius: "50%", background: "rgba(17,17,24,0.85)", border: "1px solid rgba(255,255,255,0.12)", color: "#1a1d2e", fontSize: 16, fontWeight: 700, cursor: "pointer" }}>›</button>
+                          <div style={{ position: "absolute", bottom: 10, left: "50%", transform: "translateX(-50%)", padding: "3px 10px", borderRadius: 12, background: "rgba(26,29,46,0.45)", color: "#fff", fontSize: 11, fontWeight: 700 }}>{carouselIdx + 1} / {imgs.length}</div>
                         </>
                       )}
                     </div>
@@ -1176,52 +1180,51 @@ export default function PortalPage() {
 
                 <div style={{ padding: "12px 20px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                    {cn.category && <span style={{ padding: "5px 14px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: `${catColor}18`, color: catColor, border: `1px solid ${catColor}30` }}>🏷️ {cn.category}</span>}
-                    {cn.state && <span style={{ padding: "5px 14px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: cn.state === "Nueva" ? "rgba(16,185,129,0.12)" : "rgba(245,158,11,0.12)", color: cn.state === "Nueva" ? "#10b981" : "#f59e0b", border: `1px solid ${cn.state === "Nueva" ? "rgba(16,185,129,0.25)" : "rgba(245,158,11,0.25)"}` }}>{cn.state === "Nueva" ? "✨" : "🔄"} {cn.state}</span>}
-                    <span style={{ padding: "5px 14px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: `${cond.color}18`, color: cond.color, border: `1px solid ${cond.color}30` }}>{cond.icon} {cond.label}</span>
-                    {cn.branch && <span style={{ padding: "5px 14px", borderRadius: 20, fontSize: 11, fontWeight: 700, color: "#818cf8", background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.2)" }}>🏢 {cn.branch.name}</span>}
+                    {cn.category && <span style={{ padding: "5px 12px", borderRadius: 99, fontSize: 10, fontWeight: 700, background: `${catColor}15`, color: catColor, border: `1.5px solid ${catColor}40` }}>🏷️ {cn.category}</span>}
+                    {cn.state && <span style={{ padding: "5px 12px", borderRadius: 99, fontSize: 10, fontWeight: 700, background: cn.state === "Nueva" ? "rgba(16,185,129,0.12)" : "rgba(245,158,11,0.12)", color: cn.state === "Nueva" ? "#16a34a" : "#c9952a", border: `1.5px solid ${cn.state === "Nueva" ? "rgba(16,185,129,0.35)" : "rgba(245,158,11,0.35)"}` }}>{cn.state === "Nueva" ? "✨" : "🔄"} {cn.state}</span>}
+                    <span style={{ padding: "5px 12px", borderRadius: 99, fontSize: 10, fontWeight: 700, background: `${cond.color}15`, color: cond.color, border: `1.5px solid ${cond.color}40` }}>{cond.icon} {cond.label}</span>
+                    {cn.branch && <span style={{ padding: "5px 14px", borderRadius: 12, fontSize: 11, fontWeight: 700, color: "#2dd4df", background: "rgba(26,184,196,0.06)", border: "1px solid rgba(26,184,196,0.10)" }}>🏢 {cn.branch.name}</span>}
                   </div>
 
                   {/* Price */}
-                  <div style={{ padding: "14px 18px", background: "linear-gradient(135deg, rgba(16,185,129,0.08), rgba(16,185,129,0.02))", borderRadius: 14, border: "1px solid rgba(16,185,129,0.2)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <div style={{ padding: "18px 20px", background: "linear-gradient(135deg, rgba(26,184,196,0.12), rgba(26,184,196,0.06))", borderRadius: 12, border: "2px solid rgba(26,184,196,0.35)", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", textAlign: "center", boxShadow: "0 4px 16px rgba(26,184,196,0.12)" }}>
                     <div>
-                      <div style={{ fontSize: 10, fontWeight: 700, color: "#10b981", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 2 }}>Precio</div>
-                      <div style={{ fontSize: 28, fontWeight: 800, color: "#10b981", lineHeight: 1 }}>Bs. {cn.price.toFixed(2)}</div>
+                      <div style={{ fontSize: 10, fontWeight: 700, color: "#9298ae", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: 6, textAlign: "center" }}>PRECIO</div>
+                      <div style={{ fontSize: 32, fontWeight: 800, color: "#1ab8c4", lineHeight: 1, letterSpacing: "-1.5px" }}>Bs. {Math.round(cn.price).toLocaleString()}</div>
                     </div>
-                    <div style={{ fontSize: 30 }}>💰</div>
                   </div>
 
                   {/* Especificaciones */}
                   {(cn.brand || cn.model || cn.color || cn.storage || cn.generation) && (
                     <div>
-                      <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 8 }}>📋 Especificaciones</div>
-                      <div style={{ padding: "14px 16px", background: "var(--bg-tertiary)", borderRadius: 14, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, border: "1px solid var(--border)" }}>
-                        {cn.brand && <div style={{ minWidth: 0 }}><div style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase" }}>🏢 Marca</div><div style={{ fontSize: 13, fontWeight: 700, color: "#818cf8" }}>{cn.brand}</div></div>}
-                        {cn.model && <div style={{ minWidth: 0 }}><div style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase" }}>📦 Modelo</div><div style={{ fontSize: 13, fontWeight: 700, color: "#818cf8" }}>{cn.model}</div></div>}
-                        {cn.color && <div style={{ minWidth: 0 }}><div style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase" }}>🎨 Color</div><div style={{ fontSize: 13, fontWeight: 700, color: "#a78bfa" }}>{cn.color}</div></div>}
-                        {cn.storage && <div style={{ minWidth: 0 }}><div style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase" }}>💾 Almacenamiento</div><div style={{ fontSize: 13, fontWeight: 700, color: "#f59e0b" }}>{cn.storage}</div></div>}
-                        {cn.generation && <div style={{ minWidth: 0 }}><div style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase" }}>🎯 Generación</div><div style={{ fontSize: 13, fontWeight: 700, color: "#06b6d4" }}>{cn.generation}</div></div>}
+                      <div style={{ fontSize: 11, fontWeight: 800, color: "#1e2a3a", textTransform: "uppercase", letterSpacing: "0.6px", marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}><span style={{ color: "#1ab8c4" }}>◆</span> Especificaciones</div>
+                      <div style={{ padding: "16px 18px", background: "transparent", borderRadius: 14, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, border: "none" }}>
+                        {cn.brand && <div style={{ minWidth: 0, background: "rgba(26,184,196,0.10)", borderRadius: 10, padding: "12px 14px", border: "1px solid rgba(26,184,196,0.20)" }}><div style={{ fontSize: 9, fontWeight: 700, color: "#0891b2", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 4 }}>MARCA</div><div style={{ fontSize: 13, fontWeight: 700, color: "#1ab8c4" }}>{cn.brand}</div></div>}
+                        {cn.model && <div style={{ minWidth: 0, background: "rgba(79,70,229,0.10)", borderRadius: 10, padding: "12px 14px", border: "1px solid rgba(79,70,229,0.20)" }}><div style={{ fontSize: 9, fontWeight: 700, color: "#4f46e5", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 4 }}>MODELO</div><div style={{ fontSize: 13, fontWeight: 700, color: "#4f46e5" }}>{cn.model}</div></div>}
+                        {cn.color && <div style={{ minWidth: 0, background: "rgba(124,58,237,0.10)", borderRadius: 10, padding: "12px 14px", border: "1px solid rgba(124,58,237,0.20)" }}><div style={{ fontSize: 9, fontWeight: 700, color: "#7c3aed", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 4 }}>COLOR</div><div style={{ fontSize: 13, fontWeight: 700, color: "#7c3aed" }}>{cn.color}</div></div>}
+                        {cn.storage && <div style={{ minWidth: 0, background: "rgba(217,119,6,0.10)", borderRadius: 10, padding: "12px 14px", border: "1px solid rgba(217,119,6,0.20)" }}><div style={{ fontSize: 9, fontWeight: 700, color: "#d97706", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 4 }}>ALMACENAMIENTO</div><div style={{ fontSize: 13, fontWeight: 700, color: "#d97706" }}>{cn.storage}</div></div>}
+                        {cn.generation && <div style={{ minWidth: 0, background: "rgba(14,116,144,0.10)", borderRadius: 10, padding: "12px 14px", border: "1px solid rgba(14,116,144,0.20)" }}><div style={{ fontSize: 9, fontWeight: 700, color: "#0e7490", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 4 }}>GENERACIÓN</div><div style={{ fontSize: 13, fontWeight: 700, color: "#1ab8c4" }}>{cn.generation}</div></div>}
                       </div>
                     </div>
                   )}
 
                   {cn.accessories && (
-                    <div style={{ padding: "12px 16px", background: "rgba(139,92,246,0.06)", borderRadius: 12, border: "1px solid rgba(139,92,246,0.15)" }}>
-                      <div style={{ fontSize: 10, fontWeight: 700, color: "#a78bfa", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 4 }}>🎒 Accesorios incluidos</div>
+                    <div style={{ padding: "14px 16px", background: "#ffffff", borderRadius: 12, border: "1.5px solid #e2e8f5", boxShadow: "var(--shadow-sm)" }}>
+                      <div style={{ fontSize: 9, fontWeight: 700, color: "#9298ae", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 6 }}>ACCESORIOS INCLUIDOS</div>
                       <div style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.5 }}>{cn.accessories}</div>
                     </div>
                   )}
 
                   {cn.notes && (
-                    <div style={{ padding: "12px 16px", background: "rgba(245,158,11,0.06)", borderRadius: 12, border: "1px solid rgba(245,158,11,0.15)" }}>
-                      <div style={{ fontSize: 10, fontWeight: 700, color: "#f59e0b", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 4 }}>📝 Notas</div>
+                    <div style={{ padding: "14px 16px", background: "#fffbeb", borderRadius: 12, border: "1.5px solid #fde68a" }}>
+                      <div style={{ fontSize: 9, fontWeight: 700, color: "#c9952a", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 6 }}>NOTAS</div>
                       <div style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.5 }}>{cn.notes}</div>
                     </div>
                   )}
 
-                  <div style={{ padding: "14px 16px", background: "rgba(99,102,241,0.06)", borderRadius: 12, border: "1px solid rgba(99,102,241,0.15)", textAlign: "center" }}>
-                    <div style={{ fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.5 }}>
-                      📞 ¿Te interesa esta consola? Contáctanos {cn.branch ? <>en <strong style={{ color: "#818cf8" }}>{cn.branch.name}</strong></> : "en nuestra tienda"} para más información.
+                  <div style={{ padding: "16px 18px", background: "rgba(26,184,196,0.06)", borderRadius: 12, border: "1.5px solid rgba(26,184,196,0.25)", textAlign: "center" }}>
+                    <div style={{ fontSize: 13, color: "#4a5878", lineHeight: 1.6, fontWeight: 500 }}>
+                      📞 ¿Te interesa esta consola? Contáctanos {cn.branch ? <>en <strong style={{ color: "#1ab8c4", fontWeight: 700 }}>{cn.branch.name}</strong></> : "en nuestra tienda"} para más información.
                     </div>
                   </div>
                 </div>
@@ -1237,13 +1240,13 @@ export default function PortalPage() {
           const currentImg = imgs[carouselIdx] || null;
           return (
             <div onClick={() => setSelectedSw(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", backdropFilter: "blur(10px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 200, padding: 20, overflowY: "auto" }}>
-              <div onClick={(e) => e.stopPropagation()} style={{ width: "100%", maxWidth: 620, maxHeight: "92vh", overflowY: "auto", background: "var(--bg-card)", borderRadius: 20, border: "1px solid rgba(139,92,246,0.4)", boxShadow: "0 20px 60px rgba(0,0,0,0.5)", animation: "fadeUp 0.3s ease-out" }}>
-                <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center", position: "sticky", top: 0, background: "var(--bg-card)", zIndex: 2 }}>
+              <div onClick={(e) => e.stopPropagation()} style={{ width: "100%", maxWidth: 620, maxHeight: "92vh", overflowY: "auto", background: "var(--bg-card)", borderRadius: 12, border: "1px solid rgba(139,92,246,0.4)", boxShadow: "0 20px 60px rgba(26,29,46,0.40)", animation: "fadeUp 0.3s ease-out" }}>
+                <div style={{ padding: "16px 20px", borderBottom: "1.5px solid #cbd5e8", display: "flex", justifyContent: "space-between", alignItems: "center", position: "sticky", top: 0, background: "var(--bg-card)", zIndex: 2 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <span style={{ fontSize: 22 }}>💿</span>
                     <div>
                       <h3 style={{ fontSize: 15, fontWeight: 800, color: "var(--text-primary)", lineHeight: 1.2 }}>{sw.name}</h3>
-                      {sw.category && <span style={{ fontSize: 10, fontWeight: 700, color: "#a78bfa" }}>{sw.category}</span>}
+                      {sw.category && <span style={{ fontSize: 10, fontWeight: 700, color: "#7c3aed" }}>{sw.category}</span>}
                     </div>
                   </div>
                   <button onClick={() => setSelectedSw(null)} style={{ width: 32, height: 32, borderRadius: 8, background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", color: "#ef4444", fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
@@ -1255,9 +1258,9 @@ export default function PortalPage() {
                       {currentImg && <img src={currentImg} alt={sw.name} style={{ width: "100%", height: "100%", objectFit: "contain", cursor: "zoom-in" }} onClick={() => setViewImage(currentImg)} />}
                       {imgs.length > 1 && (
                         <>
-                          <button onClick={() => setCarouselIdx(i => (i - 1 + imgs.length) % imgs.length)} style={{ position: "absolute", top: "50%", left: 10, transform: "translateY(-50%)", width: 36, height: 36, borderRadius: "50%", background: "rgba(17,17,24,0.85)", border: "1px solid rgba(255,255,255,0.12)", color: "#eeeef2", fontSize: 16, fontWeight: 700, cursor: "pointer" }}>‹</button>
-                          <button onClick={() => setCarouselIdx(i => (i + 1) % imgs.length)} style={{ position: "absolute", top: "50%", right: 10, transform: "translateY(-50%)", width: 36, height: 36, borderRadius: "50%", background: "rgba(17,17,24,0.85)", border: "1px solid rgba(255,255,255,0.12)", color: "#eeeef2", fontSize: 16, fontWeight: 700, cursor: "pointer" }}>›</button>
-                          <div style={{ position: "absolute", bottom: 10, left: "50%", transform: "translateX(-50%)", padding: "3px 10px", borderRadius: 12, background: "rgba(0,0,0,0.6)", color: "#fff", fontSize: 11, fontWeight: 700 }}>{carouselIdx + 1} / {imgs.length}</div>
+                          <button onClick={() => setCarouselIdx(i => (i - 1 + imgs.length) % imgs.length)} style={{ position: "absolute", top: "50%", left: 10, transform: "translateY(-50%)", width: 36, height: 36, borderRadius: "50%", background: "rgba(17,17,24,0.85)", border: "1px solid rgba(255,255,255,0.12)", color: "#1a1d2e", fontSize: 16, fontWeight: 700, cursor: "pointer" }}>‹</button>
+                          <button onClick={() => setCarouselIdx(i => (i + 1) % imgs.length)} style={{ position: "absolute", top: "50%", right: 10, transform: "translateY(-50%)", width: 36, height: 36, borderRadius: "50%", background: "rgba(17,17,24,0.85)", border: "1px solid rgba(255,255,255,0.12)", color: "#1a1d2e", fontSize: 16, fontWeight: 700, cursor: "pointer" }}>›</button>
+                          <div style={{ position: "absolute", bottom: 10, left: "50%", transform: "translateX(-50%)", padding: "3px 10px", borderRadius: 12, background: "rgba(26,29,46,0.45)", color: "#fff", fontSize: 11, fontWeight: 700 }}>{carouselIdx + 1} / {imgs.length}</div>
                         </>
                       )}
                     </div>
@@ -1272,22 +1275,22 @@ export default function PortalPage() {
 
                 <div style={{ padding: "12px 20px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                    {sw.category && <span style={{ padding: "5px 14px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: "rgba(139,92,246,0.12)", color: "#a78bfa", border: "1px solid rgba(139,92,246,0.25)" }}>🏷️ {sw.category}</span>}
-                    {sw.rating && <span style={{ padding: "5px 14px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: "rgba(239,68,68,0.12)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.25)" }}>🔞 {sw.rating}</span>}
-                    {sw.language && <span style={{ padding: "5px 14px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: "rgba(6,182,212,0.12)", color: "#06b6d4", border: "1px solid rgba(6,182,212,0.25)" }}>🌐 {sw.language}</span>}
-                    {sw.size && <span style={{ padding: "5px 14px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: "rgba(99,102,241,0.12)", color: "#818cf8", border: "1px solid rgba(99,102,241,0.25)" }}>💾 {sw.size}</span>}
-                    {sw.branch && <span style={{ padding: "5px 14px", borderRadius: 20, fontSize: 11, fontWeight: 700, color: "#818cf8", background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.2)" }}>🏢 {sw.branch.name}</span>}
+                    {sw.category && <span style={{ padding: "5px 14px", borderRadius: 12, fontSize: 11, fontWeight: 700, background: "rgba(139,92,246,0.12)", color: "#7c3aed", border: "1px solid rgba(139,92,246,0.25)" }}>🏷️ {sw.category}</span>}
+                    {sw.rating && <span style={{ padding: "5px 14px", borderRadius: 12, fontSize: 11, fontWeight: 700, background: "rgba(239,68,68,0.12)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.25)" }}>🔞 {sw.rating}</span>}
+                    {sw.language && <span style={{ padding: "5px 14px", borderRadius: 12, fontSize: 11, fontWeight: 700, background: "rgba(6,182,212,0.12)", color: "#0891b2", border: "1px solid rgba(6,182,212,0.25)" }}>🌐 {sw.language}</span>}
+                    {sw.size && <span style={{ padding: "5px 14px", borderRadius: 12, fontSize: 11, fontWeight: 700, background: "rgba(26,184,196,0.07)", color: "#2dd4df", border: "1px solid rgba(26,184,196,0.11)" }}>💾 {sw.size}</span>}
+                    {sw.branch && <span style={{ padding: "5px 14px", borderRadius: 12, fontSize: 11, fontWeight: 700, color: "#2dd4df", background: "rgba(26,184,196,0.06)", border: "1px solid rgba(26,184,196,0.10)" }}>🏢 {sw.branch.name}</span>}
                   </div>
 
                   {sw.description && (
-                    <div style={{ padding: "12px 16px", background: "var(--bg-tertiary)", borderRadius: 12, border: "1px solid var(--border)" }}>
-                      <div style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 4 }}>📝 Descripción</div>
+                    <div style={{ padding: "12px 16px", background: "var(--bg-tertiary)", borderRadius: 12, border: "1.5px solid #cbd5e8" }}>
+                      <div style={{ fontSize: 9, fontWeight: 700, color: "#9298ae", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 3, letterSpacing: "0.5px", marginBottom: 4 }}>📝 Descripción</div>
                       <div style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.6 }}>{sw.description}</div>
                     </div>
                   )}
 
                   {sw.minRequirements && (
-                    <div style={{ padding: "12px 16px", background: "rgba(245,158,11,0.06)", borderRadius: 12, border: "1px solid rgba(245,158,11,0.15)" }}>
+                    <div style={{ padding: "14px 16px", background: "#fffbeb", borderRadius: 12, border: "1.5px solid #fde68a" }}>
                       <div style={{ fontSize: 10, fontWeight: 700, color: "#f59e0b", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 4 }}>⚙️ Requisitos mínimos</div>
                       <div style={{ fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{sw.minRequirements}</div>
                     </div>
@@ -1300,9 +1303,9 @@ export default function PortalPage() {
                     </div>
                   )}
 
-                  <div style={{ padding: "14px 16px", background: "rgba(99,102,241,0.06)", borderRadius: 12, border: "1px solid rgba(99,102,241,0.15)", textAlign: "center" }}>
-                    <div style={{ fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.5 }}>
-                      📞 ¿Te interesa este programa? Contáctanos {sw.branch ? <>en <strong style={{ color: "#818cf8" }}>{sw.branch.name}</strong></> : "en nuestra tienda"} para más información.
+                  <div style={{ padding: "16px 18px", background: "rgba(26,184,196,0.06)", borderRadius: 12, border: "1.5px solid rgba(26,184,196,0.25)", textAlign: "center" }}>
+                    <div style={{ fontSize: 13, color: "#4a5878", lineHeight: 1.6, fontWeight: 500 }}>
+                      📞 ¿Te interesa este programa? Contáctanos {sw.branch ? <>en <strong style={{ color: "#2dd4df" }}>{sw.branch.name}</strong></> : "en nuestra tienda"} para más información.
                     </div>
                   </div>
                 </div>
@@ -1322,7 +1325,7 @@ export default function PortalPage() {
               </div>
             ) : (
               <div className="portal-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 18 }}>
-                {pagedEquipment.map((eq, i) => {
+                {(pagedEquipment || []).map((eq, i) => {
                   const imgs = parseEqImages(eq.image);
                   const firstImg = imgs[0] || null;
                   const dName = getEqDisplayName(eq);
@@ -1332,7 +1335,7 @@ export default function PortalPage() {
                       key={eq.id}
                       className="portal-card"
                       onClick={() => { setSelectedEq(eq); setCarouselIdx(0); }}
-                      style={{ background: "var(--bg-card)", borderRadius: 16, border: "1px solid var(--border)", overflow: "hidden", animation: `fadeUp 0.4s ease-out ${i * 0.05}s both`, cursor: "pointer", position: "relative" }}
+                      style={{ background: "#ffffff", borderRadius: 14, border: "1.5px solid #cbd5e8", boxShadow: "0 4px 16px rgba(30,42,58,0.10)", overflow: "hidden", animation: `fadeUp 0.4s ease-out ${i * 0.05}s both`, cursor: "pointer", position: "relative" }}
                     >
                       {/* Type badge */}
                       <div style={{ position: "absolute", top: 10, right: 10, zIndex: 2, padding: "3px 10px", borderRadius: 8, background: eq.type === "laptop" ? "rgba(139,92,246,0.85)" : "rgba(6,182,212,0.85)", color: "#fff", fontSize: 10, fontWeight: 700, backdropFilter: "blur(8px)" }}>
@@ -1358,22 +1361,22 @@ export default function PortalPage() {
                       )}
                       <div style={{ padding: "14px 16px" }}>
                         <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 6, alignItems: "center" }}>
-                          {eq.code && <span style={{ fontSize: 9, fontWeight: 800, color: "#06b6d4", padding: "2px 8px", borderRadius: 6, background: "rgba(6,182,212,0.1)", border: "1px solid rgba(6,182,212,0.2)", fontFamily: "monospace", letterSpacing: "0.3px" }}>{eq.code}</span>}
-                          {eq.branch && <span style={{ fontSize: 9, fontWeight: 700, color: "#818cf8", padding: "2px 8px", borderRadius: 6, background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.15)" }}>🏢 {eq.branch.name}</span>}
+                          {eq.code && <span style={{ fontSize: 9, fontWeight: 800, color: "#0891b2", padding: "2px 8px", borderRadius: 6, background: "rgba(6,182,212,0.1)", border: "1px solid rgba(6,182,212,0.2)", fontFamily: "monospace", letterSpacing: "0.3px" }}>{eq.code}</span>}
+                          {eq.branch && <span style={{ fontSize: 9, fontWeight: 700, color: "#1ab8c4", padding: "2px 8px", borderRadius: 99, background: "rgba(26,184,196,0.08)", border: "1px solid rgba(26,184,196,0.20)" }}>🏢 {eq.branch.name}</span>}
                         </div>
                         <h3 style={{ fontSize: 15, fontWeight: 700, color: "var(--text-primary)", lineHeight: 1.3, marginBottom: 8 }}>{dName}</h3>
 
                         {/* Quick specs badges */}
-                        <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 10 }}>
-                          {eq.processor && <span style={{ padding: "3px 7px", borderRadius: 6, background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.12)", fontSize: 10, color: "#818cf8", fontWeight: 600 }}>⚡ {eq.processor}</span>}
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: 10 }}>
+                          {eq.processor && <span style={{ padding: "3px 7px", borderRadius: 6, background: "rgba(26,184,196,0.05)", border: "1px solid rgba(26,184,196,0.07)", fontSize: 10, color: "#2dd4df", fontWeight: 600 }}>⚡ {eq.processor}</span>}
                           {eq.ram && <span style={{ padding: "3px 7px", borderRadius: 6, background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.12)", fontSize: 10, color: "#10b981", fontWeight: 600 }}>🧠 {eq.ram}</span>}
                           {disks.slice(0, 1).map((d, di) => <span key={di} style={{ padding: "3px 7px", borderRadius: 6, background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.12)", fontSize: 10, color: "#f59e0b", fontWeight: 600 }}>💾 {d}</span>)}
                           {eq.graphicsCard && <span style={{ padding: "3px 7px", borderRadius: 6, background: "rgba(236,72,153,0.08)", border: "1px solid rgba(236,72,153,0.12)", fontSize: 10, color: "#ec4899", fontWeight: 600 }}>🎮 {eq.graphicsCard.length > 18 ? eq.graphicsCard.slice(0, 18) + "…" : eq.graphicsCard}</span>}
                         </div>
 
                         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: "1px solid var(--border)", paddingTop: 10 }}>
-                          <span style={{ fontSize: 20, fontWeight: 800, color: "#10b981" }}>Bs. {eq.price.toFixed(2)}</span>
-                          <span style={{ fontSize: 11, color: "#818cf8", fontWeight: 600 }}>Ver detalles →</span>
+                          <span style={{ fontSize: 20, fontWeight: 800, color: "#10b981" }}>Bs. {Math.round(eq.price).toLocaleString()}</span>
+                          <span style={{ fontSize: 11, color: "#2dd4df", fontWeight: 600 }}>Ver detalles →</span>
                         </div>
                       </div>
                     </div>
@@ -1385,7 +1388,7 @@ export default function PortalPage() {
               <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 6, marginTop: 28 }}>
                 <button onClick={() => { setPageEq(p => Math.max(1, p - 1)); window.scrollTo({ top: 500, behavior: "smooth" }); }} disabled={pageEq === 1} style={{ padding: "8px 14px", borderRadius: 8, border: "1px solid var(--border)", background: pageEq === 1 ? "transparent" : "var(--bg-card)", color: pageEq === 1 ? "var(--text-muted)" : "var(--text-secondary)", fontSize: 13, fontWeight: 600, cursor: pageEq === 1 ? "not-allowed" : "pointer", opacity: pageEq === 1 ? 0.4 : 1 }}>← Anterior</button>
                 {Array.from({ length: totalPagesEq }, (_, i) => i + 1).map(p => (
-                  <button key={p} onClick={() => { setPageEq(p); window.scrollTo({ top: 500, behavior: "smooth" }); }} style={{ width: 36, height: 36, borderRadius: 8, border: p === pageEq ? "1.5px solid #6366f1" : "1px solid var(--border)", background: p === pageEq ? "rgba(99,102,241,0.15)" : "var(--bg-card)", color: p === pageEq ? "#818cf8" : "var(--text-secondary)", fontSize: 13, fontWeight: p === pageEq ? 800 : 600, cursor: "pointer" }}>{p}</button>
+                  <button key={p} onClick={() => { setPageEq(p); window.scrollTo({ top: 500, behavior: "smooth" }); }} style={{ width: 36, height: 36, borderRadius: 8, border: p === pageEq ? "1.5px solid #1ab8c4" : "1px solid var(--border)", background: p === pageEq ? "rgba(26,184,196,0.08)" : "var(--bg-card)", color: p === pageEq ? "#2dd4df" : "var(--text-secondary)", fontSize: 13, fontWeight: p === pageEq ? 800 : 600, cursor: "pointer" }}>{p}</button>
                 ))}
                 <button onClick={() => { setPageEq(p => Math.min(totalPagesEq, p + 1)); window.scrollTo({ top: 500, behavior: "smooth" }); }} disabled={pageEq === totalPagesEq} style={{ padding: "8px 14px", borderRadius: 8, border: "1px solid var(--border)", background: pageEq === totalPagesEq ? "transparent" : "var(--bg-card)", color: pageEq === totalPagesEq ? "var(--text-muted)" : "var(--text-secondary)", fontSize: 13, fontWeight: 600, cursor: pageEq === totalPagesEq ? "not-allowed" : "pointer", opacity: pageEq === totalPagesEq ? 0.4 : 1 }}>Siguiente →</button>
               </div>
@@ -1404,19 +1407,19 @@ export default function PortalPage() {
       {/* Branch Picker Modal */}
       {branchPickerData && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 999, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }} onClick={() => setBranchPickerData(null)}>
-          <div onClick={e => e.stopPropagation()} style={{ maxWidth: 420, width: "100%", background: "rgba(17,17,24,0.98)", borderRadius: 24, border: "1px solid rgba(99,102,241,0.15)", padding: "32px 24px", textAlign: "center" }}>
+          <div onClick={e => e.stopPropagation()} style={{ maxWidth: 420, width: "100%", background: "rgba(17,17,24,0.98)", borderRadius: 14, border: "1px solid rgba(26,184,196,0.08)", padding: "32px 24px", textAlign: "center" }}>
             <div style={{ fontSize: 48, marginBottom: 16 }}>🏢</div>
-            <h2 style={{ fontSize: 20, fontWeight: 800, color: "#eeeef2", marginBottom: 8 }}>Selecciona la Sucursal</h2>
-            <p style={{ color: "#8888a0", fontSize: 13, marginBottom: 24 }}>La orden <strong style={{ color: "#818cf8" }}>{branchPickerData.code}</strong> existe en varias sucursales</p>
+            <h2 style={{ fontSize: 20, fontWeight: 800, color: "#1a1d2e", marginBottom: 8 }}>Selecciona la Sucursal</h2>
+            <p style={{ color: "#4a5068", fontSize: 13, marginBottom: 24 }}>La orden <strong style={{ color: "#2dd4df" }}>{branchPickerData.code}</strong> existe en varias sucursales</p>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {branchPickerData.repairs.map((r: any) => (
-                <button key={r.id} onClick={() => handleBranchSelect(r)} style={{ padding: "14px 18px", background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.2)", borderRadius: 14, color: "#eeeef2", fontSize: 14, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", transition: "all 0.2s" }}>
+                <button key={r.id} onClick={() => handleBranchSelect(r)} style={{ padding: "14px 18px", background: "rgba(26,184,196,0.05)", border: "1px solid rgba(26,184,196,0.10)", borderRadius: 14, color: "#1a1d2e", fontSize: 14, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", transition: "all 0.2s" }}>
                   <span>🏢 {r.branch?.name || "Sucursal"}</span>
-                  <span style={{ fontSize: 12, color: "#818cf8" }}>{r.device} - {r.clientName || "Sin nombre"}</span>
+                  <span style={{ fontSize: 12, color: "#2dd4df" }}>{r.device} - {r.clientName || "Sin nombre"}</span>
                 </button>
               ))}
             </div>
-            <button onClick={() => setBranchPickerData(null)} style={{ marginTop: 16, padding: "10px 20px", background: "transparent", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, color: "#8888a0", fontSize: 13, cursor: "pointer" }}>Cancelar</button>
+            <button onClick={() => setBranchPickerData(null)} style={{ marginTop: 16, padding: "10px 20px", background: "transparent", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, color: "#4a5068", fontSize: 13, cursor: "pointer" }}>Cancelar</button>
           </div>
         </div>
       )}
@@ -1438,18 +1441,18 @@ export default function PortalPage() {
             <div
               onClick={e => e.stopPropagation()}
               className="eq-modal"
-              style={{ width: "100%", maxWidth: 680, maxHeight: "92vh", overflow: "auto", background: "var(--bg-card)", borderRadius: 20, border: "1px solid rgba(99,102,241,0.18)", boxShadow: "0 24px 60px rgba(0,0,0,0.6)" }}
+              style={{ width: "100%", maxWidth: 680, maxHeight: "92vh", overflow: "auto", background: "var(--bg-card)", borderRadius: 12, border: "1px solid rgba(99,102,241,0.18)", boxShadow: "0 24px 60px rgba(26,29,46,0.45)" }}
             >
               {/* Header */}
-              <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, position: "sticky", top: 0, background: "var(--bg-card)", zIndex: 3 }}>
+              <div style={{ padding: "16px 20px", borderBottom: "1.5px solid #cbd5e8", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, position: "sticky", top: 0, background: "var(--bg-card)", zIndex: 3 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
                   <span style={{ fontSize: 22 }}>{eq.type === "laptop" ? "💻" : "🖥️"}</span>
                   <div style={{ minWidth: 0 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                       <h3 style={{ fontSize: 15, fontWeight: 800, color: "var(--text-primary)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{dName}</h3>
-                      {eq.code && <span style={{ fontSize: 10, fontWeight: 800, color: "#06b6d4", padding: "2px 8px", borderRadius: 6, background: "rgba(6,182,212,0.1)", border: "1px solid rgba(6,182,212,0.2)", fontFamily: "monospace" }}>{eq.code}</span>}
+                      {eq.code && <span style={{ fontSize: 10, fontWeight: 800, color: "#0891b2", padding: "2px 8px", borderRadius: 6, background: "rgba(6,182,212,0.1)", border: "1px solid rgba(6,182,212,0.2)", fontFamily: "monospace" }}>{eq.code}</span>}
                     </div>
-                    <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>{eq.type === "laptop" ? "Laptop" : "PC de Escritorio"} · Bs. {eq.price.toFixed(2)}</div>
+                    <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>{eq.type === "laptop" ? "Laptop" : "PC de Escritorio"} · Bs. {Math.round(eq.price).toLocaleString()}</div>
                   </div>
                 </div>
                 <button onClick={() => setSelectedEq(null)} style={{ width: 32, height: 32, borderRadius: 8, background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", color: "#ef4444", fontSize: 13, cursor: "pointer", flexShrink: 0 }}>✕</button>
@@ -1469,13 +1472,13 @@ export default function PortalPage() {
 
                     {/* Counter */}
                     {imgs.length > 1 && (
-                      <div style={{ position: "absolute", top: 12, right: 12, padding: "5px 12px", background: "rgba(0,0,0,0.7)", color: "#fff", fontSize: 12, fontWeight: 700, borderRadius: 20, backdropFilter: "blur(8px)" }}>
+                      <div style={{ position: "absolute", top: 12, right: 12, padding: "5px 12px", background: "rgba(0,0,0,0.7)", color: "#fff", fontSize: 12, fontWeight: 700, borderRadius: 12, backdropFilter: "blur(8px)" }}>
                         📷 {carouselIdx + 1} / {imgs.length}
                       </div>
                     )}
 
                     {/* Zoom hint */}
-                    <div style={{ position: "absolute", bottom: 12, right: 12, padding: "4px 10px", background: "rgba(0,0,0,0.6)", color: "#eeeef2", fontSize: 10, fontWeight: 600, borderRadius: 8, backdropFilter: "blur(8px)", display: "flex", alignItems: "center", gap: 4 }}>
+                    <div style={{ position: "absolute", bottom: 12, right: 12, padding: "4px 10px", background: "rgba(26,29,46,0.45)", color: "#1a1d2e", fontSize: 10, fontWeight: 600, borderRadius: 8, backdropFilter: "blur(8px)", display: "flex", alignItems: "center", gap: 4 }}>
                       🔍 Click para ampliar
                     </div>
 
@@ -1485,14 +1488,14 @@ export default function PortalPage() {
                         <button
                           onClick={prev}
                           aria-label="Imagen anterior"
-                          style={{ position: "absolute", top: "50%", left: 10, transform: "translateY(-50%)", width: 40, height: 40, borderRadius: "50%", background: "rgba(17,17,24,0.85)", border: "1px solid rgba(255,255,255,0.12)", color: "#eeeef2", fontSize: 18, fontWeight: 700, cursor: "pointer", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.15s" }}
+                          style={{ position: "absolute", top: "50%", left: 10, transform: "translateY(-50%)", width: 40, height: 40, borderRadius: "50%", background: "rgba(17,17,24,0.85)", border: "1px solid rgba(255,255,255,0.12)", color: "#1a1d2e", fontSize: 18, fontWeight: 700, cursor: "pointer", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.15s" }}
                           onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(99,102,241,0.85)"; e.currentTarget.style.transform = "translateY(-50%) scale(1.08)"; }}
                           onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(17,17,24,0.85)"; e.currentTarget.style.transform = "translateY(-50%) scale(1)"; }}
                         >‹</button>
                         <button
                           onClick={next}
                           aria-label="Imagen siguiente"
-                          style={{ position: "absolute", top: "50%", right: 10, transform: "translateY(-50%)", width: 40, height: 40, borderRadius: "50%", background: "rgba(17,17,24,0.85)", border: "1px solid rgba(255,255,255,0.12)", color: "#eeeef2", fontSize: 18, fontWeight: 700, cursor: "pointer", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.15s" }}
+                          style={{ position: "absolute", top: "50%", right: 10, transform: "translateY(-50%)", width: 40, height: 40, borderRadius: "50%", background: "rgba(17,17,24,0.85)", border: "1px solid rgba(255,255,255,0.12)", color: "#1a1d2e", fontSize: 18, fontWeight: 700, cursor: "pointer", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.15s" }}
                           onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(99,102,241,0.85)"; e.currentTarget.style.transform = "translateY(-50%) scale(1.08)"; }}
                           onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(17,17,24,0.85)"; e.currentTarget.style.transform = "translateY(-50%) scale(1)"; }}
                         >›</button>
@@ -1503,11 +1506,11 @@ export default function PortalPage() {
                   {/* Thumbnails */}
                   {imgs.length > 1 && (
                     <div style={{ display: "flex", gap: 8, marginTop: 12, overflowX: "auto", paddingBottom: 4 }}>
-                      {imgs.map((img, idx) => (
+                      {(imgs || []).map((img, idx) => (
                         <div
                           key={idx}
                           onClick={() => setCarouselIdx(idx)}
-                          style={{ width: 76, height: 56, borderRadius: 8, overflow: "hidden", cursor: "pointer", flexShrink: 0, border: idx === carouselIdx ? "2px solid #6366f1" : "2px solid transparent", opacity: idx === carouselIdx ? 1 : 0.6, transition: "all 0.15s", position: "relative" }}
+                          style={{ width: 76, height: 56, borderRadius: 8, overflow: "hidden", cursor: "pointer", flexShrink: 0, border: idx === carouselIdx ? "2px solid #1ab8c4" : "2px solid transparent", opacity: idx === carouselIdx ? 1 : 0.6, transition: "all 0.15s", position: "relative" }}
                         >
                           <img src={img} alt={`thumb ${idx + 1}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                         </div>
@@ -1531,67 +1534,67 @@ export default function PortalPage() {
 
                 {/* Badges row */}
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  <span style={{ padding: "5px 14px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: eq.type === "laptop" ? "rgba(139,92,246,0.12)" : "rgba(6,182,212,0.12)", color: eq.type === "laptop" ? "#a78bfa" : "#06b6d4", border: `1px solid ${eq.type === "laptop" ? "rgba(139,92,246,0.25)" : "rgba(6,182,212,0.25)"}` }}>
+                  <span style={{ padding: "5px 14px", borderRadius: 12, fontSize: 11, fontWeight: 700, background: eq.type === "laptop" ? "rgba(139,92,246,0.12)" : "rgba(6,182,212,0.12)", color: eq.type === "laptop" ? "#7c3aed" : "#0891b2", border: `1px solid ${eq.type === "laptop" ? "rgba(139,92,246,0.25)" : "rgba(6,182,212,0.25)"}` }}>
                     {eq.type === "laptop" ? "💻 Laptop" : "🖥️ PC Escritorio"}
                   </span>
-                  <span style={{ padding: "5px 14px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: `${cond.color}18`, color: cond.color, border: `1px solid ${cond.color}30` }}>
+                  <span style={{ padding: "5px 12px", borderRadius: 99, fontSize: 10, fontWeight: 700, background: `${cond.color}15`, color: cond.color, border: `1.5px solid ${cond.color}40` }}>
                     {cond.icon} {cond.label}
                   </span>
                   {eq.branch && (
-                    <span style={{ padding: "5px 14px", borderRadius: 20, fontSize: 11, fontWeight: 700, color: "#818cf8", background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.2)" }}>
+                    <span style={{ padding: "5px 14px", borderRadius: 12, fontSize: 11, fontWeight: 700, color: "#2dd4df", background: "rgba(26,184,196,0.06)", border: "1px solid rgba(26,184,196,0.10)" }}>
                       🏢 {eq.branch.name}
                     </span>
                   )}
                 </div>
 
                 {/* Price */}
-                <div style={{ padding: "14px 18px", background: "linear-gradient(135deg, rgba(16,185,129,0.08), rgba(16,185,129,0.02))", borderRadius: 14, border: "1px solid rgba(16,185,129,0.2)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <div style={{ padding: "18px 20px", background: "linear-gradient(135deg, rgba(26,184,196,0.12), rgba(26,184,196,0.06))", borderRadius: 12, border: "2px solid rgba(26,184,196,0.35)", display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column", textAlign: "center", boxShadow: "0 4px 16px rgba(26,184,196,0.12)" }}>
                   <div>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: "#10b981", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 2 }}>Precio</div>
-                    <div style={{ fontSize: 28, fontWeight: 800, color: "#10b981", lineHeight: 1 }}>Bs. {eq.price.toFixed(2)}</div>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: "#9298ae", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: 6, textAlign: "center" }}>PRECIO</div>
+                    <div style={{ fontSize: 32, fontWeight: 800, color: "#1ab8c4", lineHeight: 1, letterSpacing: "-1.5px" }}>Bs. {Math.round(eq.price).toLocaleString()}</div>
                   </div>
-                  <div style={{ fontSize: 30 }}>💰</div>
+                  
                 </div>
 
                 {/* Specifications */}
                 <div>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 8 }}>📋 Especificaciones</div>
-                  <div className="eq-specs-grid" style={{ padding: "14px 16px", background: "var(--bg-tertiary)", borderRadius: 14, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, border: "1px solid var(--border)" }}>
-                    {eq.brand && <SpecRow icon="🏷️" label="Marca" value={eq.brand} color="#818cf8" />}
-                    {eq.model && <SpecRow icon="📦" label="Modelo" value={eq.model} color="#818cf8" />}
-                    {eq.processor && <SpecRow icon="⚡" label="Procesador" value={eq.processor} color="#818cf8" />}
+                  <div style={{ fontSize: 11, fontWeight: 800, color: "#1e2a3a", textTransform: "uppercase", letterSpacing: "0.6px", marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}><span style={{ color: "#1ab8c4" }}>◆</span> Especificaciones</div>
+                  <div className="eq-specs-grid" style={{ padding: "16px 18px", background: "transparent", borderRadius: 14, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, border: "none" }}>
+                    {eq.brand && <SpecRow icon="🏷️" label="Marca" value={eq.brand} color="#2dd4df" />}
+                    {eq.model && <SpecRow icon="📦" label="Modelo" value={eq.model} color="#2dd4df" />}
+                    {eq.processor && <SpecRow icon="⚡" label="Procesador" value={eq.processor} color="#2dd4df" />}
                     {eq.ram && <SpecRow icon="🧠" label="Memoria RAM" value={eq.ram} color="#10b981" />}
                     {eq.storage && <SpecRow icon="💾" label="Disco Principal" value={eq.storage} color="#f59e0b" />}
                     {eq.storage2 && <SpecRow icon="💾" label="Disco Secundario" value={eq.storage2} color="#f59e0b" />}
                     {eq.graphicsCard && <SpecRow icon="🎮" label="Tarjeta Gráfica" value={eq.graphicsCard} color="#ec4899" />}
                     {eq.screenSize && <SpecRow icon="📐" label="Pantalla" value={eq.screenSize} color="#a855f7" />}
-                    {eq.os && <SpecRow icon="🖥️" label="Sistema Operativo" value={eq.os} color="#06b6d4" />}
-                    {eq.cabinet && <SpecRow icon="🏗️" label="Gabinete" value={eq.cabinet} color="#f43f5e" />}
+                    {eq.os && <SpecRow icon="🖥️" label="Sistema Operativo" value={eq.os} color="#0891b2" />}
+                    {eq.cabinet && <SpecRow icon="🏗️" label="Gabinete" value={eq.cabinet} color="#e11d48" />}
                     {eq.motherboard && <SpecRow icon="🔌" label="Placa Madre" value={eq.motherboard} color="#14b8a6" />}
-                    {eq.powerSupply && <SpecRow icon="⚡" label="Fuente de Poder" value={eq.powerSupply} color="#fb923c" />}
+                    {eq.powerSupply && <SpecRow icon="⚡" label="Fuente de Poder" value={eq.powerSupply} color="#ea580c" />}
                   </div>
                 </div>
 
                 {/* Accessories */}
                 {eq.accessories && (
-                  <div style={{ padding: "12px 16px", background: "rgba(139,92,246,0.06)", borderRadius: 12, border: "1px solid rgba(139,92,246,0.15)" }}>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: "#a78bfa", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 4 }}>🎒 Accesorios incluidos</div>
+                  <div style={{ padding: "14px 16px", background: "#ffffff", borderRadius: 12, border: "1.5px solid #e2e8f5", boxShadow: "var(--shadow-sm)" }}>
+                    <div style={{ fontSize: 9, fontWeight: 700, color: "#9298ae", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 6 }}>ACCESORIOS INCLUIDOS</div>
                     <div style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.5 }}>{eq.accessories}</div>
                   </div>
                 )}
 
                 {/* Notes */}
                 {eq.notes && (
-                  <div style={{ padding: "12px 16px", background: "rgba(245,158,11,0.06)", borderRadius: 12, border: "1px solid rgba(245,158,11,0.15)" }}>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: "#f59e0b", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 4 }}>📝 Notas adicionales</div>
+                  <div style={{ padding: "14px 16px", background: "#fffbeb", borderRadius: 12, border: "1.5px solid #fde68a" }}>
+                    <div style={{ fontSize: 9, fontWeight: 700, color: "#c9952a", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 6 }}>NOTAS adicionales</div>
                     <div style={{ fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.5 }}>{eq.notes}</div>
                   </div>
                 )}
 
                 {/* Contact CTA */}
-                <div style={{ marginTop: 4, padding: "14px 16px", background: "rgba(99,102,241,0.06)", borderRadius: 12, border: "1px solid rgba(99,102,241,0.15)", textAlign: "center" }}>
-                  <div style={{ fontSize: 12, color: "var(--text-secondary)", lineHeight: 1.5 }}>
-                    📞 ¿Te interesa este equipo? Contáctanos {eq.branch ? <>en <strong style={{ color: "#818cf8" }}>{eq.branch.name}</strong></> : "en nuestra tienda"} para más información.
+                <div style={{ marginTop: 4, padding: "16px 18px", background: "rgba(26,184,196,0.06)", borderRadius: 12, border: "1.5px solid rgba(26,184,196,0.25)", textAlign: "center" }}>
+                  <div style={{ fontSize: 13, color: "#4a5878", lineHeight: 1.6, fontWeight: 500 }}>
+                    📞 ¿Te interesa este equipo? Contáctanos {eq.branch ? <>en <strong style={{ color: "#2dd4df" }}>{eq.branch.name}</strong></> : "en nuestra tienda"} para más información.
                   </div>
                 </div>
               </div>
@@ -1606,7 +1609,7 @@ export default function PortalPage() {
 function SpecRow({ icon, label, value, color }: { icon: string; label: string; value: string; color: string }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 2, minWidth: 0 }}>
-      <div style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.3px", display: "flex", alignItems: "center", gap: 4 }}>
+      <div style={{ fontSize: 9, fontWeight: 700, color: "#9298ae", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 3, letterSpacing: "0.3px", display: "flex", alignItems: "center", gap: 4 }}>
         <span style={{ fontSize: 11 }}>{icon}</span> {label}
       </div>
       <div style={{ fontSize: 13, fontWeight: 700, color: color, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={value}>

@@ -3,17 +3,23 @@ export function getStoredAuth() {
   if (typeof window === "undefined") return { token: null, user: null };
   const token = sessionStorage.getItem("token");
   const raw = sessionStorage.getItem("user");
-  const user = raw ? JSON.parse(raw) : null;
+  let user = null;
+  try { user = raw ? JSON.parse(raw) : null; } catch { user = null; }
   return { token, user };
 }
 
 export function getActiveBranchId(): string | null {
   if (typeof window === "undefined") return null;
-  const user = JSON.parse(sessionStorage.getItem("user") || "{}");
-  if (user.role === "superadmin") {
-    return sessionStorage.getItem("activeBranchId") || null;
+  try {
+    const raw = sessionStorage.getItem("user") || "{}";
+    const user = JSON.parse(raw);
+    if (user.role === "superadmin") {
+      return sessionStorage.getItem("activeBranchId") || null;
+    }
+    return user.branchId || null;
+  } catch {
+    return null;
   }
-  return user.branchId || null;
 }
 
 export function setActiveBranchId(id: string) {

@@ -22,10 +22,10 @@ export default function AdminBranchesPage() {
   const [settings, setSettings] = useState<{ companyName: string; logo: string | null }>({ companyName: "RepairTrackQR", logo: null });
 
   useEffect(() => {
-    fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings({ companyName: d.companyName, logo: d.logo }); }).catch(() => {});
+    fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings({ companyName: d.companyName, logo: d.logo }).catch(() => {}); }).catch(() => {});
     const userData = sessionStorage.getItem("user"); const token = sessionStorage.getItem("token");
     if (!userData || !token) { router.push("/"); return; }
-    const parsed = JSON.parse(userData);
+    const parsed = (() => { try { return JSON.parse(userData); } catch { return null; } })();
     if (parsed.role !== "superadmin") { router.push("/dashboard"); return; }
     setUser(parsed);
     loadData();
@@ -78,10 +78,10 @@ export default function AdminBranchesPage() {
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg-primary)" }}>
       <style>{`
-        .sidebar-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 14px; border-radius: 10px; border: none; font-size: 12px; font-weight: 600; cursor: pointer; background: transparent; color: var(--text-muted); transition: all 0.15s; text-align: left; }
-        .sidebar-btn:hover { background: rgba(99,102,241,0.06); color: var(--text-secondary); }
-        .sidebar-btn.active { background: rgba(99,102,241,0.12); color: #818cf8; }
-        .sidebar-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+        .sidebar-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 14px; border-radius: 10px; border: none; font-size: 12px; font-weight: 600; cursor: pointer; background: transparent; color: var(--sidebar-text); transition: all 0.15s; text-align: left; }
+        .sidebar-btn:hover { background: rgba(26,184,196,0.05); color: var(--text-secondary); }
+        .sidebar-btn.active { background: rgba(26,184,196,0.07); color: #2dd4df; }
+        .sidebar-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; background: var(--sidebar-item); color: var(--sidebar-text); }
         @media(max-width:768px){
           .sidebar-desktop{transform:translateX(-100%)!important}
           .sidebar-desktop.open{transform:translateX(0)!important}
@@ -89,20 +89,20 @@ export default function AdminBranchesPage() {
           .mobile-header{display:flex!important}
           .sidebar-overlay{display:block!important}
         }
-        .form-input { width: 100%; padding: 10px 14px; background: rgba(22,22,31,0.8); border: 1px solid var(--border); border-radius: 10px; color: var(--text-primary); font-size: 13px; outline: none; }
-        .form-input:focus { border-color: #6366f1; }
+        .form-input { width: 100%; padding: 10px 14px; background: #ffffff; border: 1px solid var(--border); border-radius: 10px; color:#1e2a3a; font-size: 13px; outline: none; }
+        .form-input:focus { border-color: #1ab8c4; box-shadow: 0 0 0 3px rgba(26,184,196,0.12); background: #ffffff; }
       `}</style>
 
       <AppSidebar user={user} />
 
       {/* MAIN */}
-      <main className="main-content" style={{ marginLeft: 200, padding: "24px 28px", minHeight: "100vh" }}>
+      <main className="main-content" style={{ marginLeft: 210, padding: "24px 28px", minHeight: "100vh" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
           <div>
             <h1 style={{ fontSize: 22, fontWeight: 800 }}>🏢 Gestión de Sucursales</h1>
             <p style={{ color: "var(--text-muted)", fontSize: 13, marginTop: 4 }}>{branches.length} sucursales activas</p>
           </div>
-          <button onClick={() => { resetForm(); setShowForm(true); }} style={{ padding: "10px 20px", background: "linear-gradient(135deg, #6366f1, #7c3aed)", border: "none", borderRadius: 12, color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer", boxShadow: "0 4px 16px rgba(99,102,241,0.3)" }}>＋ Nueva Sucursal</button>
+          <button onClick={() => { resetForm(); setShowForm(true); }} style={{ padding: "10px 20px", background: "linear-gradient(135deg, #1ab8c4, #149aa5)", border: "none", borderRadius: 12, color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer", boxShadow: "0 4px 16px rgba(26,184,196,0.14)" }}>＋ Nueva Sucursal</button>
         </div>
 
         {loading ? (
@@ -110,23 +110,23 @@ export default function AdminBranchesPage() {
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: 16 }}>
             {branches.map(b => (
-              <div key={b.id} style={{ background: "var(--bg-card)", borderRadius: 18, border: "1px solid var(--border)", padding: "22px 20px", position: "relative" }}>
+              <div key={b.id} style={{ background: "var(--bg-card)", borderRadius: 14, border: "1.5px solid #cbd5e8", padding: "22px 20px", position: "relative" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
                   <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-                    <div style={{ width: 46, height: 46, borderRadius: 14, background: "linear-gradient(135deg, rgba(99,102,241,0.15), rgba(99,102,241,0.05))", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>🏢</div>
+                    <div style={{ width: 46, height: 46, borderRadius: 14, background: "linear-gradient(135deg, rgba(26,184,196,0.08), rgba(26,184,196,0.04))", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>🏢</div>
                     <div>
                       <div style={{ fontWeight: 700, fontSize: 16 }}>{b.name}</div>
                       {b.address && <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 2 }}>📍 {b.address}</div>}
                     </div>
                   </div>
                   <div style={{ display: "flex", gap: 6 }}>
-                    <button onClick={() => startEdit(b)} style={{ width: 32, height: 32, borderRadius: 8, background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.15)", color: "#818cf8", fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>✏️</button>
+                    <button onClick={() => startEdit(b)} style={{ width: 32, height: 32, borderRadius: 8, background: "rgba(26,184,196,0.05)", border: "1px solid rgba(26,184,196,0.08)", color: "#2dd4df", fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>✏️</button>
                     <button onClick={() => handleDelete(b)} style={{ width: 32, height: 32, borderRadius: 8, background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.15)", color: "#ef4444", fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>🗑️</button>
                   </div>
                 </div>
                 <div style={{ display: "flex", gap: 12 }}>
                   <div style={{ flex: 1, padding: "10px 12px", background: "var(--bg-tertiary)", borderRadius: 10, textAlign: "center" }}>
-                    <div style={{ fontSize: 20, fontWeight: 800, color: "#6366f1" }}>{b._count.users}</div>
+                    <div style={{ fontSize: 20, fontWeight: 800, color: "#1ab8c4" }}>{b._count.users}</div>
                     <div style={{ fontSize: 10, color: "var(--text-muted)", fontWeight: 600 }}>Usuarios</div>
                   </div>
                   <div style={{ flex: 1, padding: "10px 12px", background: "var(--bg-tertiary)", borderRadius: 10, textAlign: "center" }}>
@@ -149,7 +149,7 @@ export default function AdminBranchesPage() {
       {/* Form Modal */}
       {showForm && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }} onClick={() => { setShowForm(false); resetForm(); }}>
-          <div onClick={e => e.stopPropagation()} style={{ maxWidth: 440, width: "100%", background: "var(--bg-card)", borderRadius: 20, border: "1px solid var(--border)", padding: "28px 24px" }}>
+          <div onClick={e => e.stopPropagation()} style={{ maxWidth: 440, width: "100%", background: "var(--bg-card)", borderRadius: 12, border: "1.5px solid #cbd5e8", padding: "28px 24px" }}>
             <h3 style={{ fontSize: 18, fontWeight: 800, marginBottom: 20 }}>{editId ? "✏️ Editar Sucursal" : "➕ Nueva Sucursal"}</h3>
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               <div>
@@ -166,8 +166,8 @@ export default function AdminBranchesPage() {
               </div>
             </div>
             <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
-              <button onClick={() => { setShowForm(false); resetForm(); }} style={{ flex: 1, padding: "12px", background: "var(--bg-tertiary)", border: "1px solid var(--border)", borderRadius: 12, color: "var(--text-muted)", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>Cancelar</button>
-              <button onClick={handleSubmit} style={{ flex: 1, padding: "12px", background: "linear-gradient(135deg, #6366f1, #7c3aed)", border: "none", borderRadius: 12, color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>{editId ? "Guardar" : "Crear"}</button>
+              <button onClick={() => { setShowForm(false); resetForm(); }} style={{ flex: 1, padding: "12px", background: "#f5f7fc", border: "1.5px solid #cbd5e8", borderRadius: 12, color: "var(--text-secondary)", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>Cancelar</button>
+              <button onClick={handleSubmit} style={{ flex: 1, padding: "12px", background: "linear-gradient(135deg, #1ab8c4, #149aa5)", border: "none", borderRadius: 12, color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>{editId ? "Guardar" : "Crear"}</button>
             </div>
           </div>
         </div>

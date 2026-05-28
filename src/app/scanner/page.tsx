@@ -57,10 +57,10 @@ export default function ScannerPage() {
   const scannerContainerId = "qr-reader";
 
   useEffect(() => {
-    fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings({ companyName: d.companyName, logo: d.logo }); }).catch(() => {});
+    fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings({ companyName: d.companyName, logo: d.logo }).catch(() => {}); }).catch(() => {});
     const userData = sessionStorage.getItem("user"); const token = sessionStorage.getItem("token");
     if (!userData || !token) { router.push("/"); return; }
-    const _u = JSON.parse(userData); setUser(_u);
+    const _u = (() => { try { return JSON.parse(userData); } catch { return null; } })(); setUser(_u);
     // Load branches for superadmin
     if (_u.role === "superadmin") {
       apiFetch("/api/branches").then(r => r.json()).then(b => { if (Array.isArray(b)) { setBranches(b); const ab = sessionStorage.getItem("activeBranchId"); if (ab) setActiveBranch(ab); else if (b.length > 0) { setActiveBranch(b[0].id); setActiveBranchId(b[0].id); } } }).catch(() => {});
@@ -232,17 +232,17 @@ export default function ScannerPage() {
   if (!user) return <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg-primary)", color: "var(--text-muted)", fontSize: 14 }}>Cargando...</div>;
 
   const DOC_TYPES = [
-    { prefix: "OT-#", label: "Orden de Trabajo", desc: "Abre la página de seguimiento del equipo", color: "#6366f1", bg: "rgba(99,102,241,0.1)", borderColor: "rgba(99,102,241,0.1)", icon: "📋" },
+    { prefix: "OT-#", label: "Orden de Trabajo", desc: "Abre la página de seguimiento del equipo", color: "#1ab8c4", bg: "rgba(26,184,196,0.06)", borderColor: "rgba(26,184,196,0.06)", icon: "📋" },
     { prefix: "CE-#", label: "Comprobante de Entrega", desc: "Abre el comprobante de entrega al cliente", color: "#10b981", bg: "rgba(16,185,129,0.1)", borderColor: "rgba(16,185,129,0.1)", icon: "📄" },
     { prefix: "COT-#", label: "Cotización", desc: "Abre el detalle de la cotización", color: "#f59e0b", bg: "rgba(245,158,11,0.1)", borderColor: "rgba(245,158,11,0.1)", icon: "🧾" },
     { prefix: "NV-#", label: "Nota de Venta", desc: "Abre el detalle de la nota de venta", color: "#a855f7", bg: "rgba(168,85,247,0.1)", borderColor: "rgba(168,85,247,0.1)", icon: "💰" },
     { prefix: "CL-#", label: "Certificado de Licencia", desc: "Abre el certificado de autenticidad de licencias", color: "#ec4899", bg: "rgba(236,72,153,0.1)", borderColor: "rgba(236,72,153,0.1)", icon: "🏅" },
-    { prefix: "EQ-#", label: "Equipo en Venta", desc: "Abre la ficha técnica del equipo para imprimir", color: "#06b6d4", bg: "rgba(6,182,212,0.1)", borderColor: "rgba(6,182,212,0.1)", icon: "💻" },
+    { prefix: "EQ-#", label: "Equipo en Venta", desc: "Abre la ficha técnica del equipo para imprimir", color: "#0891b2", bg: "rgba(6,182,212,0.1)", borderColor: "rgba(6,182,212,0.1)", icon: "💻" },
     { prefix: "CN-#", label: "Consola", desc: "Abre la ficha técnica de la consola para imprimir", color: "#f97316", bg: "rgba(249,115,22,0.1)", borderColor: "rgba(249,115,22,0.1)", icon: "🕹️" },
   ];
 
   return (
-    <div className="main-content" style={{ minHeight: "100vh", background: "var(--bg-primary)", paddingLeft: 200, paddingTop: 0 }}>
+    <div className="main-content" style={{ minHeight: "100vh", background: "var(--bg-primary)", paddingLeft: 210, paddingTop: 0 }}>
       <style>{`
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeScale { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
@@ -251,10 +251,10 @@ export default function ScannerPage() {
         #${scannerContainerId} video { width: 100% !important; height: 100% !important; object-fit: cover !important; border-radius: 12px; }
         #${scannerContainerId} img[alt="Info icon"] { display: none !important; }
         #${scannerContainerId} { position: relative; overflow: hidden; border-radius: 12px; }
-        .sidebar-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 14px; border-radius: 10px; border: none; font-size: 12px; font-weight: 600; cursor: pointer; background: transparent; color: var(--text-muted); transition: all 0.15s; text-align: left; }
-        .sidebar-btn:hover { background: rgba(99,102,241,0.06); color: var(--text-secondary); }
-        .sidebar-btn.active { background: rgba(99,102,241,0.12); color: #818cf8; }
-        .sidebar-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+        .sidebar-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 14px; border-radius: 10px; border: none; font-size: 12px; font-weight: 600; cursor: pointer; background: transparent; color: var(--sidebar-text); transition: all 0.15s; text-align: left; }
+        .sidebar-btn:hover { background: rgba(26,184,196,0.05); color: var(--text-secondary); }
+        .sidebar-btn.active { background: rgba(26,184,196,0.07); color: #2dd4df; }
+        .sidebar-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; background: var(--sidebar-item); color: var(--sidebar-text); }
       
         @media(max-width:1024px){
           .sidebar-desktop{transform:translateX(-100%)!important}
@@ -284,30 +284,30 @@ export default function ScannerPage() {
 
         <div className="form-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
           {/* ═══ CÁMARA ═══ */}
-          <div style={{ padding: 28, background: "var(--bg-card)", borderRadius: 20, border: "1px solid var(--border)", animation: "fadeIn 0.4s ease-out" }}>
+          <div style={{ padding: 28, background: "var(--bg-card)", borderRadius: 12, border: "1.5px solid #cbd5e8", animation: "fadeIn 0.4s ease-out" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 22 }}>
-              <div style={{ width: 32, height: 32, borderRadius: 8, background: "rgba(99,102,241,0.1)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15 }}>📷</div>
+              <div style={{ width: 32, height: 32, borderRadius: 8, background: "rgba(26,184,196,0.06)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15 }}>📷</div>
               <h3 style={{ fontSize: 16, fontWeight: 700 }}>Cámara</h3>
               {scanCount > 0 && <span style={{ fontSize: 9, padding: "2px 8px", borderRadius: 8, background: "rgba(16,185,129,0.1)", color: "#10b981", fontWeight: 700 }}>{scanCount} escaneos</span>}
             </div>
-            <div style={{ width: "100%", aspectRatio: "1", maxWidth: 280, margin: "0 auto 22px", borderRadius: 16, background: "#000", border: "2px solid var(--border)", position: "relative", overflow: "hidden" }}>
+            <div style={{ width: "100%", aspectRatio: "1", maxWidth: 280, margin: "0 auto 22px", borderRadius: 12, background: "#000", border: "2px solid var(--border)", position: "relative", overflow: "hidden" }}>
               <div id={scannerContainerId} style={{ width: "100%", height: "100%", position: "absolute", top: 0, left: 0, display: scanning ? "block" : "none" }} />
-              {!scanning && (<div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, background: "var(--bg-primary)" }}>{[{ top: 16, left: 16 }, { top: 16, right: 16 }, { bottom: 16, left: 16 }, { bottom: 16, right: 16 }].map((pos, i) => (<div key={i} style={{ position: "absolute", width: 28, height: 28, ...pos, borderTop: "top" in pos ? "3px solid #6366f1" : "none", borderBottom: "bottom" in pos ? "3px solid #6366f1" : "none", borderLeft: "left" in pos ? "3px solid #6366f1" : "none", borderRight: "right" in pos ? "3px solid #6366f1" : "none", borderRadius: 4, opacity: 0.6 } as React.CSSProperties} />))}<div style={{ fontSize: 36, opacity: 0.3 }}>📷</div><p style={{ fontSize: 12, color: "var(--text-muted)" }}>Listo para escanear</p></div>)}
-              {scanning && (<div style={{ position: "absolute", left: "10%", right: "10%", height: 3, borderRadius: 2, background: "linear-gradient(90deg, transparent, #6366f1, transparent)", boxShadow: "0 0 15px #6366f1", animation: "scanLine 2s ease-in-out infinite", top: 0, zIndex: 10 }} />)}
+              {!scanning && (<div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, background: "var(--bg-primary)" }}>{[{ top: 16, left: 16 }, { top: 16, right: 16 }, { bottom: 16, left: 16 }, { bottom: 16, right: 16 }].map((pos, i) => (<div key={i} style={{ position: "absolute", width: 28, height: 28, ...pos, borderTop: "top" in pos ? "3px solid #1ab8c4" : "none", borderBottom: "bottom" in pos ? "3px solid #1ab8c4" : "none", borderLeft: "left" in pos ? "3px solid #1ab8c4" : "none", borderRight: "right" in pos ? "3px solid #1ab8c4" : "none", borderRadius: 4, opacity: 0.6 } as React.CSSProperties} />))}<div style={{ fontSize: 36, opacity: 0.3 }}>📷</div><p style={{ fontSize: 12, color: "var(--text-muted)" }}>Listo para escanear</p></div>)}
+              {scanning && (<div style={{ position: "absolute", left: "10%", right: "10%", height: 3, borderRadius: 2, background: "linear-gradient(90deg, transparent, #1ab8c4, transparent)", boxShadow: "0 0 15px #1ab8c4", animation: "scanLine 2s ease-in-out infinite", top: 0, zIndex: 10 }} />)}
             </div>
-            {!scanning ? (<button onClick={startScanner} style={{ width: "100%", padding: 14, background: "linear-gradient(135deg, #6366f1, #7c3aed)", border: "none", borderRadius: 14, color: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer", boxShadow: "0 4px 16px rgba(99,102,241,0.3)" }}>📷 Iniciar Escáner</button>) : (<button onClick={stopScanner} style={{ width: "100%", padding: 14, background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 14, color: "#ef4444", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>⏹ Detener</button>)}
+            {!scanning ? (<button onClick={startScanner} style={{ width: "100%", padding: 14, background: "linear-gradient(135deg, #1ab8c4, #149aa5)", border: "none", borderRadius: 14, color: "#fff", fontWeight: 700, fontSize: 14, cursor: "pointer", boxShadow: "0 4px 16px rgba(26,184,196,0.14)" }}>📷 Iniciar Escáner</button>) : (<button onClick={stopScanner} style={{ width: "100%", padding: 14, background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 14, color: "#ef4444", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>⏹ Detener</button>)}
             <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 14, lineHeight: 1.6 }}>Apunta la cámara al código QR. Se detecta automáticamente el tipo de documento.</p>
           </div>
 
           {/* ═══ BÚSQUEDA MANUAL ═══ */}
-          <div style={{ padding: 28, background: "var(--bg-card)", borderRadius: 20, border: "1px solid var(--border)", animation: "fadeIn 0.4s ease-out 0.1s both" }}>
+          <div style={{ padding: 28, background: "var(--bg-card)", borderRadius: 12, border: "1.5px solid #cbd5e8", animation: "fadeIn 0.4s ease-out 0.1s both" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 22 }}>
               <div style={{ width: 32, height: 32, borderRadius: 8, background: "rgba(16,185,129,0.1)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15 }}>🔍</div>
               <h3 style={{ fontSize: 16, fontWeight: 700 }}>Búsqueda Manual</h3>
             </div>
             <p style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 18, lineHeight: 1.6 }}>Ingresa el código según el documento que necesitas consultar.</p>
             <form onSubmit={handleManualSearch} style={{ display: "flex", gap: 8, marginBottom: 20 }}>
-              <div style={{ flex: 1, display: "flex", alignItems: "center", background: "var(--bg-tertiary)", borderRadius: 12, border: "1px solid var(--border)", padding: "0 14px" }}>
+              <div style={{ flex: 1, display: "flex", alignItems: "center", background: "var(--bg-tertiary)", borderRadius: 12, border: "1.5px solid #cbd5e8", padding: "0 14px" }}>
                 <span style={{ color: "var(--text-muted)", fontSize: 13, marginRight: 8 }}>🔍</span>
                 <input value={manualCode} onChange={(e) => setManualCode(e.target.value)} placeholder="OT-1, CE-1, COT-1, NV-1, CL-1, EQ-1..." style={{ flex: 1, border: "none", background: "none", padding: "13px 0", color: "var(--text-primary)", fontSize: 14, outline: "none", fontFamily: "monospace", fontWeight: 600 }} />
               </div>
@@ -318,21 +318,21 @@ export default function ScannerPage() {
 
             {/* Branch picker for superadmin when code exists in multiple branches */}
             {branchPicker && (
-              <div style={{ padding: 20, background: "rgba(99,102,241,0.06)", borderRadius: 16, border: "1px solid rgba(99,102,241,0.15)", marginBottom: 16, animation: "fadeScale 0.3s ease-out" }}>
+              <div style={{ padding: 20, background: "rgba(26,184,196,0.05)", borderRadius: 12, border: "1px solid rgba(26,184,196,0.08)", marginBottom: 16, animation: "fadeScale 0.3s ease-out" }}>
                 <div style={{ textAlign: "center", marginBottom: 14 }}>
-                  <span style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 800, color: "#818cf8", background: "rgba(99,102,241,0.1)", padding: "4px 14px", borderRadius: 8 }}>{branchPicker.code}</span>
+                  <span style={{ fontFamily: "monospace", fontSize: 16, fontWeight: 800, color: "#2dd4df", background: "rgba(26,184,196,0.06)", padding: "4px 14px", borderRadius: 8 }}>{branchPicker.code}</span>
                   <p style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: 8 }}>Este código existe en varias sucursales. ¿Cuál deseas ver?</p>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                   {branchPicker.items.map((item: any, i: number) => (
-                    <button key={item.id || i} onClick={() => handleBranchPick(item)} style={{ padding: "12px 16px", background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 12, cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", transition: "all 0.15s" }}
-                      onMouseOver={(e) => { (e.currentTarget as any).style.borderColor = "#818cf8"; }}
+                    <button key={item.id || i} onClick={() => handleBranchPick(item)} style={{ padding: "12px 16px", background: "var(--bg-card)", border: "1.5px solid #cbd5e8", borderRadius: 12, cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", transition: "all 0.15s" }}
+                      onMouseOver={(e) => { (e.currentTarget as any).style.borderColor = "#2dd4df"; }}
                       onMouseOut={(e) => { (e.currentTarget as any).style.borderColor = "var(--border)"; }}>
                       <div>
                         <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)" }}>🏢 {item.branch?.name || "Sucursal"}</div>
                         <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>{item.clientName || item.device || item.code || ""}</div>
                       </div>
-                      <span style={{ fontSize: 12, color: "#818cf8", fontWeight: 600 }}>Abrir →</span>
+                      <span style={{ fontSize: 12, color: "#2dd4df", fontWeight: 600 }}>Abrir →</span>
                     </button>
                   ))}
                 </div>
@@ -340,14 +340,14 @@ export default function ScannerPage() {
               </div>
             )}
 
-            {loading && (<div style={{ padding: 20, textAlign: "center" }}><div style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: "#6366f1", animation: "pulse 0.8s ease-in-out infinite" }} /><p style={{ color: "var(--text-muted)", fontSize: 12, marginTop: 8 }}>Verificando documento...</p></div>)}
+            {loading && (<div style={{ padding: 20, textAlign: "center" }}><div style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: "#1ab8c4", animation: "pulse 0.8s ease-in-out infinite" }} /><p style={{ color: "var(--text-muted)", fontSize: 12, marginTop: 8 }}>Verificando documento...</p></div>)}
 
             {!error && !loading && (
               <div>
-                <div style={{ padding: "16px 18px", background: "var(--bg-tertiary)", borderRadius: 14, border: "1px solid var(--border)", marginBottom: 16 }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: "#818cf8", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 14 }}>📋 Códigos de Documentos</div>
+                <div style={{ padding: "16px 18px", background: "var(--bg-tertiary)", borderRadius: 14, border: "1.5px solid #cbd5e8", marginBottom: 16 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: "#2dd4df", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 14 }}>📋 Códigos de Documentos</div>
                   <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                    {DOC_TYPES.map((doc) => (
+                    {(DOC_TYPES || []).map((doc) => (
                       <div key={doc.prefix} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", background: "var(--bg-card)", borderRadius: 10, border: `1px solid ${doc.borderColor}` }}>
                         <div style={{ width: 36, height: 36, borderRadius: 8, background: doc.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15, flexShrink: 0 }}>{doc.icon}</div>
                         <div style={{ flex: 1 }}>
@@ -361,11 +361,11 @@ export default function ScannerPage() {
                     ))}
                   </div>
                 </div>
-                <div style={{ padding: "12px 16px", background: "rgba(99,102,241,0.04)", borderRadius: 12, border: "1px solid rgba(99,102,241,0.08)" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}><span style={{ fontSize: 13 }}>💡</span><span style={{ fontSize: 11, fontWeight: 700, color: "#818cf8" }}>Ejemplos de códigos</span></div>
+                <div style={{ padding: "12px 16px", background: "rgba(26,184,196,0.04)", borderRadius: 12, border: "1px solid rgba(26,184,196,0.05)" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}><span style={{ fontSize: 13 }}>💡</span><span style={{ fontSize: 11, fontWeight: 700, color: "#2dd4df" }}>Ejemplos de códigos</span></div>
                   <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                     {[
-                      { code: "OT-1", label: "Seguimiento", color: "#6366f1" },
+                      { code: "OT-1", label: "Seguimiento", color: "#1ab8c4" },
                       { code: "CE-1", label: "Entrega", color: "#10b981" },
                       { code: "CL-1", label: "Licencia", color: "#ec4899" },
                     ].map((ex) => (

@@ -23,7 +23,7 @@ function getDisplayName(cn: ConsoleItem): string {
 
 const CONDITIONS: Record<string, { label: string; color: string; icon: string }> = {
   disponible: { label: "DISPONIBLE", color: "#10b981", icon: "✅" },
-  vendida: { label: "VENDIDA", color: "#6366f1", icon: "💰" },
+  vendida: { label: "VENDIDA", color: "#1ab8c4", icon: "💰" },
   reservada: { label: "RESERVADA", color: "#f59e0b", icon: "🔖" },
 };
 
@@ -44,7 +44,7 @@ export default function ConsoleFichaPrintPage() {
     setBaseUrl(window.location.origin);
     const m = new URLSearchParams(window.location.search).get("mode");
     if (m === "sticker") setMode("sticker");
-    fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings(d); }).catch(() => {});
+    fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings(d).catch(() => {}); }).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -76,13 +76,13 @@ export default function ConsoleFichaPrintPage() {
   const cnColor = "#f97316";
 
   const specs: { icon: string; label: string; value: string; color: string }[] = [];
-  if (cn.brand) specs.push({ icon: "🏢", label: "Marca", value: cn.brand, color: "#6366f1" });
-  if (cn.model) specs.push({ icon: "📦", label: "Modelo", value: cn.model, color: "#6366f1" });
+  if (cn.brand) specs.push({ icon: "🏢", label: "Marca", value: cn.brand, color: "#1ab8c4" });
+  if (cn.model) specs.push({ icon: "📦", label: "Modelo", value: cn.model, color: "#1ab8c4" });
   if (cn.category) specs.push({ icon: "🏷️", label: "Categoría", value: cn.category, color: "#f97316" });
   if (cn.state) specs.push({ icon: cn.state === "Nueva" ? "✨" : "🔄", label: "Estado", value: cn.state, color: cn.state === "Nueva" ? "#10b981" : "#f59e0b" });
-  if (cn.color) specs.push({ icon: "🎨", label: "Color", value: cn.color, color: "#a78bfa" });
+  if (cn.color) specs.push({ icon: "🎨", label: "Color", value: cn.color, color: "#7c3aed" });
   if (cn.storage) specs.push({ icon: "💾", label: "Almacenamiento", value: cn.storage, color: "#f59e0b" });
-  if (cn.generation) specs.push({ icon: "🎯", label: "Generación", value: cn.generation, color: "#06b6d4" });
+  if (cn.generation) specs.push({ icon: "🎯", label: "Generación", value: cn.generation, color: "#0891b2" });
 
   return (
     <div style={{ background: "#fff", minHeight: "100vh", fontFamily: "'Segoe UI', Arial, sans-serif", color: "#111" }}>
@@ -98,26 +98,26 @@ export default function ConsoleFichaPrintPage() {
         }
       `}</style>
 
-      <div className="no-print" style={{ position: "sticky", top: 0, padding: "12px 24px", background: "#111118", display: "flex", justifyContent: "space-between", alignItems: "center", zIndex: 100, flexWrap: "wrap", gap: 8 }}>
+      <div className="no-print" style={{ position: "sticky", top: 0, padding: "12px 24px", background: "#ffffff", display: "flex", justifyContent: "space-between", alignItems: "center", zIndex: 100, flexWrap: "wrap", gap: 8 }}>
         <span style={{ color: "#eee", fontSize: 14, fontWeight: 600 }}>
           {mode === "sticker" ? "🏷️ Sticker QR Consola" : "🕹️ Ficha Técnica Consola"} · {shortCode}
         </span>
         <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
-          <div style={{ display: "flex", gap: 0, background: "#1e1e2e", border: "1px solid #333", borderRadius: 6, overflow: "hidden" }}>
+          <div style={{ display: "flex", gap: 0, background: "#e8ebf2", border: "1px solid #333", borderRadius: 6, overflow: "hidden" }}>
             <button onClick={() => { setMode("full"); const u = new URL(window.location.href); u.searchParams.delete("mode"); window.history.replaceState({}, "", u.toString()); }} style={{ padding: "7px 12px", background: mode === "full" ? cnColor : "transparent", border: "none", color: mode === "full" ? "#fff" : "#888", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>📄 Ficha completa</button>
             <button onClick={() => { setMode("sticker"); const u = new URL(window.location.href); u.searchParams.set("mode", "sticker"); window.history.replaceState({}, "", u.toString()); }} style={{ padding: "7px 12px", background: mode === "sticker" ? cnColor : "transparent", border: "none", color: mode === "sticker" ? "#fff" : "#888", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>🏷️ Solo QR</button>
           </div>
           {mode === "sticker" && (
-            <div style={{ display: "flex", gap: 0, background: "#1e1e2e", border: "1px solid #333", borderRadius: 6, overflow: "hidden" }}>
+            <div style={{ display: "flex", gap: 0, background: "#e8ebf2", border: "1px solid #333", borderRadius: 6, overflow: "hidden" }}>
               <button onClick={() => setStickerSize("small")} style={{ padding: "7px 10px", background: stickerSize === "small" ? cnColor : "transparent", border: "none", color: stickerSize === "small" ? "#fff" : "#888", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>S</button>
               <button onClick={() => setStickerSize("medium")} style={{ padding: "7px 10px", background: stickerSize === "medium" ? cnColor : "transparent", border: "none", color: stickerSize === "medium" ? "#fff" : "#888", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>M</button>
               <button onClick={() => setStickerSize("large")} style={{ padding: "7px 10px", background: stickerSize === "large" ? cnColor : "transparent", border: "none", color: stickerSize === "large" ? "#fff" : "#888", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>L</button>
             </div>
           )}
-          <button onClick={() => { navigator.clipboard.writeText(portalUrl); }} style={{ padding: "7px 14px", background: "#1e1e2e", border: "1px solid #333", borderRadius: 6, color: "#eee", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>🔗 Copiar link</button>
-          <button onClick={() => window.open(portalUrl, "_blank")} style={{ padding: "7px 14px", background: "#1e1e2e", border: "1px solid #333", borderRadius: 6, color: "#eee", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>👁️ Ver en portal</button>
+          <button onClick={() => { navigator.clipboard.writeText(portalUrl); }} style={{ padding: "7px 14px", background: "#e8ebf2", border: "1px solid #333", borderRadius: 6, color: "#eee", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>🔗 Copiar link</button>
+          <button onClick={() => window.open(portalUrl, "_blank")} style={{ padding: "7px 14px", background: "#e8ebf2", border: "1px solid #333", borderRadius: 6, color: "#eee", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>👁️ Ver en portal</button>
           <button onClick={() => window.print()} style={{ padding: "7px 18px", background: cnColor, border: "none", borderRadius: 6, color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>🖨️ Imprimir</button>
-          <button onClick={() => window.close()} style={{ padding: "7px 14px", background: "#1e1e2e", border: "1px solid #333", borderRadius: 6, color: "#888", fontSize: 12, cursor: "pointer" }}>✕</button>
+          <button onClick={() => window.close()} style={{ padding: "7px 14px", background: "#e8ebf2", border: "1px solid #333", borderRadius: 6, color: "#888", fontSize: 12, cursor: "pointer" }}>✕</button>
         </div>
       </div>
 
@@ -151,7 +151,7 @@ export default function ConsoleFichaPrintPage() {
                 {qrImgBig ? <img src={qrImgBig} alt="QR" width={sz.qr} height={sz.qr} style={{ display: "block" }} /> : <div style={{ width: sz.qr, height: sz.qr, background: "#f3f4f6" }} />}
               </div>
               <div style={{ fontSize: sz.code, fontWeight: 800, color: cnColor, fontFamily: "monospace", marginTop: 6, letterSpacing: "0.5px" }}>{shortCode}</div>
-              {cn.price > 0 && <div style={{ fontSize: sz.title, fontWeight: 800, color: "#10b981", marginTop: 4 }}>Bs. {cn.price.toFixed(2)}</div>}
+              {cn.price > 0 && <div style={{ fontSize: sz.title, fontWeight: 800, color: "#10b981", marginTop: 4 }}>Bs. {Math.round(cn.price || 0).toLocaleString()}</div>}
               <div style={{ fontSize: sz.sub, color: "#666", marginTop: 4, fontWeight: 600 }}>📱 Escanea para ver detalles</div>
             </div>
           </div>
@@ -203,13 +203,13 @@ export default function ConsoleFichaPrintPage() {
                   {cn.category && <span style={{ padding: "4px 10px", borderRadius: 6, fontSize: 10, fontWeight: 700, background: `${cnColor}22`, color: accent, border: `1px solid ${cnColor}55`, textTransform: "uppercase", letterSpacing: "0.3px" }}>🏷️ {cn.category}</span>}
                   {cn.state && <span style={{ padding: "4px 10px", borderRadius: 6, fontSize: 10, fontWeight: 700, background: cn.state === "Nueva" ? "#dcfce7" : "#fef3c7", color: cn.state === "Nueva" ? "#15803d" : "#a16207", border: `1px solid ${cn.state === "Nueva" ? "#86efac" : "#fcd34d"}`, textTransform: "uppercase", letterSpacing: "0.3px" }}>{cn.state === "Nueva" ? "✨" : "🔄"} {cn.state}</span>}
                   <span style={{ padding: "4px 10px", borderRadius: 6, fontSize: 10, fontWeight: 700, background: `${cond.color}22`, color: cond.color, border: `1px solid ${cond.color}55`, textTransform: "uppercase", letterSpacing: "0.3px" }}>{cond.icon} {cond.label}</span>
-                  {cn.branch && <span style={{ padding: "4px 10px", borderRadius: 6, fontSize: 10, fontWeight: 700, background: "#eef2ff", color: "#4338ca", border: "1px solid #c7d2fe", textTransform: "uppercase", letterSpacing: "0.3px" }}>🏢 {cn.branch.name}</span>}
+                  {cn.branch && <span style={{ padding: "4px 10px", borderRadius: 6, fontSize: 10, fontWeight: 700, background: "#eef2ff", color: "#4338ca", border: "1px solid #fde68a", textTransform: "uppercase", letterSpacing: "0.3px" }}>🏢 {cn.branch.name}</span>}
                 </div>
 
                 <div style={{ padding: "14px 18px", background: "linear-gradient(135deg, #f0fdf4, #ecfdf5)", borderRadius: 10, border: "1px solid #bbf7d0", display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 4 }}>
                   <div>
                     <div style={{ fontSize: 10, fontWeight: 700, color: "#15803d", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 2 }}>Precio de venta</div>
-                    <div style={{ fontSize: 30, fontWeight: 900, color: "#15803d", lineHeight: 1 }}>Bs. {cn.price.toFixed(2)}</div>
+                    <div style={{ fontSize: 30, fontWeight: 900, color: "#15803d", lineHeight: 1 }}>Bs. {Math.round(cn.price || 0).toLocaleString()}</div>
                   </div>
                   <div style={{ fontSize: 34 }}>💰</div>
                 </div>

@@ -60,7 +60,7 @@ export default function QrBatchPrintPage() {
           <strong>{data.items.length}</strong> stickers · tamaño {data.size} · {pages.length} página{pages.length !== 1 ? "s" : ""}
         </span>
         <div style={{ display: "flex", gap: 8 }}>
-          <button onClick={() => window.print()} style={{ padding: "8px 18px", background: "#6366f1", color: "#fff", border: "none", borderRadius: 8, fontWeight: 700, cursor: "pointer" }}>🖨️ Imprimir</button>
+          <button onClick={() => window.print()} style={{ padding: "8px 18px", background: "#1ab8c4", color: "#fff", border: "none", borderRadius: 8, fontWeight: 700, cursor: "pointer" }}>🖨️ Imprimir</button>
           <button onClick={() => window.close()} style={{ padding: "8px 16px", background: "#fff", color: "#334155", border: "1px solid #cbd5e1", borderRadius: 8, fontWeight: 600, cursor: "pointer" }}>Cerrar</button>
         </div>
       </div>
@@ -93,7 +93,7 @@ function QrSticker({ item, config, showLogo, companyName, logo }: any) {
       background: "#fff",
     }}>
       {showLogo && (
-        <div style={{ display: "flex", alignItems: "center", gap: 4, fontSize: config.fontSize - 1, fontWeight: 700, color: "#6366f1", marginBottom: 2 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 4, fontSize: config.fontSize - 1, fontWeight: 700, color: "#1ab8c4", marginBottom: 2 }}>
           {logo ? <img src={logo} style={{ width: 12, height: 12, borderRadius: 3 }} /> : <span>🔧</span>}
           <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 120 }}>{companyName}</span>
         </div>
@@ -102,7 +102,7 @@ function QrSticker({ item, config, showLogo, companyName, logo }: any) {
       <div style={{ fontSize: config.fontSize, fontWeight: 700, textAlign: "center", lineHeight: 1.2, maxWidth: "100%", wordBreak: "break-word" }}>
         {item.name}
       </div>
-      {item.code && <div style={{ fontSize: config.fontSize - 2, fontFamily: "monospace", color: "#6366f1", fontWeight: 700 }}>{item.code}</div>}
+      {item.code && <div style={{ fontSize: config.fontSize - 2, fontFamily: "monospace", color: "#1ab8c4", fontWeight: 700 }}>{item.code}</div>}
       {item.price !== undefined && item.price > 0 && (
         <div style={{ fontSize: config.fontSize, fontWeight: 800, color: "#10b981" }}>Bs. {item.price}</div>
       )}

@@ -50,10 +50,10 @@ export default function CertificatesPage() {
   const handleSerialChange = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => setForm(f => ({ ...f, [field]: formatSerial(e.target.value) }));
 
   useEffect(() => {
-    fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings({ companyName: d.companyName || "RepairTrackQR", slogan: d.slogan || "Servicio Técnico", logo: d.logo || null, website: d.website || null, phone: d.phone || null, address: d.address || null }); }).catch(() => {});
+    fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings({ companyName: d.companyName || "RepairTrackQR", slogan: d.slogan || "Servicio Técnico", logo: d.logo || null, website: d.website || null, phone: d.phone || null, address: d.address || null }).catch(() => {}); }).catch(() => {});
     const token = sessionStorage.getItem("token"); const userData = sessionStorage.getItem("user");
     if (!token || !userData) { router.push("/"); return; }
-    const parsed = JSON.parse(userData);
+    const parsed = (() => { try { return JSON.parse(userData); } catch { return null; } })();
     setUser(parsed);
     setForm(f => ({ ...f, technician: parsed.name || "" }));
     if (parsed.role === "superadmin") {
@@ -137,20 +137,20 @@ export default function CertificatesPage() {
     : [{ label: "Panel Principal", path: "/dashboard", icon: "📋" },{ label: "Servicios", path: "/services", icon: "🛠️" },{ label: "Inventario", path: "/inventory", icon: "📦" },{ label: "Software", path: "/software", icon: "🎮" },{ label: "Escáner", path: "/scanner", icon: "📷" },{ label: "Cotizaciones", path: "/quotations", icon: "🧾" },{ label: "Extracto", path: "/extracto", icon: "📊" },{ label: "Certificados", path: "/certificates", icon: "🏅", active: true },
       ...(user?.role === "superadmin" ? [{ label: "Usuarios", path: "/admin/users", icon: "👥" },{ label: "Sucursales", path: "/admin/branches", icon: "🏢" },{ label: "Configuración", path: "/admin/settings", icon: "⚙️" }] : [])];
 
-  if (loading) return <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg-primary)", color: "#818cf8" }}>⏳ Cargando...</div>;
+  if (loading) return <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg-primary)", color: "#2dd4df" }}>⏳ Cargando...</div>;
 
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg-primary)", color: "var(--text-primary)", display: "flex" }}>
       <style>{`
         .sidebar-btn{display:flex;align-items:center;gap:10px;width:100%;padding:10px 14px;border-radius:10px;border:none;font-size:12px;font-weight:600;cursor:pointer;background:transparent;color:var(--text-muted);transition:all .15s;text-align:left}
-        .sidebar-btn:hover{background:rgba(99,102,241,0.06);color:var(--text-secondary)}
-        .sidebar-btn.active{background:rgba(99,102,241,0.12);color:#818cf8}
+        .sidebar-btn:hover{background:rgba(26,184,196,0.05);color:var(--text-secondary)}
+        .sidebar-btn.active{background:rgba(26,184,196,0.07);color:#2dd4df}
         .sidebar-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
-        .cert-input{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:10px;font-size:13px;background:var(--bg-tertiary);color:var(--text-primary);outline:none;transition:border-color .2s,box-shadow .2s}
-        .cert-input:focus{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,0.12)}
+        .cert-input{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:10px;font-size:13px;background:#ffffff;color:#1e2a3a;outline:none;transition:border-color .2s,box-shadow .2s}
+        .cert-input:focus{border-color:#1ab8c4;box-shadow:0 0 0 3px rgba(26,184,196,0.07)}
         .cert-input::placeholder{color:var(--text-muted)}
-        .cert-select{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:10px;font-size:13px;background:var(--bg-tertiary);color:var(--text-primary);outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23818cf8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
-        .cert-select:focus{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,0.12)}
+        .cert-select{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:10px;font-size:13px;background:#ffffff;color:var(--text-primary);outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23818cf8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+        .cert-select:focus{border-color:#1ab8c4;box-shadow:0 0 0 3px rgba(26,184,196,0.07)}
         .cert-select option{background:#1a1a2e;color:#e2e8f0}
         @media(max-width:1024px){.sidebar-desktop{transform:translateX(-100%)!important}.sidebar-desktop.open{transform:translateX(0)!important}.main-content{margin-left:0!important;padding-top:56px!important}.sidebar-overlay{display:block!important}}
       `}</style>
@@ -158,7 +158,7 @@ export default function CertificatesPage() {
       <AppSidebar user={user} />
 
       {/* Main content */}
-      <main className="main-content" style={{ marginLeft: 200, flex: 1, padding: "20px 24px", minHeight: "100vh" }}>
+      <main className="main-content" style={{ marginLeft: 210, flex: 1, padding: "20px 24px", minHeight: "100vh" }}>
         {!preview ? (
           <>
             <div style={{ maxWidth: 700, margin: "0 auto" }}>
@@ -168,8 +168,8 @@ export default function CertificatesPage() {
                 <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 2 }}>Genera certificados con código CL auto-incremental por sucursal · Guardados en base de datos</p>
               </div>
               <div style={{ display: "flex", gap: 8 }}>
-                <button onClick={() => { setTab("form"); setEditingId(null); setForm({ ...defaultForm, technician: user?.name || "" }); }} style={{ padding: "8px 18px", borderRadius: 10, border: tab === "form" ? "none" : "1px solid var(--border)", background: tab === "form" ? "linear-gradient(135deg,#6366f1,#7c3aed)" : "transparent", color: tab === "form" ? "#fff" : "var(--text-secondary)", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>📝 Nuevo</button>
-                <button onClick={() => setTab("history")} style={{ padding: "8px 18px", borderRadius: 10, border: tab === "history" ? "none" : "1px solid var(--border)", background: tab === "history" ? "linear-gradient(135deg,#6366f1,#7c3aed)" : "transparent", color: tab === "history" ? "#fff" : "var(--text-secondary)", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>📋 Historial ({history.length})</button>
+                <button onClick={() => { setTab("form"); setEditingId(null); setForm({ ...defaultForm, technician: user?.name || "" }); }} style={{ padding: "8px 18px", borderRadius: 10, border: tab === "form" ? "none" : "1px solid var(--border)", background: tab === "form" ? "linear-gradient(135deg,#1ab8c4,#149aa5)" : "transparent", color: tab === "form" ? "#fff" : "var(--text-secondary)", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>📝 Nuevo</button>
+                <button onClick={() => setTab("history")} style={{ padding: "8px 18px", borderRadius: 10, border: tab === "history" ? "none" : "1px solid var(--border)", background: tab === "history" ? "linear-gradient(135deg,#1ab8c4,#149aa5)" : "transparent", color: tab === "history" ? "#fff" : "var(--text-secondary)", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>📋 Historial ({history.length})</button>
               </div>
             </div>
             </div>
@@ -184,8 +184,8 @@ export default function CertificatesPage() {
                 )}
 
                 {/* Client Info */}
-                <div style={{ background: "var(--bg-secondary)", border: "1px solid var(--border)", borderRadius: 16, padding: 20, marginBottom: 16 }}>
-                  <h3 style={{ fontSize: 13, fontWeight: 700, color: "#818cf8", marginBottom: 14, display: "flex", alignItems: "center", gap: 8 }}>👤 Información del Cliente</h3>
+                <div style={{ background: "var(--bg-secondary)", border: "1.5px solid #cbd5e8", borderRadius: 12, padding: 20, marginBottom: 16 }}>
+                  <h3 style={{ fontSize: 13, fontWeight: 700, color: "#2dd4df", marginBottom: 14, display: "flex", alignItems: "center", gap: 8 }}>👤 Información del Cliente</h3>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                     <div><label style={{ display: "block", fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1.5, color: "var(--text-muted)", marginBottom: 5 }}>Nombre del Cliente *</label><input className="cert-input" value={form.clientName} onChange={set("clientName")} placeholder="Juan Pérez" /></div>
                     <div><label style={{ display: "block", fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1.5, color: "var(--text-muted)", marginBottom: 5 }}>Nombre del Equipo</label><input className="cert-input" value={form.computerName} onChange={set("computerName")} placeholder="PC-OFICINA-01" /></div>
@@ -195,36 +195,36 @@ export default function CertificatesPage() {
                 </div>
 
                 {/* Windows */}
-                <div style={{ background: "var(--bg-secondary)", border: "1px solid var(--border)", borderRadius: 16, padding: 20, marginBottom: 16 }}>
+                <div style={{ background: "var(--bg-secondary)", border: "1.5px solid #cbd5e8", borderRadius: 12, padding: 20, marginBottom: 16 }}>
                   <h3 style={{ fontSize: 13, fontWeight: 700, color: "#0078D4", marginBottom: 14, display: "flex", alignItems: "center", gap: 8 }}>
                     <svg width="18" height="18" viewBox="0 0 28 28" fill="none"><rect x="2" y="2" width="11" height="11" rx="1.5" fill="#0078D4"/><rect x="15" y="2" width="11" height="11" rx="1.5" fill="#0078D4"/><rect x="2" y="15" width="11" height="11" rx="1.5" fill="#0078D4"/><rect x="15" y="15" width="11" height="11" rx="1.5" fill="#0078D4"/></svg>
                     Licencia de Windows
                   </h3>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                    <div><label style={{ display: "block", fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1.5, color: "var(--text-muted)", marginBottom: 5 }}>Edición</label><select className="cert-select" value={form.windowsEdition} onChange={set("windowsEdition")}>{WINDOWS_EDITIONS.map(e => <option key={e} value={e}>{e}</option>)}</select></div>
+                    <div><label style={{ display: "block", fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1.5, color: "var(--text-muted)", marginBottom: 5 }}>Edición</label><select className="cert-select" value={form.windowsEdition} onChange={set("windowsEdition")}>{(WINDOWS_EDITIONS || []).map(e => <option key={e} value={e}>{e}</option>)}</select></div>
                     <div><label style={{ display: "block", fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1.5, color: "var(--text-muted)", marginBottom: 5 }}>Clave de Producto</label><input className="cert-input" style={{ fontFamily: "'Courier New', monospace", letterSpacing: 1.5 }} value={form.windowsSerial} onChange={handleSerialChange("windowsSerial")} placeholder="XXXXX-XXXXX-XXXXX-XXXXX-XXXXX" maxLength={29} /></div>
                   </div>
                 </div>
 
                 {/* Office */}
-                <div style={{ background: "var(--bg-secondary)", border: "1px solid var(--border)", borderRadius: 16, padding: 20, marginBottom: 16 }}>
+                <div style={{ background: "var(--bg-secondary)", border: "1.5px solid #cbd5e8", borderRadius: 12, padding: 20, marginBottom: 16 }}>
                   <h3 style={{ fontSize: 13, fontWeight: 700, color: "#D83B01", marginBottom: 14, display: "flex", alignItems: "center", gap: 8 }}>
                     <svg width="18" height="18" viewBox="0 0 28 28" fill="none"><rect x="3" y="3" width="22" height="22" rx="4" fill="#D83B01"/><text x="14" y="19" textAnchor="middle" fill="#fff" fontSize="14" fontWeight="700" fontFamily="serif">O</text></svg>
                     Licencia de Microsoft Office
                   </h3>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                    <div><label style={{ display: "block", fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1.5, color: "var(--text-muted)", marginBottom: 5 }}>Edición</label><select className="cert-select" value={form.officeEdition} onChange={set("officeEdition")}>{OFFICE_EDITIONS.map(e => <option key={e} value={e}>{e}</option>)}</select></div>
+                    <div><label style={{ display: "block", fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1.5, color: "var(--text-muted)", marginBottom: 5 }}>Edición</label><select className="cert-select" value={form.officeEdition} onChange={set("officeEdition")}>{(OFFICE_EDITIONS || []).map(e => <option key={e} value={e}>{e}</option>)}</select></div>
                     <div><label style={{ display: "block", fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1.5, color: "var(--text-muted)", marginBottom: 5 }}>Clave de Producto</label><input className="cert-input" style={{ fontFamily: "'Courier New', monospace", letterSpacing: 1.5 }} value={form.officeSerial} onChange={handleSerialChange("officeSerial")} placeholder="XXXXX-XXXXX-XXXXX-XXXXX-XXXXX" maxLength={29} /></div>
                   </div>
                 </div>
 
                 {/* Notes */}
-                <div style={{ background: "var(--bg-secondary)", border: "1px solid var(--border)", borderRadius: 16, padding: 20, marginBottom: 20 }}>
+                <div style={{ background: "var(--bg-secondary)", border: "1.5px solid #cbd5e8", borderRadius: 12, padding: 20, marginBottom: 20 }}>
                   <label style={{ display: "block", fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1.5, color: "var(--text-muted)", marginBottom: 5 }}>Notas Adicionales</label>
                   <textarea className="cert-input" style={{ minHeight: 60, resize: "vertical" }} value={form.notes} onChange={set("notes") as any} placeholder="Observaciones opcionales..." />
                 </div>
 
-                <button disabled={!canGenerate || saving} onClick={handleGenerate} style={{ width: "100%", padding: "14px 0", border: "none", borderRadius: 12, background: canGenerate && !saving ? "linear-gradient(135deg,#6366f1,#7c3aed)" : "rgba(99,102,241,0.2)", color: canGenerate && !saving ? "#fff" : "var(--text-muted)", fontSize: 14, fontWeight: 700, cursor: canGenerate && !saving ? "pointer" : "not-allowed", letterSpacing: 1, textTransform: "uppercase", boxShadow: canGenerate && !saving ? "0 4px 16px rgba(99,102,241,0.3)" : "none", transition: "all .2s" }}>
+                <button disabled={!canGenerate || saving} onClick={handleGenerate} style={{ width: "100%", padding: "14px 0", border: "none", borderRadius: 12, background: canGenerate && !saving ? "linear-gradient(135deg,#1ab8c4,#149aa5)" : "rgba(26,184,196,0.10)", color: canGenerate && !saving ? "#fff" : "var(--text-muted)", fontSize: 14, fontWeight: 700, cursor: canGenerate && !saving ? "pointer" : "not-allowed", letterSpacing: 1, textTransform: "uppercase", boxShadow: canGenerate && !saving ? "0 4px 16px rgba(26,184,196,0.14)" : "none", transition: "all .2s" }}>
                   {saving ? "⏳ Guardando en DB..." : editingId ? "✏️ Actualizar Certificado" : "🏅 Generar Certificado (CL)"}
                 </button>
                 {!canGenerate && <p style={{ textAlign: "center", fontSize: 11, color: "var(--text-muted)", marginTop: 8 }}>Ingresa el nombre del cliente y al menos una clave de producto</p>}
@@ -234,10 +234,10 @@ export default function CertificatesPage() {
                 {history.length === 0 ? (
                   <div style={{ textAlign: "center", padding: 60, color: "var(--text-muted)" }}><div style={{ fontSize: 40, marginBottom: 12 }}>📋</div><p style={{ fontSize: 13 }}>No hay certificados en la base de datos</p></div>
                 ) : history.map(h => (
-                  <div key={h.id} style={{ background: "var(--bg-secondary)", border: "1px solid var(--border)", borderRadius: 14, padding: 16, marginBottom: 10, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+                  <div key={h.id} style={{ background: "#ffffff", border: "1.5px solid #cbd5e8", borderRadius: 14, padding: 16, boxShadow: "var(--shadow-sm)", marginBottom: 10, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 2 }}>
-                        <span style={{ fontSize: 11, fontWeight: 700, color: "#818cf8", background: "rgba(99,102,241,0.1)", padding: "2px 8px", borderRadius: 6, border: "1px solid rgba(99,102,241,0.15)" }}>{h.code}</span>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: "#2dd4df", background: "rgba(26,184,196,0.06)", padding: "2px 8px", borderRadius: 6, border: "1px solid rgba(26,184,196,0.08)" }}>{h.code}</span>
                         <span style={{ fontSize: 14, fontWeight: 600 }}>{h.clientName}</span>
                       </div>
                       <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>
@@ -250,7 +250,7 @@ export default function CertificatesPage() {
                     </div>
                     <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
                       <button onClick={() => viewCertificate(h)} title="Ver/Imprimir" style={{ padding: "7px 10px", borderRadius: 8, border: "1px solid rgba(16,185,129,0.2)", background: "rgba(16,185,129,0.06)", color: "#10b981", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>👁️</button>
-                      <button onClick={() => loadFromHistory(h)} title="Editar" style={{ padding: "7px 12px", borderRadius: 8, border: "1px solid rgba(99,102,241,0.2)", background: "rgba(99,102,241,0.06)", color: "#818cf8", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>📝</button>
+                      <button onClick={() => loadFromHistory(h)} title="Editar" style={{ padding: "7px 12px", borderRadius: 8, border: "1px solid rgba(26,184,196,0.10)", background: "rgba(26,184,196,0.05)", color: "#2dd4df", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>📝</button>
                       <button onClick={() => deleteFromHistory(h.id, h.code)} title="Eliminar" style={{ padding: "7px 10px", borderRadius: 8, border: "1px solid rgba(239,68,68,0.2)", background: "rgba(239,68,68,0.06)", color: "#ef4444", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>🗑️</button>
                     </div>
                   </div>
@@ -262,10 +262,10 @@ export default function CertificatesPage() {
           <>
             <div style={{ display: "flex", gap: 10, marginBottom: 16, justifyContent: "center", flexWrap: "wrap" }}>
               <button onClick={() => setPreview(false)} style={{ padding: "10px 22px", borderRadius: 10, border: "1px solid var(--border)", background: "var(--bg-secondary)", color: "var(--text-secondary)", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>← Volver</button>
-              <button onClick={handlePrint} style={{ padding: "10px 28px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#6366f1,#7c3aed)", color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 16px rgba(99,102,241,0.3)" }}>🖨️ Imprimir</button>
+              <button onClick={handlePrint} style={{ padding: "10px 28px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#1ab8c4,#149aa5)", color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 16px rgba(26,184,196,0.14)" }}>🖨️ Imprimir</button>
               <button onClick={() => { setForm({ ...defaultForm, technician: user?.name || "" }); setEditingId(null); setPreview(false); }} style={{ padding: "10px 22px", borderRadius: 10, border: "1px solid rgba(16,185,129,0.2)", background: "rgba(16,185,129,0.06)", color: "#10b981", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>＋ Nuevo</button>
             </div>
-            {previewCode && <div style={{ textAlign: "center", marginBottom: 12 }}><span style={{ fontSize: 14, fontWeight: 700, color: "#818cf8", background: "rgba(99,102,241,0.1)", padding: "6px 20px", borderRadius: 10, border: "1px solid rgba(99,102,241,0.2)", letterSpacing: 1.5 }}>📋 {previewCode}</span></div>}
+            {previewCode && <div style={{ textAlign: "center", marginBottom: 12 }}><span style={{ fontSize: 14, fontWeight: 700, color: "#2dd4df", background: "rgba(26,184,196,0.06)", padding: "6px 20px", borderRadius: 10, border: "1px solid rgba(26,184,196,0.10)", letterSpacing: 1.5 }}>📋 {previewCode}</span></div>}
             <div ref={certRef}>
               <div style={{ maxWidth: "7.5in", margin: "0 auto", padding: "40px 38px", border: "3px solid #1e3a5f", position: "relative", background: "#fff", borderRadius: 4, fontFamily: "'Source Sans 3','Segoe UI',sans-serif", color: "#1a1a2e" }}>
                 <div style={{ position: "absolute", inset: 6, border: "1px solid #b0c4de", pointerEvents: "none", borderRadius: 2 }} />
@@ -299,7 +299,7 @@ export default function CertificatesPage() {
                 {form.notes && <div style={{ marginBottom: 16 }}><h3 style={{ fontFamily: "'Playfair Display',serif", fontSize: 14, fontWeight: 600, color: "#1e3a5f", textTransform: "uppercase", letterSpacing: 2, marginBottom: 8, paddingBottom: 4, borderBottom: "1px solid #e2e8f0" }}>Observaciones</h3><div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: 6, padding: "10px 14px", fontSize: 13, color: "#475569" }}>{form.notes}</div></div>}
                 <div style={{ marginTop: 28, paddingTop: 16, borderTop: "2px solid #e2e8f0", display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
                   <div style={{ textAlign: "center", width: 220 }}><div style={{ borderTop: "1px solid #1a1a2e", marginBottom: 4 }} /><div style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: 1.5, color: "#94a3b8" }}>Firma del Técnico</div></div>
-                  <div style={{ width: 80, height: 80, borderRadius: "50%", background: "conic-gradient(from 180deg,#00bfff,#7c3aed,#ec4899,#f59e0b,#10b981,#00bfff)", display: "flex", alignItems: "center", justifyContent: "center", opacity: 0.6 }}><div style={{ width: 60, height: 60, borderRadius: "50%", background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Playfair Display',serif", fontSize: 10, fontWeight: 700, color: "#1e3a5f", textAlign: "center", lineHeight: 1.2 }}>SELLO DE<br/>GARANTÍA</div></div>
+                  <div style={{ width: 80, height: 80, borderRadius: "50%", background: "conic-gradient(from 180deg,#00bfff,#149aa5,#ec4899,#f59e0b,#10b981,#00bfff)", display: "flex", alignItems: "center", justifyContent: "center", opacity: 0.6 }}><div style={{ width: 60, height: 60, borderRadius: "50%", background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Playfair Display',serif", fontSize: 10, fontWeight: 700, color: "#1e3a5f", textAlign: "center", lineHeight: 1.2 }}>SELLO DE<br/>GARANTÍA</div></div>
                   <div style={{ textAlign: "center", width: 220 }}><div style={{ borderTop: "1px solid #1a1a2e", marginBottom: 4 }} /><div style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: 1.5, color: "#94a3b8" }}>Firma del Cliente</div></div>
                 </div>
                 <p style={{ textAlign: "center", fontSize: 9, color: "#94a3b8", marginTop: 14, lineHeight: 1.5 }}>Este certificado garantiza que las licencias de software indicadas son productos originales y legítimos.<br/>El uso de las claves de producto está sujeto a los términos y condiciones de Microsoft Corporation.</p>

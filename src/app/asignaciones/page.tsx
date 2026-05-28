@@ -48,10 +48,10 @@ export default function AsignacionesPage() {
   const load = async (token: string) => { try { const r = await apiFetch("/api/repairs", { }); if (r.ok) setRepairs(await r.json()); } catch {} };
 
   useEffect(() => {
-    fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings({ companyName: d.companyName, slogan: d.slogan, logo: d.logo, website: d.website }); }).catch(() => {});
+    fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings({ companyName: d.companyName, slogan: d.slogan, logo: d.logo, website: d.website }).catch(() => {}); }).catch(() => {});
     const ud = sessionStorage.getItem("user"); const tk = sessionStorage.getItem("token");
     if (!ud || !tk) { router.push("/"); return; }
-    const p = JSON.parse(ud);
+    const p = (() => { try { return JSON.parse(ud); } catch { return null; } })();
     if (p.role === "admin") { router.push("/dashboard"); return; }
     setUser(p); load(tk);
     apiFetch("/api/services").then(r => r.json()).then(d => { if (Array.isArray(d)) setSvcList(d); }).catch(() => {});
@@ -92,7 +92,7 @@ export default function AsignacionesPage() {
   if (!user) return <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg-primary)", color: "var(--text-muted)", fontSize: 14 }}>Cargando...</div>;
 
   return (
-    <div className="main-content" style={{ minHeight: "100vh", background: "var(--bg-primary)", paddingLeft: 200, paddingTop: 0 }}>
+    <div className="main-content" style={{ minHeight: "100vh", background: "var(--bg-primary)", paddingLeft: 210, paddingTop: 0 }}>
 {viewImg && <div onClick={() => setViewImg(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.92)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 200, cursor: "pointer" }}><img src={viewImg} style={{ maxWidth: "90%", maxHeight: "90vh", borderRadius: 12 }} /></div>}
 
       <style>{`
@@ -100,7 +100,7 @@ export default function AsignacionesPage() {
         @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
         @keyframes fadeScale{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:scale(1)}}
         .sb{display:flex;align-items:center;gap:10px;width:100%;padding:10px 14px;border-radius:10px;border:none;font-size:12px;font-weight:600;cursor:pointer;background:transparent;color:var(--text-muted);transition:.15s;text-align:left}
-        .sb:hover{background:rgba(99,102,241,.06);color:var(--text-secondary)}.sb.on{background:rgba(99,102,241,.12);color:#818cf8}
+        .sb:hover{background:rgba(99,102,241,.06);color:var(--text-secondary)}.sb.on{background:rgba(99,102,241,.12);color:#2dd4df}
         .sbi{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
         .sidebar-group-btn{display:flex;align-items:center;justify-content:space-between;width:100%;padding:7px 10px;border-radius:8px;border:none;font-size:9px;font-weight:700;cursor:pointer;background:transparent;color:var(--text-muted);letter-spacing:.5px;text-transform:uppercase;transition:.15s;text-align:left}
         .sidebar-group-btn:hover{background:rgba(99,102,241,.04);color:var(--text-secondary)}
@@ -140,7 +140,7 @@ export default function AsignacionesPage() {
         </div>
 
         <div className="stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 24 }}>
-          {[{ l: "Asignadas", v: st.total, i: "📋", c: "#6366f1" }, { l: "Pendientes", v: st.pend, i: "⏳", c: "#f59e0b" }, { l: "En Progreso", v: st.prog, i: "🔧", c: "#3b82f6" }, { l: "Completadas", v: st.done, i: "✅", c: "#10b981" }].map((s, i) => (
+          {[{ l: "Asignadas", v: st.total, i: "📋", c: "#1ab8c4" }, { l: "Pendientes", v: st.pend, i: "⏳", c: "#f59e0b" }, { l: "En Progreso", v: st.prog, i: "🔧", c: "#3b82f6" }, { l: "Completadas", v: st.done, i: "✅", c: "#10b981" }].map((s, i) => (
             <div key={i} style={{ padding: "16px", background: `linear-gradient(135deg,${s.c}10,${s.c}03)`, borderRadius: 14, border: `1px solid ${s.c}15`, position: "relative", overflow: "hidden", animation: `fadeIn .4s ease-out ${i * .06}s both` }}>
               <div style={{ position: "absolute", top: -8, right: -8, fontSize: 40, opacity: .06 }}>{s.i}</div>
               <div style={{ fontSize: 10, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: ".7px", fontWeight: 600 }}>{s.l}</div>
@@ -155,7 +155,7 @@ export default function AsignacionesPage() {
             <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar..." style={{ flex: 1, border: "none", background: "none", padding: "10px 0", color: "var(--text-primary)", fontSize: 12, outline: "none" }} />
           </div>
           <div className="filter-btns" style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-            {[{ k: "all", l: "Todas", i: "📋", c: "#6366f1" }, ...Object.entries(STATUS).filter(([k]) => k !== "delivered").map(([k, v]) => ({ k, l: v.label, i: v.icon, c: v.color }))].map(f => {
+            {[{ k: "all", l: "Todas", i: "📋", c: "#1ab8c4" }, ...Object.entries(STATUS).filter(([k]) => k !== "delivered").map(([k, v]) => ({ k, l: v.label, i: v.icon, c: v.color }))].map(f => {
               const on = filter === f.k; const n = f.k === "all" ? repairs.length : repairs.filter(r => r.status === f.k).length;
               return <button key={f.k} onClick={() => setFilter(f.k)} style={{ padding: "6px 12px", borderRadius: 8, fontSize: 10, fontWeight: on ? 700 : 500, cursor: "pointer", display: "flex", alignItems: "center", gap: 4, background: on ? `${f.c}15` : "var(--bg-card)", border: on ? `1.5px solid ${f.c}40` : "1.5px solid var(--border)", color: on ? f.c : "var(--text-muted)" }}><span style={{ fontSize: 11 }}>{f.i}</span>{f.l}{n > 0 && <span style={{ fontSize: 9, fontWeight: 700, padding: "0 5px", borderRadius: 5, background: on ? `${f.c}20` : "var(--bg-tertiary)", color: on ? f.c : "var(--text-muted)" }}>{n}</span>}</button>;
             })}
@@ -163,10 +163,10 @@ export default function AsignacionesPage() {
         </div>
 
         {loading ? <div style={{ padding: 50, textAlign: "center", color: "var(--text-muted)" }}>Cargando...</div>
-        : list.length === 0 ? <div style={{ padding: 50, textAlign: "center", background: "var(--bg-card)", borderRadius: 16, border: "1px solid var(--border)" }}><div style={{ fontSize: 40, marginBottom: 12 }}>📋</div><h3 style={{ fontSize: 15, fontWeight: 700 }}>Sin asignaciones</h3></div>
+        : list.length === 0 ? <div style={{ padding: 50, textAlign: "center", background: "var(--bg-card)", borderRadius: 12, border: "1.5px solid #cbd5e8" }}><div style={{ fontSize: 40, marginBottom: 12 }}>📋</div><h3 style={{ fontSize: 15, fontWeight: 700 }}>Sin asignaciones</h3></div>
         : (
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            {list.map((r, i) => {
+            {(list || []).map((r, i) => {
               const s = STATUS[r.status] || { label: r.status, color: "#666", icon: "❓", bg: "rgba(100,100,100,.08)" };
               const isOpen = expanded === r.id;
               const isDone = r.status === "delivered";
@@ -184,7 +184,7 @@ export default function AsignacionesPage() {
                     <div style={{ width: 40, height: 40, borderRadius: 10, overflow: "hidden", flexShrink: 0, background: s.bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, border: `1px solid ${s.color}15` }}>
                       {imgs[0] ? <img src={imgs[0]} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : s.icon}
                     </div>
-                    <span style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, color: "#6366f1", background: "rgba(99,102,241,.07)", padding: "2px 7px", borderRadius: 5, flexShrink: 0 }}>{r.code}</span>
+                    <span style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, color: "#1ab8c4", background: "rgba(99,102,241,.07)", padding: "2px 7px", borderRadius: 5, flexShrink: 0 }}>{r.code}</span>
                     <span style={{ fontSize: 13, fontWeight: 700, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{dev}</span>
                     <span style={{ fontSize: 11, color: "var(--text-muted)", flexShrink: 0 }}>👤 {r.clientName || "—"}</span>
                     {next ? (
@@ -202,7 +202,7 @@ export default function AsignacionesPage() {
                   {isOpen && (
                     <div style={{ padding: "16px 18px", borderTop: "1px solid var(--border)", animation: "fadeScale .2s ease-out" }}>
                       {/* Fotos */}
-                      {imgs.length > 0 && (<div style={{ display: "flex", gap: 8, marginBottom: 14, overflowX: "auto", paddingBottom: 4 }}>{imgs.map((img, idx) => (<div key={idx} onClick={e => { e.stopPropagation(); setViewImg(img); }} style={{ width: 160, height: 110, borderRadius: 8, overflow: "hidden", cursor: "pointer", border: "1px solid var(--border)", flexShrink: 0, position: "relative" }}><img src={img} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} /><span style={{ position: "absolute", bottom: 3, left: 5, fontSize: 8, color: "#fff", background: "rgba(0,0,0,0.5)", padding: "1px 5px", borderRadius: 3 }}>{idx + 1}/{imgs.length}</span></div>))}</div>)}
+                      {imgs.length > 0 && (<div style={{ display: "flex", gap: 8, marginBottom: 14, overflowX: "auto", paddingBottom: 4 }}>{(imgs || []).map((img, idx) => (<div key={idx} onClick={e => { e.stopPropagation(); setViewImg(img); }} style={{ width: 160, height: 110, borderRadius: 8, overflow: "hidden", cursor: "pointer", border: "1px solid var(--border)", flexShrink: 0, position: "relative" }}><img src={img} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} /><span style={{ position: "absolute", bottom: 3, left: 5, fontSize: 8, color: "#fff", background: "rgba(26,29,46,0.40)", padding: "1px 5px", borderRadius: 3 }}>{idx + 1}/{imgs.length}</span></div>))}</div>)}
 
                       {/* ═══ LAYOUT: [CLIENTE+EQUIPO | SEGUIMIENTO] + [DETALLES] ═══ */}
                       <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: 12, marginBottom: 12 }}>
@@ -211,8 +211,8 @@ export default function AsignacionesPage() {
                           {/* FILA: CLIENTE | EQUIPO */}
                           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
                             {/* CLIENTE */}
-                            <div style={{ background: "var(--bg-tertiary)", borderRadius: 12, overflow: "hidden", border: "1px solid rgba(99,102,241,0.15)", borderLeft: "3px solid #6366f1" }}>
-                              <div style={{ padding: "8px 14px", background: "linear-gradient(135deg, rgba(99,102,241,0.1), rgba(99,102,241,0.03))", borderBottom: "1px solid rgba(99,102,241,0.1)", display: "flex", alignItems: "center", gap: 6 }}><span style={{ fontSize: 13 }}>👤</span><span style={{ fontSize: 10, fontWeight: 700, color: "#818cf8", textTransform: "uppercase", letterSpacing: "0.5px" }}>Cliente</span></div>
+                            <div style={{ background: "var(--bg-tertiary)", borderRadius: 12, overflow: "hidden", border: "1px solid rgba(26,184,196,0.08)", borderLeft: "3px solid #1ab8c4" }}>
+                              <div style={{ padding: "8px 14px", background: "var(--bg-tertiary)", borderBottom: "1.5px solid #cbd5e8", display: "flex", alignItems: "center", gap: 6 }}><span style={{ fontSize: 13 }}>👤</span><span style={{ fontSize: 10, fontWeight: 700, color: "#1ab8c4", textTransform: "uppercase", letterSpacing: "0.6px" }}>Cliente</span></div>
                               <div style={{ padding: 10, display: "flex", flexDirection: "column", gap: 6 }}>
                                 <div style={{ padding: "8px 10px", background: "var(--bg-hover)", borderRadius: 8, border: "1px solid var(--border)" }}><div style={{ fontSize: 8, color: "var(--text-muted)", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.3px" }}>Nombre</div><div style={{ fontSize: 13, fontWeight: 700, marginTop: 3, color: "var(--text-primary)" }}>{r.clientName || "—"}</div></div>
                                 <div style={{ padding: "8px 10px", background: "var(--bg-hover)", borderRadius: 8, border: "1px solid var(--border)" }}><div style={{ fontSize: 8, color: "var(--text-muted)", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.3px" }}>Celular</div><div style={{ fontSize: 13, fontWeight: 700, marginTop: 3, color: "var(--text-primary)" }}>{r.clientPhone || "—"}</div></div>
@@ -220,7 +220,7 @@ export default function AsignacionesPage() {
                             </div>
                             {/* EQUIPO */}
                             <div style={{ background: "var(--bg-tertiary)", borderRadius: 12, overflow: "hidden", border: "1px solid rgba(16,185,129,0.15)", borderLeft: "3px solid #10b981" }}>
-                              <div style={{ padding: "8px 14px", background: "linear-gradient(135deg, rgba(16,185,129,0.1), rgba(16,185,129,0.03))", borderBottom: "1px solid rgba(16,185,129,0.1)", display: "flex", alignItems: "center", gap: 6 }}><span style={{ fontSize: 13 }}>💻</span><span style={{ fontSize: 10, fontWeight: 700, color: "#10b981", textTransform: "uppercase", letterSpacing: "0.5px" }}>Equipo</span></div>
+                              <div style={{ padding: "8px 14px", background: "var(--bg-tertiary)", borderBottom: "1.5px solid #cbd5e8", display: "flex", alignItems: "center", gap: 6 }}><span style={{ fontSize: 13 }}>💻</span><span style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.85)", textTransform: "uppercase", letterSpacing: "0.6px" }}>Equipo</span></div>
                               <div style={{ padding: 10, display: "flex", flexDirection: "column", gap: 6 }}>
                                 <div style={{ padding: "8px 10px", background: "var(--bg-hover)", borderRadius: 8, border: "1px solid var(--border)" }}><div style={{ fontSize: 8, color: "var(--text-muted)", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.3px" }}>Dispositivo</div><div style={{ fontSize: 13, fontWeight: 700, marginTop: 3, color: "var(--text-primary)" }}>{r.device}</div></div>
                                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}><div style={{ padding: "8px 10px", background: "var(--bg-hover)", borderRadius: 8, border: "1px solid var(--border)" }}><div style={{ fontSize: 8, color: "var(--text-muted)", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.3px" }}>Marca</div><div style={{ fontSize: 13, fontWeight: 700, marginTop: 3, color: "var(--text-primary)" }}>{r.brand || "—"}</div></div><div style={{ padding: "8px 10px", background: "var(--bg-hover)", borderRadius: 8, border: "1px solid var(--border)" }}><div style={{ fontSize: 8, color: "var(--text-muted)", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.3px" }}>Modelo</div><div style={{ fontSize: 13, fontWeight: 700, marginTop: 3, color: "var(--text-primary)" }}>{r.model || "—"}</div></div></div>
@@ -230,7 +230,7 @@ export default function AsignacionesPage() {
                           </div>
                           {/* DETALLES */}
                           <div style={{ background: "var(--bg-tertiary)", borderRadius: 12, overflow: "hidden", border: "1px solid rgba(168,85,247,0.15)", borderLeft: "3px solid #a855f7" }}>
-                            <div style={{ padding: "8px 14px", background: "linear-gradient(135deg, rgba(168,85,247,0.1), rgba(168,85,247,0.03))", borderBottom: "1px solid rgba(168,85,247,0.1)", display: "flex", alignItems: "center", gap: 6 }}><span style={{ fontSize: 13 }}>📋</span><span style={{ fontSize: 10, fontWeight: 700, color: "#a855f7", textTransform: "uppercase", letterSpacing: "0.5px" }}>Detalles</span></div>
+                            <div style={{ padding: "8px 14px", background: "var(--bg-tertiary)", borderBottom: "1.5px solid #cbd5e8", display: "flex", alignItems: "center", gap: 6 }}><span style={{ fontSize: 13 }}>📋</span><span style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.85)", textTransform: "uppercase", letterSpacing: "0.6px" }}>Detalles</span></div>
                             <div style={{ padding: 10, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 6 }}>
                               {r.issue && (<div style={{ padding: "8px 10px", background: "var(--bg-hover)", borderRadius: 8, border: "1px solid var(--border)" }}><div style={{ fontSize: 8, color: s.color, textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.3px" }}>⚠️ Problema</div><div style={{ fontSize: 11, marginTop: 3, color: "var(--text-primary)", lineHeight: 1.4 }}>{r.issue}</div></div>)}
                               {p.notes && (<div style={{ padding: "8px 10px", background: "var(--bg-hover)", borderRadius: 8, border: "1px solid var(--border)" }}><div style={{ fontSize: 8, color: "#f59e0b", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.3px" }}>📝 Observaciones</div><div style={{ fontSize: 11, marginTop: 3, color: "var(--text-secondary)", lineHeight: 1.4 }}>{p.notes}</div></div>)}
@@ -294,9 +294,9 @@ export default function AsignacionesPage() {
                       {/* ACCESORIOS */}
                       {acc.length > 0 && (
                         <div style={{ background: "var(--bg-tertiary)", borderRadius: 12, overflow: "hidden", border: "1px solid rgba(16,185,129,0.15)", borderLeft: "3px solid #10b981", marginBottom: 12 }}>
-                          <div style={{ padding: "8px 14px", background: "linear-gradient(135deg, rgba(16,185,129,0.1), rgba(16,185,129,0.03))", borderBottom: "1px solid rgba(16,185,129,0.1)", display: "flex", alignItems: "center", gap: 6 }}><span style={{ fontSize: 13 }}>🎒</span><span style={{ fontSize: 10, fontWeight: 700, color: "#10b981", textTransform: "uppercase", letterSpacing: "0.5px" }}>Accesorios</span><span style={{ fontSize: 9, padding: "1px 7px", borderRadius: 8, background: "rgba(16,185,129,0.12)", color: "#10b981", fontWeight: 700 }}>{acc.length}</span></div>
+                          <div style={{ padding: "8px 14px", background: "var(--bg-tertiary)", borderBottom: "1.5px solid #cbd5e8", display: "flex", alignItems: "center", gap: 6 }}><span style={{ fontSize: 13 }}>🎒</span><span style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.85)", textTransform: "uppercase", letterSpacing: "0.6px" }}>Accesorios</span><span style={{ fontSize: 9, padding: "1px 7px", borderRadius: 8, background: "rgba(16,185,129,0.12)", color: "#10b981", fontWeight: 700 }}>{acc.length}</span></div>
                           <div style={{ padding: 10, display: "flex", gap: 6, flexWrap: "wrap" }}>
-                            {acc.map(a => <span key={a} style={{ padding: "5px 12px", background: "rgba(16,185,129,0.08)", borderRadius: 8, fontSize: 11, fontWeight: 600, color: "#10b981", border: "1px solid rgba(16,185,129,0.15)", display: "flex", alignItems: "center", gap: 4 }}><span style={{ fontSize: 10 }}>✓</span> {a}</span>)}
+                            {(acc || []).map(a => <span key={a} style={{ padding: "5px 12px", background: "rgba(16,185,129,0.08)", borderRadius: 8, fontSize: 11, fontWeight: 600, color: "#10b981", border: "1px solid rgba(16,185,129,0.15)", display: "flex", alignItems: "center", gap: 4 }}><span style={{ fontSize: 10 }}>✓</span> {a}</span>)}
                           </div>
                         </div>
                       )}

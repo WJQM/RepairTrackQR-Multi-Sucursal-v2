@@ -64,7 +64,7 @@ export default function PrintQRPage() {
   useEffect(() => {
     setBaseUrl(window.location.origin);
     setBranchId(new URLSearchParams(window.location.search).get("branchId") || "");
-    fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings({ companyName: d.companyName, logo: d.logo }); }).catch(() => {});
+    fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings({ companyName: d.companyName, logo: d.logo }).catch(() => {}); }).catch(() => {});
   }, []);
 
   const cfg = TYPES[type];
@@ -99,20 +99,20 @@ export default function PrintQRPage() {
       `}</style>
 
       {/* Top bar (not printed) */}
-      <div className="no-print" style={{ position: "sticky", top: 0, padding: "12px 24px", background: "#111118", display: "flex", justifyContent: "space-between", alignItems: "center", zIndex: 100, flexWrap: "wrap", gap: 8 }}>
+      <div className="no-print" style={{ position: "sticky", top: 0, padding: "12px 24px", background: "#ffffff", display: "flex", justifyContent: "space-between", alignItems: "center", zIndex: 100, flexWrap: "wrap", gap: 8 }}>
         <span style={{ color: "#eee", fontSize: 14, fontWeight: 600 }}>
           🏷️ Sticker QR · {displayCode}
         </span>
         <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
           {/* Sticker size */}
-          <div style={{ display: "flex", gap: 0, background: "#1e1e2e", border: "1px solid #333", borderRadius: 6, overflow: "hidden" }}>
+          <div style={{ display: "flex", gap: 0, background: "#e8ebf2", border: "1px solid #333", borderRadius: 6, overflow: "hidden" }}>
             <button onClick={() => setStickerSize("small")} style={{ padding: "7px 12px", background: stickerSize === "small" ? cfg.color : "transparent", border: "none", color: stickerSize === "small" ? "#fff" : "#888", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>S</button>
             <button onClick={() => setStickerSize("medium")} style={{ padding: "7px 12px", background: stickerSize === "medium" ? cfg.color : "transparent", border: "none", color: stickerSize === "medium" ? "#fff" : "#888", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>M</button>
             <button onClick={() => setStickerSize("large")} style={{ padding: "7px 12px", background: stickerSize === "large" ? cfg.color : "transparent", border: "none", color: stickerSize === "large" ? "#fff" : "#888", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>L</button>
           </div>
-          <button onClick={() => { navigator.clipboard.writeText(targetUrl); }} style={{ padding: "7px 14px", background: "#1e1e2e", border: "1px solid #333", borderRadius: 6, color: "#eee", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>🔗 Copiar link</button>
+          <button onClick={() => { navigator.clipboard.writeText(targetUrl); }} style={{ padding: "7px 14px", background: "#e8ebf2", border: "1px solid #333", borderRadius: 6, color: "#eee", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>🔗 Copiar link</button>
           <button onClick={() => window.print()} style={{ padding: "7px 18px", background: cfg.color, border: "none", borderRadius: 6, color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>🖨️ Imprimir</button>
-          <button onClick={() => window.close()} style={{ padding: "7px 14px", background: "#1e1e2e", border: "1px solid #333", borderRadius: 6, color: "#888", fontSize: 12, cursor: "pointer" }}>✕</button>
+          <button onClick={() => window.close()} style={{ padding: "7px 14px", background: "#e8ebf2", border: "1px solid #333", borderRadius: 6, color: "#888", fontSize: 12, cursor: "pointer" }}>✕</button>
         </div>
       </div>
 

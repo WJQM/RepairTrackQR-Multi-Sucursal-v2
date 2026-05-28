@@ -32,7 +32,7 @@ export default function PrintPage() {
   const [settings, setSettings] = useState<{ companyName: string; slogan: string; logo: string | null; phone: string | null; email: string | null; address: string | null }>({ companyName: "RepairTrackQR", slogan: "Servicio Técnico Especializado", logo: null, phone: null, email: null, address: null });
   const [branchParam, setBranchParam] = useState("");
 
-  useEffect(() => { setBaseUrl(window.location.origin); const bp = new URLSearchParams(window.location.search).get("branchId") || ""; setBranchParam(bp); fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings(d); }).catch(() => {}); }, []);
+  useEffect(() => { setBaseUrl(window.location.origin); const bp = new URLSearchParams(window.location.search).get("branchId") || ""; setBranchParam(bp); fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings(d).catch(() => {}); }).catch(() => {}); }, []);
   useEffect(() => { if (code) { (() => { const bp = new URLSearchParams(window.location.search).get("branchId"); return fetch(`/api/track/${code}${bp ? `?branchId=${bp}` : ""}`); })().then(r => r.ok ? r.json() : null).then(d => { if (d && d.multiple) setRepair(d.repairs[0]); else if (d) setRepair(d); setLoading(false); }).catch(() => setLoading(false)); } }, [code]);
 
   if (loading) return <div style={{ padding: 60, textAlign: "center", fontFamily: "Arial", fontSize: 16 }}>Cargando orden...</div>;
@@ -62,7 +62,7 @@ export default function PrintPage() {
           <p style={{ fontSize: 8, color: "#888", margin: 0 }}>{today}</p>
         </div>
       </div>
-      <div style={{ height: 2, background: `linear-gradient(90deg, ${accent}, #6366f1, #a5b4fc, transparent)`, borderRadius: 1, marginBottom: 4 }} />
+      <div style={{ height: 2, background: `linear-gradient(90deg, ${accent}, #1ab8c4, #a5b4fc, transparent)`, borderRadius: 1, marginBottom: 4 }} />
       {(settings.phone || settings.email || settings.address) && (
         <div style={{ display: "flex", gap: 8, fontSize: 6, color: "#999", marginBottom: 6, flexWrap: "wrap" }}>
           {settings.phone && <span>📞 {settings.phone}</span>}
@@ -91,7 +91,7 @@ export default function PrintPage() {
         </div>
         <div style={{ flex: 1, border: "1px solid #e5e5e5", borderRadius: 5, overflow: "hidden" }}>
           <div style={{ background: "#f8f7ff", padding: "3px 8px", borderBottom: "1px solid #eeecfa" }}>
-            <span style={{ fontSize: 7, fontWeight: 700, color: "#6366f1", textTransform: "uppercase", letterSpacing: "0.5px" }}>👤 Cliente</span>
+            <span style={{ fontSize: 7, fontWeight: 700, color: "#1ab8c4", textTransform: "uppercase", letterSpacing: "0.5px" }}>👤 Cliente</span>
           </div>
           <div style={{ padding: "4px 8px", display: "flex", flexDirection: "column", gap: 2 }}>
             <Row label="Nombre" value={repair.clientName || "—"} />
@@ -115,12 +115,12 @@ export default function PrintPage() {
       <div style={{ display: "flex", gap: 6, marginBottom: 6 }}>
         <div style={{ flex: 1, border: "1px solid #e5e5e5", borderRadius: 5, overflow: "hidden" }}>
           <div style={{ background: "#faf5ff", padding: "3px 8px", borderBottom: "1px solid #e9d5ff" }}>
-            <span style={{ fontSize: 7, fontWeight: 700, color: "#7c3aed", textTransform: "uppercase", letterSpacing: "0.5px" }}>📋 Detalles</span>
+            <span style={{ fontSize: 7, fontWeight: 700, color: "#149aa5", textTransform: "uppercase", letterSpacing: "0.5px" }}>📋 Detalles</span>
           </div>
           <div style={{ padding: "4px 8px", display: "flex", flexDirection: "column", gap: 3 }}>
             {repair.issue && <div style={{ padding: "3px 6px", background: "#f7f7f8", borderRadius: 3, borderLeft: "2px solid #555" }}><div style={{ fontSize: 6, color: "#888", fontWeight: 700, textTransform: "uppercase" }}>Problema</div><div style={{ fontSize: 8, color: "#222", marginTop: 1 }}>{repair.issue}</div></div>}
             {parsed.notes && <div style={{ padding: "3px 6px", background: "#fffbeb", borderRadius: 3, borderLeft: "2px solid #f59e0b" }}><div style={{ fontSize: 6, color: "#b45309", fontWeight: 700, textTransform: "uppercase" }}>Observaciones</div><div style={{ fontSize: 8, color: "#333", marginTop: 1 }}>{parsed.notes}</div></div>}
-            {parsed.services.length > 0 && <div style={{ padding: "3px 6px", background: "#faf5ff", borderRadius: 3, borderLeft: "2px solid #7c3aed" }}><div style={{ fontSize: 6, color: "#7c3aed", fontWeight: 700, textTransform: "uppercase", marginBottom: 2 }}>Servicios</div><div style={{ display: "flex", gap: 3, flexWrap: "wrap" }}>{parsed.services.map(n => <span key={n} style={{ padding: "1px 5px", background: "#f0ebff", border: "1px solid #e9d5ff", borderRadius: 3, fontSize: 7, fontWeight: 600, color: "#7c3aed" }}>{n}</span>)}</div></div>}
+            {parsed.services.length > 0 && <div style={{ padding: "3px 6px", background: "#faf5ff", borderRadius: 3, borderLeft: "2px solid #149aa5" }}><div style={{ fontSize: 6, color: "#149aa5", fontWeight: 700, textTransform: "uppercase", marginBottom: 2 }}>Servicios</div><div style={{ display: "flex", gap: 3, flexWrap: "wrap" }}>{parsed.services.map(n => <span key={n} style={{ padding: "1px 5px", background: "#f0ebff", border: "1px solid #e9d5ff", borderRadius: 3, fontSize: 7, fontWeight: 600, color: "#149aa5" }}>{n}</span>)}</div></div>}
             {parsed.software.length > 0 && <div style={{ padding: "3px 6px", background: "#f5f3ff", borderRadius: 3, borderLeft: "2px solid #6d28d9" }}><div style={{ fontSize: 6, color: "#6d28d9", fontWeight: 700, textTransform: "uppercase", marginBottom: 2 }}>Programas</div><div style={{ display: "flex", gap: 3, flexWrap: "wrap" }}>{parsed.software.map(n => <span key={n} style={{ padding: "1px 5px", background: "#ede9fe", border: "1px solid #ddd6fe", borderRadius: 3, fontSize: 7, fontWeight: 600, color: "#6d28d9" }}>{n}</span>)}</div></div>}
             {parsed.videogames.length > 0 && <div style={{ padding: "3px 6px", background: "#fef2f2", borderRadius: 3, borderLeft: "2px solid #b91c1c" }}><div style={{ fontSize: 6, color: "#b91c1c", fontWeight: 700, textTransform: "uppercase", marginBottom: 2 }}>Videojuegos</div><div style={{ display: "flex", gap: 3, flexWrap: "wrap" }}>{parsed.videogames.map(n => <span key={n} style={{ padding: "1px 5px", background: "#fee2e2", border: "1px solid #fecaca", borderRadius: 3, fontSize: 7, fontWeight: 600, color: "#b91c1c" }}>{n}</span>)}</div></div>}
             {parsed.repuestos.length > 0 && <div style={{ padding: "3px 6px", background: "#fffbeb", borderRadius: 3, borderLeft: "2px solid #b45309" }}><div style={{ fontSize: 6, color: "#b45309", fontWeight: 700, textTransform: "uppercase", marginBottom: 2 }}>Repuestos</div><div style={{ display: "flex", gap: 3, flexWrap: "wrap" }}>{parsed.repuestos.map(n => <span key={n} style={{ padding: "1px 5px", background: "#fef3c7", border: "1px solid #fde68a", borderRadius: 3, fontSize: 7, fontWeight: 600, color: "#b45309" }}>{n}</span>)}</div></div>}
@@ -154,8 +154,8 @@ export default function PrintPage() {
       <div className="no-print" style={{ position: "fixed", top: 0, left: 0, right: 0, padding: "10px 24px", background: "#0a0a12", display: "flex", justifyContent: "space-between", alignItems: "center", zIndex: 100 }}>
         <span style={{ color: "#eee", fontSize: 14, fontWeight: 600 }}>🖨️ Recepción x2 — {repair.code}</span>
         <div style={{ display: "flex", gap: 10 }}>
-          <button onClick={() => window.print()} style={{ padding: "8px 20px", background: "#6366f1", border: "none", borderRadius: 8, color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>🖨️ Imprimir</button>
-          <button onClick={() => window.close()} style={{ padding: "8px 20px", background: "#1e1e2e", border: "1px solid #2e2e3e", borderRadius: 8, color: "#888", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>✕ Cerrar</button>
+          <button onClick={() => window.print()} style={{ padding: "8px 20px", background: "#1ab8c4", border: "none", borderRadius: 8, color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>🖨️ Imprimir</button>
+          <button onClick={() => window.close()} style={{ padding: "8px 20px", background: "#e8ebf2", border: "1px solid #2e2e3e", borderRadius: 8, color: "#888", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>✕ Cerrar</button>
         </div>
       </div>
 
@@ -180,5 +180,5 @@ export default function PrintPage() {
 }
 
 function Row({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
-  return <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}><span style={{ fontSize: 7, color: "#999", fontWeight: 600, textTransform: "uppercase", flexShrink: 0, width: 40 }}>{label}</span><span style={{ fontSize: 9, fontWeight: highlight ? 700 : 600, color: highlight ? "#6366f1" : "#111", flex: 1, borderBottom: "1px dotted #e5e5e5", paddingBottom: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{value}</span></div>;
+  return <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}><span style={{ fontSize: 7, color: "#999", fontWeight: 600, textTransform: "uppercase", flexShrink: 0, width: 40 }}>{label}</span><span style={{ fontSize: 9, fontWeight: highlight ? 700 : 600, color: highlight ? "#1ab8c4" : "#111", flex: 1, borderBottom: "1px dotted #e5e5e5", paddingBottom: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{value}</span></div>;
 }

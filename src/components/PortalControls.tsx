@@ -29,9 +29,9 @@ export function PortalControls() {
         title="Español"
         style={{
           padding: "6px 10px", borderRadius: 6,
-          background: locale === "es" ? "rgba(99,102,241,0.15)" : "transparent",
+          background: locale === "es" ? "rgba(26,184,196,0.08)" : "transparent",
           border: "none",
-          color: locale === "es" ? "#818cf8" : "var(--text-muted)",
+          color: locale === "es" ? "#2dd4df" : "var(--text-muted)",
           fontWeight: 700, fontSize: 11, cursor: "pointer",
           display: "flex", alignItems: "center", gap: 4,
         }}
@@ -43,9 +43,9 @@ export function PortalControls() {
         title="English"
         style={{
           padding: "6px 10px", borderRadius: 6,
-          background: locale === "en" ? "rgba(99,102,241,0.15)" : "transparent",
+          background: locale === "en" ? "rgba(26,184,196,0.08)" : "transparent",
           border: "none",
-          color: locale === "en" ? "#818cf8" : "var(--text-muted)",
+          color: locale === "en" ? "#2dd4df" : "var(--text-muted)",
           fontWeight: 700, fontSize: 11, cursor: "pointer",
           display: "flex", alignItems: "center", gap: 4,
         }}

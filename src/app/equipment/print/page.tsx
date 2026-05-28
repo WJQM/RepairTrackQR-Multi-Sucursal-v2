@@ -10,7 +10,7 @@ function getDisplayName(eq: Equipment): string {
 
 const condLabel: Record<string, { label: string; color: string }> = {
   disponible: { label: "DISPONIBLE", color: "#10b981" },
-  vendido: { label: "VENDIDO", color: "#6366f1" },
+  vendido: { label: "VENDIDO", color: "#1ab8c4" },
   en_reparacion: { label: "EN REPARACIÓN", color: "#f59e0b" },
 };
 
@@ -24,10 +24,10 @@ export default function EquipmentPrintPage() {
   const [settings, setSettings] = useState<{ companyName: string; logo: string | null; phone: string | null; email: string | null; address: string | null }>({ companyName: "RepairTrackQR", logo: null, phone: null, email: null, address: null });
 
   useEffect(() => {
-    fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings(d); }).catch(() => {});
+    fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings(d).catch(() => {}); }).catch(() => {});
     apiFetch("/api/equipment").then(r => r.json()).then(d => { if (Array.isArray(d)) setItems(d); setLoading(false); }).catch(() => setLoading(false));
     try {
-      const user = JSON.parse(sessionStorage.getItem("user") || "{}");
+      const user = ((() => { try { return JSON.parse(sessionStorage.getItem("user") || "{}"); } catch { return {}; } })());
       if (user.branchName) setBranchName(user.branchName);
       else if (user.role === "superadmin") {
         apiFetch("/api/branches").then(r => r.json()).then(branches => {
@@ -66,23 +66,23 @@ export default function EquipmentPrintPage() {
         }
       `}</style>
 
-      <div className="no-print" style={{ position: "fixed", top: 0, left: 0, right: 0, padding: "12px 24px", background: "#111118", display: "flex", justifyContent: "space-between", alignItems: "center", zIndex: 100 }}>
+      <div className="no-print" style={{ position: "fixed", top: 0, left: 0, right: 0, padding: "12px 24px", background: "#ffffff", display: "flex", justifyContent: "space-between", alignItems: "center", zIndex: 100 }}>
         <span style={{ color: "#eee", fontSize: 14, fontWeight: 600 }}>💻 Extracto de Equipos</span>
         <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar por EQ-#, nombre, CPU..." style={{ padding: "7px 12px", background: "#1e1e2e", border: "1px solid #333", borderRadius: 6, color: "#eee", fontSize: 12, outline: "none", width: 220 }} />
-          <select value={filterType} onChange={e => setFilterType(e.target.value)} style={{ padding: "7px 10px", background: "#1e1e2e", border: "1px solid #333", borderRadius: 6, color: "#eee", fontSize: 12, cursor: "pointer", outline: "none" }}>
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar por EQ-#, nombre, CPU..." style={{ padding: "7px 12px", background: "#e8ebf2", border: "1px solid #333", borderRadius: 6, color: "#eee", fontSize: 12, outline: "none", width: 220 }} />
+          <select value={filterType} onChange={e => setFilterType(e.target.value)} style={{ padding: "7px 10px", background: "#e8ebf2", border: "1px solid #333", borderRadius: 6, color: "#eee", fontSize: 12, cursor: "pointer", outline: "none" }}>
             <option value="all">Todos</option>
             <option value="laptop">Laptops</option>
             <option value="desktop">Escritorio</option>
           </select>
-          <select value={filterCond} onChange={e => setFilterCond(e.target.value)} style={{ padding: "7px 10px", background: "#1e1e2e", border: "1px solid #333", borderRadius: 6, color: "#eee", fontSize: 12, cursor: "pointer", outline: "none" }}>
+          <select value={filterCond} onChange={e => setFilterCond(e.target.value)} style={{ padding: "7px 10px", background: "#e8ebf2", border: "1px solid #333", borderRadius: 6, color: "#eee", fontSize: 12, cursor: "pointer", outline: "none" }}>
             <option value="all">Todos estados</option>
             <option value="disponible">Disponible</option>
             <option value="vendido">Vendido</option>
             <option value="en_reparacion">En reparación</option>
           </select>
           <button onClick={() => window.print()} style={{ padding: "7px 18px", background: "#3b82f6", border: "none", borderRadius: 6, color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>🖨️ Imprimir</button>
-          <button onClick={() => window.close()} style={{ padding: "7px 14px", background: "#1e1e2e", border: "1px solid #333", borderRadius: 6, color: "#888", fontSize: 12, cursor: "pointer" }}>✕</button>
+          <button onClick={() => window.close()} style={{ padding: "7px 14px", background: "#e8ebf2", border: "1px solid #333", borderRadius: 6, color: "#888", fontSize: 12, cursor: "pointer" }}>✕</button>
         </div>
       </div>
 
@@ -91,7 +91,7 @@ export default function EquipmentPrintPage() {
           <div>
             <h1 style={{ fontSize: 24, fontWeight: 800 }}>{settings.companyName}</h1>
             <p style={{ fontSize: 10, color: "#888", marginTop: 3 }}>SERVICIO TÉCNICO ESPECIALIZADO</p>
-            {branchName && <p style={{ fontSize: 11, fontWeight: 700, color: "#6366f1", marginTop: 4 }}>🏢 {branchName}</p>}
+            {branchName && <p style={{ fontSize: 11, fontWeight: 700, color: "#1ab8c4", marginTop: 4 }}>🏢 {branchName}</p>}
             {(settings.phone || settings.email || settings.address) && (
               <div style={{ display: "flex", gap: 12, fontSize: 9, color: "#888", marginTop: 6, flexWrap: "wrap" }}>
                 {settings.phone && <span>📞 {settings.phone}</span>}
@@ -112,8 +112,8 @@ export default function EquipmentPrintPage() {
           {[
             { label: "Total Equipos", value: filtered.length, color: "#3b82f6", icon: "💻" },
             { label: "Laptops", value: filtered.filter(i => i.type === "laptop").length, color: "#8b5cf6", icon: "💻" },
-            { label: "Escritorio", value: filtered.filter(i => i.type === "desktop").length, color: "#06b6d4", icon: "🖥️" },
-            { label: "Valor Total", value: `Bs. ${totalValue.toFixed(2)}`, color: "#f59e0b", icon: "💰" },
+            { label: "Escritorio", value: filtered.filter(i => i.type === "desktop").length, color: "#0891b2", icon: "🖥️" },
+            { label: "Valor Total", value: `Bs. ${totalValue}`, color: "#f59e0b", icon: "💰" },
           ].map((s, i) => (
             <div key={i} style={{ padding: "14px 18px", background: `${s.color}08`, borderRadius: 10, border: `1.5px solid ${s.color}25`, position: "relative", overflow: "hidden" }}>
               <div style={{ position: "absolute", top: -6, right: -6, fontSize: 36, opacity: 0.08 }}>{s.icon}</div>
@@ -149,7 +149,7 @@ export default function EquipmentPrintPage() {
                   <tr key={item.id} style={{ background: idx % 2 === 0 ? "#fff" : "#fafafa", borderBottom: "1px solid #f0f0f0" }}>
                     <td style={{ padding: "10px 8px", fontSize: 12, color: "#888", textAlign: "center" }}>{idx + 1}</td>
                     <td style={{ padding: "10px 8px", textAlign: "center" }}>
-                      <span style={{ fontSize: 10, fontWeight: 800, color: "#06b6d4", padding: "2px 8px", borderRadius: 4, background: "#06b6d410", border: "1px solid #06b6d430", fontFamily: "monospace" }}>{item.code || "—"}</span>
+                      <span style={{ fontSize: 10, fontWeight: 800, color: "#0891b2", padding: "2px 8px", borderRadius: 4, background: "#0891b210", border: "1px solid #0891b230", fontFamily: "monospace" }}>{item.code || "—"}</span>
                     </td>
                     <td style={{ padding: "10px 10px" }}>
                       <div style={{ fontSize: 12, fontWeight: 600 }}>{getDisplayName(item)}</div>
@@ -165,7 +165,7 @@ export default function EquipmentPrintPage() {
                       {extra ? <>{item.type === "laptop" ? "📐" : "🏗️"} {extra}</> : "—"}
                       {item.powerSupply && <div style={{ fontSize: 8, color: "#888", marginTop: 2 }}>⚡ {item.powerSupply}</div>}
                     </td>
-                    <td style={{ padding: "10px 8px", fontSize: 12, textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: "#3b82f6" }}>Bs. {item.price.toFixed(2)}</td>
+                    <td style={{ padding: "10px 8px", fontSize: 12, textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: "#3b82f6" }}>Bs. {Math.round(item.price || 0).toLocaleString()}</td>
                     <td style={{ padding: "10px 8px", textAlign: "center" }}>
                       <span style={{ padding: "2px 6px", borderRadius: 4, fontSize: 8, fontWeight: 700, color: cond.color, background: `${cond.color}10`, border: `1px solid ${cond.color}30`, whiteSpace: "nowrap" }}>{cond.label}</span>
                     </td>
@@ -189,20 +189,20 @@ export default function EquipmentPrintPage() {
                 return (
                   <>
                     {laptops > 0 && <span style={{ fontSize: 10, fontWeight: 700, color: "#8b5cf6" }}>💻 {laptops} Laptop{laptops !== 1 ? "s" : ""}</span>}
-                    {desks > 0 && <span style={{ fontSize: 10, fontWeight: 700, color: "#06b6d4" }}>🖥️ {desks} Escritorio</span>}
+                    {desks > 0 && <span style={{ fontSize: 10, fontWeight: 700, color: "#0891b2" }}>🖥️ {desks} Escritorio</span>}
                     <span style={{ height: 14, width: 1, background: "#d0d5dd" }} />
                     {dispo > 0 && <span style={{ fontSize: 10, fontWeight: 700, color: "#10b981" }}>✅ {dispo} Disponible{dispo !== 1 ? "s" : ""}</span>}
-                    {vend > 0 && <span style={{ fontSize: 10, fontWeight: 700, color: "#6366f1" }}>💰 {vend} Vendido{vend !== 1 ? "s" : ""}</span>}
+                    {vend > 0 && <span style={{ fontSize: 10, fontWeight: 700, color: "#1ab8c4" }}>💰 {vend} Vendido{vend !== 1 ? "s" : ""}</span>}
                     {repar > 0 && <span style={{ fontSize: 10, fontWeight: 700, color: "#f59e0b" }}>🔧 {repar} En reparación</span>}
                     <span style={{ height: 14, width: 1, background: "#d0d5dd" }} />
-                    <span style={{ fontSize: 10, fontWeight: 700, color: "#666" }}>📊 Promedio: Bs. {avg.toFixed(2)}</span>
+                    <span style={{ fontSize: 10, fontWeight: 700, color: "#666" }}>📊 Promedio: Bs. {avg}</span>
                   </>
                 );
               })()}
             </div>
             <div style={{ textAlign: "right" }}>
               <span style={{ fontSize: 11, color: "#888", marginRight: 10 }}>VALOR TOTAL EQUIPOS</span>
-              <span style={{ fontSize: 22, fontWeight: 800, color: "#3b82f6" }}>Bs. {totalValue.toFixed(2)}</span>
+              <span style={{ fontSize: 22, fontWeight: 800, color: "#3b82f6" }}>Bs. {totalValue}</span>
             </div>
           </div>
         </div>

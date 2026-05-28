@@ -32,7 +32,7 @@ export default function DeliveryPage() {
   const [settings, setSettings] = useState<{ companyName: string; slogan: string; logo: string | null; phone: string | null; email: string | null; address: string | null; website: string | null }>({ companyName: "RepairTrackQR", slogan: "Servicio Técnico Especializado", logo: null, phone: null, email: null, address: null, website: null });
   const [branchParam, setBranchParam] = useState("");
 
-  useEffect(() => { setBaseUrl(window.location.origin); const bp = new URLSearchParams(window.location.search).get("branchId") || ""; setBranchParam(bp); fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings(d); }).catch(() => {}); }, []);
+  useEffect(() => { setBaseUrl(window.location.origin); const bp = new URLSearchParams(window.location.search).get("branchId") || ""; setBranchParam(bp); fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings(d).catch(() => {}); }).catch(() => {}); }, []);
   useEffect(() => {
     if (code) {
       (() => { const bp = new URLSearchParams(window.location.search).get("branchId"); return fetch(`/api/track/${code}${bp ? `?branchId=${bp}` : ""}`); })().then(r => r.ok ? r.json() : null).then(d => { if (d && d.multiple) setRepair(d.repairs[0]); else if (d) setRepair(d); setLoading(false); }).catch(() => setLoading(false));
@@ -96,7 +96,7 @@ export default function DeliveryPage() {
         </div>
         <div style={{ flex: 1, border: "1px solid #e5e5e5", borderRadius: 5, overflow: "hidden" }}>
           <div style={{ background: "#f8f7ff", padding: "4px 10px", borderBottom: "1px solid #eeecfa" }}>
-            <span style={{ fontSize: 8, fontWeight: 700, color: "#6366f1", textTransform: "uppercase" }}>👤 Cliente</span>
+            <span style={{ fontSize: 8, fontWeight: 700, color: "#1ab8c4", textTransform: "uppercase" }}>👤 Cliente</span>
           </div>
           <div style={{ padding: "5px 10px", display: "flex", flexDirection: "column", gap: 3 }}>
             <Row label="Nombre" value={repair.clientName || "—"} />
@@ -123,7 +123,7 @@ export default function DeliveryPage() {
         <div style={{ padding: "5px 10px" }}>
           {checkedAcc.length > 0 ? (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 3 }}>
-              {checkedAcc.map((a, i) => { const { name, detail } = parseAccWithDetail(a); return (
+              {(checkedAcc || []).map((a, i) => { const { name, detail } = parseAccWithDetail(a); return (
                 <div key={a} style={{ display: "flex", alignItems: "center", gap: 4, padding: "2px 5px", background: i % 2 === 0 ? "#ecfdf5" : "#fff", borderRadius: 3 }}>
                   <span style={{ width: 12, height: 12, borderRadius: 2, background: accent, display: "inline-flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 7, fontWeight: 800, flexShrink: 0 }}>✓</span>
                   <span style={{ fontSize: 9, fontWeight: 600, color: "#111" }}>{name}{detail && <span style={{ color: accent }}> ({detail})</span>}</span>
@@ -137,15 +137,15 @@ export default function DeliveryPage() {
       {/* RESUMEN DE COSTOS */}
       <div style={{ border: "1px solid #e5e5e5", borderRadius: 5, overflow: "hidden", marginBottom: 6 }}>
         <div style={{ background: "#f8f7ff", padding: "4px 10px", borderBottom: "1px solid #eeecfa" }}>
-          <span style={{ fontSize: 8, fontWeight: 700, color: "#6366f1", textTransform: "uppercase" }}>💰 Resumen de Costos</span>
+          <span style={{ fontSize: 8, fontWeight: 700, color: "#1ab8c4", textTransform: "uppercase" }}>💰 Resumen de Costos</span>
         </div>
         <div style={{ padding: "5px 10px" }}>
-          {parsed.services.map(name => { const svc = servicesList.find(s => s.name === name); return <div key={name} style={{ display: "flex", justifyContent: "space-between", padding: "2px 0", fontSize: 9, color: "#7c3aed", borderBottom: "1px dashed #f0f0f0" }}><span>🛠️ {name}</span><span style={{ fontWeight: 600 }}>Bs. {svc?.price || "—"}</span></div>; })}
+          {parsed.services.map(name => { const svc = servicesList.find(s => s.name === name); return <div key={name} style={{ display: "flex", justifyContent: "space-between", padding: "2px 0", fontSize: 9, color: "#149aa5", borderBottom: "1px dashed #f0f0f0" }}><span>🛠️ {name}</span><span style={{ fontWeight: 600 }}>Bs. {svc?.price || "—"}</span></div>; })}
           {parsed.repuestos.map(name => { const inv = inventoryList.find(i => i.name === name); return <div key={name} style={{ display: "flex", justifyContent: "space-between", padding: "2px 0", fontSize: 9, color: "#b45309", borderBottom: "1px dashed #f0f0f0" }}><span>📦 {name}</span><span style={{ fontWeight: 600 }}>Bs. {inv?.price || "—"}</span></div>; })}
           <div style={{ marginTop: 3, paddingTop: 3, borderTop: "1px solid #e5e5e5" }}>
             <div style={{ display: "flex", justifyContent: "space-between", padding: "1px 0", fontSize: 9, color: "#555" }}><span>Subtotal</span><span style={{ fontWeight: 600 }}>Bs. {Number(repair.estimatedCost) + Number(parsed.discount || 0)}</span></div>
             {Number(parsed.discount || 0) > 0 && <div style={{ display: "flex", justifyContent: "space-between", padding: "1px 0", fontSize: 9, color: "#ef4444" }}><span>🏷️ Descuento</span><span style={{ fontWeight: 600 }}>- Bs. {parsed.discount}</span></div>}
-            <div style={{ display: "flex", justifyContent: "space-between", padding: "3px 0 0", marginTop: 2, borderTop: "2px solid #e5e5e5" }}><span style={{ fontSize: 11, fontWeight: 800 }}>TOTAL COBRADO</span><span style={{ fontSize: 14, fontWeight: 800, color: accent }}>Bs. {repair.estimatedCost}</span></div>
+            <div style={{ display: "flex", justifyContent: "space-between", padding: "3px 0 0", marginTop: 2, borderTop: "2px solid #e5e5e5" }}><span style={{ fontSize: 11, fontWeight: 800 }}>TOTAL COBRADO</span><span style={{ fontSize: 14, fontWeight: 800, color: accent }}>Bs. {Math.round(repair.estimatedCost || 0).toLocaleString()}</span></div>
           </div>
         </div>
       </div>
@@ -175,9 +175,9 @@ export default function DeliveryPage() {
       <div className="no-print" style={{ position: "fixed", top: 0, left: 0, right: 0, padding: "10px 24px", background: "#0a0a12", display: "flex", justifyContent: "space-between", alignItems: "center", zIndex: 100 }}>
         <span style={{ color: "#eee", fontSize: 14, fontWeight: 600 }}>📄 Comprobante x2 — {ceCode}</span>
         <div style={{ display: "flex", gap: 10 }}>
-          <button onClick={() => window.open(`/delivery/view/${repair.code}${branchParam ? `?branchId=${branchParam}` : ""}`, "_blank")} style={{ padding: "8px 20px", background: "#6366f1", border: "none", borderRadius: 8, color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>📄 Ver Plana Completa</button>
+          <button onClick={() => window.open(`/delivery/view/${repair.code}${branchParam ? `?branchId=${branchParam}` : ""}`, "_blank")} style={{ padding: "8px 20px", background: "#1ab8c4", border: "none", borderRadius: 8, color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>📄 Ver Plana Completa</button>
           <button onClick={() => window.print()} style={{ padding: "8px 20px", background: accent, border: "none", borderRadius: 8, color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>🖨️ Imprimir</button>
-          <button onClick={() => window.close()} style={{ padding: "8px 20px", background: "#1e1e2e", border: "1px solid #2e2e3e", borderRadius: 8, color: "#888", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>✕ Cerrar</button>
+          <button onClick={() => window.close()} style={{ padding: "8px 20px", background: "#e8ebf2", border: "1px solid #2e2e3e", borderRadius: 8, color: "#888", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>✕ Cerrar</button>
         </div>
       </div>
 

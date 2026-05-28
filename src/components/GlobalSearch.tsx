@@ -14,8 +14,8 @@ interface SearchResult {
 }
 
 const TYPE_META: Record<string, { label: string; color: string; icon: string }> = {
-  repair: { label: "OT", color: "#6366f1", icon: "🔧" },
-  equipment: { label: "Equipo", color: "#06b6d4", icon: "💻" },
+  repair: { label: "OT", color: "#1ab8c4", icon: "⚙" },
+  equipment: { label: "Equipo", color: "#0891b2", icon: "💻" },
   console: { label: "Consola", color: "#f97316", icon: "🕹️" },
   quotation: { label: "Cotización", color: "#f59e0b", icon: "🧾" },
   sale: { label: "Venta", color: "#a855f7", icon: "💰" },
@@ -150,7 +150,7 @@ export function GlobalSearch({ inline = false }: { inline?: boolean }) {
       onClick={() => setOpen(false)}
       style={{
         position: "fixed", inset: 0, zIndex: 100,
-        background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)",
+        background: "rgba(30,42,58,0.35)", backdropFilter: "blur(6px)",
         display: "flex", alignItems: "flex-start", justifyContent: "center",
         paddingTop: "12vh",
       }}
@@ -160,9 +160,9 @@ export function GlobalSearch({ inline = false }: { inline?: boolean }) {
         style={{
           width: "min(600px, 94%)",
           background: "var(--bg-card)",
-          borderRadius: 16,
+          borderRadius: 12,
           border: "1px solid var(--border)",
-          boxShadow: "0 20px 60px rgba(0,0,0,0.5)",
+          boxShadow: "0 20px 60px rgba(26,29,46,0.40)",
           overflow: "hidden",
           maxHeight: "70vh",
           display: "flex", flexDirection: "column",
@@ -170,7 +170,7 @@ export function GlobalSearch({ inline = false }: { inline?: boolean }) {
       >
         {/* Input */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "16px 18px", borderBottom: "1px solid var(--border)" }}>
-          <span style={{ fontSize: 18, color: "#6366f1" }}>🔍</span>
+          <span style={{ fontSize: 18, color: "#1ab8c4" }}>🔍</span>
           <input
             ref={inputRef}
             value={q}
@@ -223,9 +223,9 @@ export function GlobalSearch({ inline = false }: { inline?: boolean }) {
                   style={{
                     display: "flex", alignItems: "center", gap: 12,
                     width: "100%", padding: "10px 18px", border: "none",
-                    background: isFocus ? "rgba(99,102,241,0.1)" : "transparent",
+                    background: isFocus ? "rgba(26,184,196,0.06)" : "transparent",
                     cursor: "pointer", textAlign: "left",
-                    borderLeft: isFocus ? "3px solid #6366f1" : "3px solid transparent",
+                    borderLeft: isFocus ? "3px solid #1ab8c4" : "3px solid transparent",
                     transition: "all 0.1s",
                   }}
                 >

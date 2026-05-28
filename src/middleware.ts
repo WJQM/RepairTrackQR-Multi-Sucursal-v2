@@ -17,7 +17,6 @@ const PROTECTED_PREFIXES = [
   "/extracto",
   "/new-order",
   "/print",
-  "/messages",
   "/admin",
   "/certificates",
 ];
@@ -61,7 +60,6 @@ export const config = {
     "/extracto/:path*",
     "/new-order/:path*",
     "/print/:path*",
-    "/messages/:path*",
     "/admin/:path*",
     "/certificates/:path*",
   ],

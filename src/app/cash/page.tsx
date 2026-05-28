@@ -41,9 +41,9 @@ export default function CashPage() {
   useEffect(() => {
     const token = sessionStorage.getItem("token"); const userData = sessionStorage.getItem("user");
     if (!token || !userData) { router.push("/"); return; }
-    const u = JSON.parse(userData); setUser(u);
+    const u = (() => { try { return JSON.parse(userData); } catch { return null; } })(); setUser(u);
     if (u.role === "tech") { router.push("/asignaciones"); return; }
-    fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings({ companyName: d.companyName, logo: d.logo }); }).catch(() => {});
+    fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings({ companyName: d.companyName, logo: d.logo }).catch(() => {}); }).catch(() => {});
     if (u.role === "superadmin") {
       apiFetch("/api/branches").then(r => r.json()).then(b => { if (Array.isArray(b)) { setBranches(b); const ab = sessionStorage.getItem("activeBranchId"); if (ab) setActiveBranch(ab); else if (b.length) { setActiveBranch(b[0].id); setActiveBranchId(b[0].id); } } }).catch(() => {});
     } else { setActiveBranch(u.branchId || ""); }
@@ -98,10 +98,10 @@ export default function CashPage() {
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg-primary)", color: "var(--text-primary)" }}>
       <style>{`
-        .sidebar-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 14px; border-radius: 10px; border: none; font-size: 12px; font-weight: 600; cursor: pointer; background: transparent; color: var(--text-muted); transition: all 0.15s; text-align: left; }
-        .sidebar-btn:hover { background: rgba(99,102,241,0.06); color: var(--text-secondary); }
-        .sidebar-btn.active { background: rgba(99,102,241,0.12); color: #818cf8; }
-        .sidebar-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+        .sidebar-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 14px; border-radius: 10px; border: none; font-size: 12px; font-weight: 600; cursor: pointer; background: transparent; color: var(--sidebar-text); transition: all 0.15s; text-align: left; }
+        .sidebar-btn:hover { background: rgba(26,184,196,0.05); color: var(--text-secondary); }
+        .sidebar-btn.active { background: rgba(26,184,196,0.07); color: #2dd4df; }
+        .sidebar-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; background: var(--sidebar-item); color: var(--sidebar-text); }
         @media(max-width:1024px){
           .sidebar-desktop{transform:translateX(-100%)!important}
           .sidebar-desktop.open{transform:translateX(0)!important}
@@ -113,7 +113,7 @@ export default function CashPage() {
       <AppSidebar user={user} />
 
       {/* MAIN */}
-      <div className="main-content" style={{ marginLeft: 200, padding: "24px 28px 60px" }}>
+      <div className="main-content" style={{ marginLeft: 210, padding: "24px 28px 60px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, gap: 12 }}>
           <div>
             <h1 style={{ fontSize: 26, fontWeight: 800, marginBottom: 4 }}>💵 Caja Chica</h1>
@@ -129,7 +129,7 @@ export default function CashPage() {
             {/* Resúmenes */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14, marginBottom: 20 }}>
               {[
-                { label: "Hoy", data: data?.today, color: "#6366f1", icon: "🌅" },
+                { label: "Hoy", data: data?.today, color: "#1ab8c4", icon: "🌅" },
                 { label: "Este mes", data: data?.month, color: "#8b5cf6", icon: "📆" },
                 { label: "Filtro actual", data: { income: data?.summary?.totalIncome || 0, expense: data?.summary?.totalExpense || 0, balance: data?.summary?.balance || 0 }, color: "#10b981", icon: "📊" },
               ].map(c => (
@@ -153,7 +153,7 @@ export default function CashPage() {
             {/* Filtros */}
             <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
               {[
-                { k: "all", l: "Todos", c: "#6366f1" },
+                { k: "all", l: "Todos", c: "#1ab8c4" },
                 { k: "income", l: "Ingresos", c: "#10b981" },
                 { k: "expense", l: "Egresos", c: "#ef4444" },
               ].map(f => (
@@ -162,7 +162,7 @@ export default function CashPage() {
             </div>
 
             {/* Lista */}
-            <div style={{ background: "var(--bg-card)", borderRadius: 14, border: "1px solid var(--border)", overflow: "hidden" }}>
+            <div style={{ background: "var(--bg-card)", borderRadius: 14, border: "1.5px solid #cbd5e8", overflow: "hidden" }}>
               {filteredMov.length === 0 ? (
                 <div style={{ padding: 40, textAlign: "center", color: "var(--text-muted)", fontSize: 12 }}>No hay movimientos registrados</div>
               ) : (
@@ -170,7 +170,7 @@ export default function CashPage() {
                   const cat = CATEGORIES.find(c => c.value === m.category);
                   const isIncome = m.type === "income";
                   return (
-                    <div key={m.id} style={{ display: "flex", alignItems: "center", gap: 14, padding: "12px 16px", borderBottom: "1px solid var(--border)" }}>
+                    <div key={m.id} style={{ display: "flex", alignItems: "center", gap: 14, padding: "12px 16px", borderBottom: "1.5px solid #cbd5e8" }}>
                       <div style={{ width: 38, height: 38, borderRadius: 10, background: isIncome ? "rgba(16,185,129,0.1)" : "rgba(239,68,68,0.08)", color: isIncome ? "#10b981" : "#ef4444", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>{cat?.icon || (isIncome ? "↑" : "↓")}</div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontSize: 13, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{m.description}</div>
@@ -194,9 +194,9 @@ export default function CashPage() {
 
       {/* MODAL NUEVO MOVIMIENTO */}
       {showForm && (
-        <div onClick={() => setShowForm(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", backdropFilter: "blur(6px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 150, padding: 20 }}>
-          <div onClick={(e) => e.stopPropagation()} style={{ width: "100%", maxWidth: 480, background: "var(--bg-card)", borderRadius: 16, border: "1px solid var(--border)", overflow: "hidden" }}>
-            <div style={{ padding: "18px 22px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div onClick={() => setShowForm(false)} style={{ position: "fixed", inset: 0, background: "rgba(26,29,46,0.45)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 150, padding: 20 }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ width: "100%", maxWidth: 480, background: "var(--bg-card)", borderRadius: 12, border: "1.5px solid #cbd5e8", overflow: "hidden" }}>
+            <div style={{ padding: "18px 22px", borderBottom: "1.5px solid #cbd5e8", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <h3 style={{ fontSize: 15, fontWeight: 800 }}>💵 Nuevo movimiento</h3>
               <button onClick={() => setShowForm(false)} style={{ width: 28, height: 28, borderRadius: 8, border: "1px solid var(--border)", background: "var(--bg-tertiary)", color: "var(--text-muted)", cursor: "pointer" }}>✕</button>
             </div>
@@ -213,7 +213,7 @@ export default function CashPage() {
               <div>
                 <label style={{ fontSize: 10, color: "var(--text-muted)", textTransform: "uppercase", fontWeight: 700, marginBottom: 6, display: "block" }}>Categoría</label>
                 <select value={formCat} onChange={(e) => setFormCat(e.target.value)} style={{ width: "100%", padding: "10px 12px", background: "var(--bg-tertiary)", border: "1px solid var(--border)", borderRadius: 8, color: "var(--text-primary)", fontSize: 13 }}>
-                  {CATEGORIES.filter(c => c.type === formType || c.type === "both").map(c => <option key={c.value} value={c.value} style={{ background: "#111118" }}>{c.icon} {c.label}</option>)}
+                  {CATEGORIES.filter(c => c.type === formType || c.type === "both").map(c => <option key={c.value} value={c.value} style={{ background: "#ffffff" }}>{c.icon} {c.label}</option>)}
                 </select>
               </div>
               {/* Monto */}

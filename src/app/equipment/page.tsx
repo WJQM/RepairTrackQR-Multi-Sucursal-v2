@@ -15,7 +15,7 @@ function parseImages(img: string | null): string[] {
 
 const CONDITIONS = [
   { value: "disponible", label: "Disponible", icon: "✅", color: "#10b981" },
-  { value: "vendido", label: "Vendido", icon: "💰", color: "#6366f1" },
+  { value: "vendido", label: "Vendido", icon: "💰", color: "#1ab8c4" },
   { value: "en_reparacion", label: "En reparación", icon: "🔧", color: "#f59e0b" },
 ];
 
@@ -74,11 +74,11 @@ export default function EquipmentPage() {
   };
 
   useEffect(() => {
-    fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings({ companyName: d.companyName, logo: d.logo }); }).catch(() => {});
+    fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings({ companyName: d.companyName, logo: d.logo }).catch(() => {}); }).catch(() => {});
     const token = sessionStorage.getItem("token");
     const userData = sessionStorage.getItem("user");
     if (!token || !userData) { router.push("/"); return; }
-    const parsed = JSON.parse(userData);
+    const parsed = (() => { try { return JSON.parse(userData); } catch { return null; } })();
     if (parsed.role !== "admin" && parsed.role !== "superadmin") { router.push("/dashboard"); return; }
     setUser(parsed);
     if (parsed.role === "superadmin") {
@@ -89,7 +89,7 @@ export default function EquipmentPage() {
     const savedForm = sessionStorage.getItem("equipmentFormData");
     if (savedForm) {
       try {
-        const data = JSON.parse(savedForm);
+        const data = (() => { try { return JSON.parse(savedForm); } catch { return null; } })();
         setEditingId(data.editingId || null); setType(data.type || "laptop");
         setBrand(data.brand || ""); setModel(data.model || ""); setProcessor(data.processor || "");
         setRam(data.ram || ""); setStorage(data.storage || ""); setStorage2(data.storage2 || "");
@@ -105,7 +105,7 @@ export default function EquipmentPage() {
     const capturedData = sessionStorage.getItem("capturedImage");
     if (capturedData) {
       try {
-        const { url, preview } = JSON.parse(capturedData);
+        const { url, preview } = (() => { try { return JSON.parse(capturedData); } catch { return {}; } })();
         setImageUrls(prev => [...prev, url]); setImagePreviews(prev => [...prev, preview]);
         setShowForm(true);
         setTimeout(() => sileo.success({ title: "Foto capturada" }), 500);
@@ -201,11 +201,11 @@ export default function EquipmentPage() {
   if (!user) return <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg-primary)", color: "var(--text-muted)", fontSize: 14 }}>Cargando...</div>;
 
   return (
-    <div className="main-content" style={{ minHeight: "100vh", background: "var(--bg-primary)", paddingLeft: 200, paddingTop: 0 }}>
+    <div className="main-content" style={{ minHeight: "100vh", background: "var(--bg-primary)", paddingLeft: 210, paddingTop: 0 }}>
       {viewImage && (
         <div onClick={() => setViewImage(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", backdropFilter: "blur(10px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 300, cursor: "pointer" }}>
           <div style={{ position: "relative", maxWidth: "90%", maxHeight: "90%" }}>
-            <img src={viewImage} alt="Equipo" style={{ maxWidth: "100%", maxHeight: "85vh", borderRadius: 16, boxShadow: "0 20px 60px rgba(0,0,0,0.5)" }} />
+            <img src={viewImage} alt="Equipo" style={{ maxWidth: "100%", maxHeight: "85vh", borderRadius: 12, boxShadow: "0 20px 60px rgba(26,29,46,0.40)" }} />
             <button onClick={() => setViewImage(null)} style={{ position: "absolute", top: -14, right: -14, width: 32, height: 32, borderRadius: "50%", background: "rgba(239,68,68,0.9)", border: "none", color: "#fff", fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
           </div>
         </div>
@@ -215,10 +215,10 @@ export default function EquipmentPage() {
         @keyframes slideIn { from { opacity: 0; transform: translateX(80px) scale(0.95); } to { opacity: 1; transform: translateX(0) scale(1); } }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeScale { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
-        .sidebar-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 14px; border-radius: 10px; border: none; font-size: 12px; font-weight: 600; cursor: pointer; background: transparent; color: var(--text-muted); transition: all 0.15s; text-align: left; }
-        .sidebar-btn:hover { background: rgba(99,102,241,0.06); color: var(--text-secondary); }
-        .sidebar-btn.active { background: rgba(99,102,241,0.12); color: #818cf8; }
-        .sidebar-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+        .sidebar-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 14px; border-radius: 10px; border: none; font-size: 12px; font-weight: 600; cursor: pointer; background: transparent; color: var(--sidebar-text); transition: all 0.15s; text-align: left; }
+        .sidebar-btn:hover { background: rgba(26,184,196,0.05); color: var(--text-secondary); }
+        .sidebar-btn.active { background: rgba(26,184,196,0.07); color: #2dd4df; }
+        .sidebar-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; background: var(--sidebar-item); color: var(--sidebar-text); }
         .sidebar-group-btn{display:flex;align-items:center;justify-content:space-between;width:100%;padding:9px 14px;border-radius:10px;border:none;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.15s;text-align:left;margin-top:4px}
         .sidebar-group-btn:hover{filter:brightness(1.2)}
         .group-arrow{font-size:10px;transition:transform 0.2s}
@@ -251,7 +251,7 @@ export default function EquipmentPage() {
       {/* MAIN CONTENT */}
       <div style={{ maxWidth: 1200, margin: "0 auto", padding: "32px 24px" }}>
         <div style={{ marginBottom: 28 }}>
-          <h1 style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-0.5px" }}>💻 Equipos de Cómputo</h1>
+          <h1 style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-0.5px" }}>💻 Equipos para la venta</h1>
           <p style={{ color: "var(--text-muted)", fontSize: 14, marginTop: 4 }}>Laptops y equipos de escritorio — cada equipo es único, sin stock</p>
         </div>
 
@@ -260,11 +260,11 @@ export default function EquipmentPage() {
           {[
             { label: "Total Equipos", value: stats.total, icon: "💻", color: "#3b82f6" },
             { label: "Laptops", value: stats.laptops, icon: "💻", color: "#8b5cf6" },
-            { label: "Escritorio", value: stats.desktops, icon: "🖥️", color: "#06b6d4" },
+            { label: "Escritorio", value: stats.desktops, icon: "🖥️", color: "#0891b2" },
             { label: "Disponibles", value: stats.disponibles, icon: "✅", color: "#10b981" },
           ].map((s, i) => (
-            <div key={i} style={{ padding: "20px 18px", background: `linear-gradient(135deg, ${s.color}10, ${s.color}02)`, borderRadius: 16, border: `1px solid ${s.color}15`, animation: `fadeIn 0.4s ease-out ${i * 0.06}s both`, position: "relative", overflow: "hidden" }}>
-              <div style={{ position: "absolute", top: -10, right: -10, fontSize: 48, opacity: 0.06 }}>{s.icon}</div>
+            <div key={i} style={{ padding: "20px 18px", background: "#ffffff", borderRadius: 12, border: "1.5px solid #cbd5e8", borderTop: `4px solid ${s.color}`, boxShadow: "0 4px 18px rgba(30,42,58,0.10), 0 1px 3px rgba(30,42,58,0.05)", animation: `fadeIn 0.4s ease-out ${i * 0.06}s both`, position: "relative", overflow: "hidden" }}>
+              <div style={{ position: "absolute", top: 8, right: 12, fontSize: 28, opacity: 0.12 }}>{s.icon}</div>
               <div style={{ fontSize: 11, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.8px", fontWeight: 600 }}>{s.label}</div>
               <div style={{ fontSize: 28, fontWeight: 800, color: s.color, marginTop: 8 }}>{s.value}</div>
             </div>
@@ -281,16 +281,16 @@ export default function EquipmentPage() {
             <div className="filter-btns" style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
               {([{ key: "all", label: "Todos", icon: "📄" }, { key: "laptop", label: "Laptops", icon: "💻" }, { key: "desktop", label: "Escritorio", icon: "🖥️" }] as const).map(f => {
                 const isActive = filterType === f.key;
-                return (<button key={f.key} onClick={() => setFilterType(f.key)} style={{ padding: "8px 12px", borderRadius: 10, fontSize: 11, fontWeight: isActive ? 700 : 500, cursor: "pointer", display: "flex", alignItems: "center", gap: 5, background: isActive ? "rgba(99,102,241,0.12)" : "var(--bg-card)", border: isActive ? "1.5px solid rgba(99,102,241,0.4)" : "1.5px solid var(--border)", color: isActive ? "#818cf8" : "var(--text-muted)", whiteSpace: "nowrap" }}><span style={{ fontSize: 12 }}>{f.icon}</span>{f.label}</button>);
+                return (<button key={f.key} onClick={() => setFilterType(f.key)} style={{ padding: "8px 12px", borderRadius: 10, fontSize: 11, fontWeight: isActive ? 700 : 500, cursor: "pointer", display: "flex", alignItems: "center", gap: 5, background: isActive ? "rgba(26,184,196,0.07)" : "var(--bg-card)", border: isActive ? "1.5px solid rgba(26,184,196,0.25)" : "1.5px solid var(--border)", color: isActive ? "#2dd4df" : "var(--text-muted)", whiteSpace: "nowrap" }}><span style={{ fontSize: 12 }}>{f.icon}</span>{f.label}</button>);
               })}
             </div>
             <select value={filterCondition} onChange={(e) => setFilterCondition(e.target.value)} style={{ padding: "8px 12px", background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 10, color: "var(--text-primary)", fontSize: 12, cursor: "pointer", outline: "none" }}>
               <option value="all">Todos los estados</option>
-              {CONDITIONS.map(c => <option key={c.value} value={c.value}>{c.icon} {c.label}</option>)}
+              {(CONDITIONS || []).map(c => <option key={c.value} value={c.value}>{c.icon} {c.label}</option>)}
             </select>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
-            <button onClick={() => window.open("/equipment/print", "_blank")} style={{ padding: "10px 16px", background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.2)", borderRadius: 12, color: "#6366f1", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>🖨️ Extracto</button>
+            <button onClick={() => window.open("/equipment/print", "_blank")} style={{ padding: "10px 16px", background: "rgba(26,184,196,0.05)", border: "1px solid rgba(26,184,196,0.10)", borderRadius: 12, color: "#1ab8c4", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>🖨️ Extracto</button>
             <button onClick={() => { resetForm(); setShowForm(true); }} style={{ padding: "10px 20px", background: "linear-gradient(135deg, #3b82f6, #2563eb)", border: "none", borderRadius: 12, color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer", boxShadow: "0 4px 16px rgba(59,130,246,0.3)" }}>＋ Nuevo Equipo</button>
           </div>
         </div>
@@ -298,8 +298,8 @@ export default function EquipmentPage() {
         {/* ═══ FORM MODAL ═══ */}
         {showForm && (
           <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 150, padding: 20 }}>
-            <div style={{ width: "100%", maxWidth: 640, maxHeight: "90vh", overflow: "auto", background: "var(--bg-card)", borderRadius: 20, border: "1px solid rgba(59,130,246,0.2)", boxShadow: "0 20px 60px rgba(0,0,0,0.5)", animation: "fadeScale 0.3s ease-out" }}>
-              <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ width: "100%", maxWidth: 640, maxHeight: "90vh", overflow: "auto", background: "var(--bg-card)", borderRadius: 12, border: "1px solid rgba(59,130,246,0.2)", boxShadow: "0 20px 60px rgba(26,29,46,0.40)", animation: "fadeScale 0.3s ease-out" }}>
+              <div style={{ padding: "16px 20px", borderBottom: "1.5px solid #cbd5e8", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div>
                   <h3 style={{ fontSize: 15, fontWeight: 700, color: "#3b82f6" }}>{editingId ? "✏️ Editar Equipo" : "＋ Nuevo Equipo"}</h3>
                   {previewName && <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 3 }}>→ {previewName}</div>}
@@ -311,7 +311,7 @@ export default function EquipmentPage() {
                 <div>
                   <label style={labelStyle}>📷 Fotos del equipo</label>
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                    {imagePreviews.map((preview, idx) => (
+                    {(imagePreviews || []).map((preview, idx) => (
                       <div key={idx} style={{ width: 100, height: 130, borderRadius: 10, overflow: "hidden", position: "relative", border: "2px solid #3b82f6", flexShrink: 0 }}>
                         <img src={preview} alt={`Foto ${idx + 1}`} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                         <button type="button" onClick={() => removeImage(idx)} style={{ position: "absolute", top: 4, right: 4, width: 20, height: 20, borderRadius: "50%", background: "rgba(239,68,68,0.9)", border: "none", color: "#fff", fontSize: 10, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
@@ -333,12 +333,12 @@ export default function EquipmentPage() {
                     <label style={labelStyle}>Tipo *</label>
                     <div style={{ display: "flex", gap: 8 }}>
                       <button onClick={() => setType("laptop")} style={{ flex: 1, padding: "10px", borderRadius: 10, border: type === "laptop" ? "2px solid #8b5cf6" : "1px solid var(--border)", background: type === "laptop" ? "rgba(139,92,246,0.1)" : "var(--bg-tertiary)", color: type === "laptop" ? "#8b5cf6" : "var(--text-muted)", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>💻 Laptop</button>
-                      <button onClick={() => setType("desktop")} style={{ flex: 1, padding: "10px", borderRadius: 10, border: type === "desktop" ? "2px solid #06b6d4" : "1px solid var(--border)", background: type === "desktop" ? "rgba(6,182,212,0.1)" : "var(--bg-tertiary)", color: type === "desktop" ? "#06b6d4" : "var(--text-muted)", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>🖥️ Escritorio</button>
+                      <button onClick={() => setType("desktop")} style={{ flex: 1, padding: "10px", borderRadius: 10, border: type === "desktop" ? "2px solid #0891b2" : "1px solid var(--border)", background: type === "desktop" ? "rgba(6,182,212,0.1)" : "var(--bg-tertiary)", color: type === "desktop" ? "#0891b2" : "var(--text-muted)", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>🖥️ Escritorio</button>
                     </div>
                   </div>
                   <div><label style={labelStyle}>Estado</label>
                     <select value={condition} onChange={(e) => setCondition(e.target.value)} style={{ ...fieldStyle, cursor: "pointer" }}>
-                      {CONDITIONS.map(c => <option key={c.value} value={c.value}>{c.icon} {c.label}</option>)}
+                      {(CONDITIONS || []).map(c => <option key={c.value} value={c.value}>{c.icon} {c.label}</option>)}
                     </select>
                   </div>
                 </div>
@@ -352,8 +352,8 @@ export default function EquipmentPage() {
                 )}
 
                 {/* Specs - all unified */}
-                <div style={{ padding: "12px 14px", background: "rgba(99,102,241,0.04)", borderRadius: 12, border: "1px solid rgba(99,102,241,0.1)" }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: "#6366f1", marginBottom: 10, textTransform: "uppercase", letterSpacing: "0.5px" }}>⚙️ Especificaciones</div>
+                <div style={{ padding: "12px 14px", background: "rgba(26,184,196,0.04)", borderRadius: 12, border: "1px solid rgba(26,184,196,0.06)" }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: "#1ab8c4", marginBottom: 10, textTransform: "uppercase", letterSpacing: "0.5px" }}>⚙️ Especificaciones</div>
                   <div className="form-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                     <div><label style={labelStyle}>Procesador</label><input value={processor} onChange={(e) => setProcessor(e.target.value)} placeholder="Ej: Intel Core i5-1135G7" style={fieldStyle} /></div>
                     <div><label style={labelStyle}>Memoria RAM</label><input value={ram} onChange={(e) => setRam(e.target.value)} placeholder="Ej: 16GB DDR4" style={fieldStyle} /></div>
@@ -395,25 +395,25 @@ export default function EquipmentPage() {
           const dName = getDisplayName(eq);
           return (
             <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 150, padding: 20 }}>
-              <div style={{ width: "100%", maxWidth: 580, maxHeight: "90vh", overflow: "auto", background: "var(--bg-card)", borderRadius: 20, border: "1px solid var(--border)", boxShadow: "0 20px 60px rgba(0,0,0,0.5)", animation: "fadeScale 0.3s ease-out" }}>
-                <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div style={{ width: "100%", maxWidth: 580, maxHeight: "90vh", overflow: "auto", background: "var(--bg-card)", borderRadius: 12, border: "1.5px solid #cbd5e8", boxShadow: "0 20px 60px rgba(26,29,46,0.40)", animation: "fadeScale 0.3s ease-out" }}>
+                <div style={{ padding: "16px 20px", borderBottom: "1.5px solid #cbd5e8", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                     <h3 style={{ fontSize: 15, fontWeight: 700 }}>{eq.type === "laptop" ? "💻" : "🖥️"} {dName}</h3>
-                    {eq.code && <span style={{ fontSize: 11, fontWeight: 800, color: "#06b6d4", padding: "3px 10px", borderRadius: 6, background: "rgba(6,182,212,0.1)", border: "1px solid rgba(6,182,212,0.2)", fontFamily: "monospace", letterSpacing: "0.3px" }}>{eq.code}</span>}
+                    {eq.code && <span style={{ fontSize: 11, fontWeight: 800, color: "#0891b2", padding: "3px 10px", borderRadius: 6, background: "rgba(6,182,212,0.1)", border: "1px solid rgba(6,182,212,0.2)", fontFamily: "monospace", letterSpacing: "0.3px" }}>{eq.code}</span>}
                   </div>
                   <button onClick={() => setViewDetail(null)} style={{ width: 28, height: 28, borderRadius: 6, background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", color: "#ef4444", fontSize: 12, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
                 </div>
                 {imgs.length > 0 && (
                   <div style={{ display: "flex", gap: 8, padding: "16px 20px", overflowX: "auto" }}>
-                    {imgs.map((img, idx) => (<img key={idx} src={img} alt="" onClick={() => setViewImage(img)} style={{ width: 140, height: 100, objectFit: "cover", borderRadius: 10, cursor: "pointer", border: "2px solid var(--border)", flexShrink: 0 }} />))}
+                    {(imgs || []).map((img, idx) => (<img key={idx} src={img} alt="" onClick={() => setViewImage(img)} style={{ width: 140, height: 100, objectFit: "cover", borderRadius: 10, cursor: "pointer", border: "2px solid var(--border)", flexShrink: 0 }} />))}
                   </div>
                 )}
                 <div style={{ padding: "12px 20px 20px", display: "flex", flexDirection: "column", gap: 10 }}>
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                    <span style={{ padding: "4px 12px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: eq.type === "laptop" ? "rgba(139,92,246,0.1)" : "rgba(6,182,212,0.1)", color: eq.type === "laptop" ? "#8b5cf6" : "#06b6d4" }}>{eq.type === "laptop" ? "💻 Laptop" : "🖥️ Escritorio"}</span>
-                    <span style={{ padding: "4px 12px", borderRadius: 20, fontSize: 11, fontWeight: 700, background: `${cond.color}15`, color: cond.color }}>{cond.icon} {cond.label}</span>
+                    <span style={{ padding: "4px 12px", borderRadius: 12, fontSize: 11, fontWeight: 700, background: eq.type === "laptop" ? "rgba(139,92,246,0.1)" : "rgba(6,182,212,0.1)", color: eq.type === "laptop" ? "#8b5cf6" : "#0891b2" }}>{eq.type === "laptop" ? "💻 Laptop" : "🖥️ Escritorio"}</span>
+                    <span style={{ padding: "4px 12px", borderRadius: 12, fontSize: 11, fontWeight: 700, background: `${cond.color}15`, color: cond.color }}>{cond.icon} {cond.label}</span>
                   </div>
-                  <div style={{ fontSize: 22, fontWeight: 800, color: "#10b981" }}>Bs. {eq.price.toFixed(2)}</div>
+                  <div style={{ fontSize: 22, fontWeight: 800, color: "#10b981" }}>Bs. {Math.round(eq.price || 0).toLocaleString()}</div>
 
                   <div style={{ padding: "12px 14px", background: "var(--bg-tertiary)", borderRadius: 12, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
                     {eq.processor && <div style={{ fontSize: 12 }}><span style={{ color: "var(--text-muted)" }}>CPU:</span> <span style={{ fontWeight: 600 }}>{eq.processor}</span></div>}
@@ -431,8 +431,8 @@ export default function EquipmentPage() {
                   {eq.notes && <div style={{ padding: "10px 14px", background: "rgba(245,158,11,0.05)", borderRadius: 10, border: "1px solid rgba(245,158,11,0.1)", fontSize: 12, color: "var(--text-secondary)" }}>📝 {eq.notes}</div>}
                   <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Registrado: {new Date(eq.createdAt).toLocaleDateString("es-BO")}</div>
                   <div style={{ display: "flex", gap: 8, marginTop: 6, flexWrap: "wrap" }}>
-                    <button onClick={() => { editItem(eq); setViewDetail(null); }} style={{ flex: "1 1 90px", padding: "10px", background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.2)", borderRadius: 10, color: "#6366f1", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>✏️ Editar</button>
-                    <button onClick={() => { window.open(`/equipment/print/${eq.id}`, "_blank"); }} style={{ flex: "1 1 110px", padding: "10px", background: "rgba(6,182,212,0.08)", border: "1px solid rgba(6,182,212,0.2)", borderRadius: 10, color: "#06b6d4", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>🏷️ Ficha</button>
+                    <button onClick={() => { editItem(eq); setViewDetail(null); }} style={{ flex: "1 1 90px", padding: "10px", background: "rgba(26,184,196,0.05)", border: "1px solid rgba(26,184,196,0.10)", borderRadius: 10, color: "#1ab8c4", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>✏️ Editar</button>
+                    <button onClick={() => { window.open(`/equipment/print/${eq.id}`, "_blank"); }} style={{ flex: "1 1 110px", padding: "10px", background: "rgba(6,182,212,0.08)", border: "1px solid rgba(6,182,212,0.2)", borderRadius: 10, color: "#0891b2", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>🏷️ Ficha</button>
                     <button onClick={() => { window.open(`/equipment/print/${eq.id}?mode=sticker`, "_blank"); }} style={{ flex: "1 1 110px", padding: "10px", background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.2)", borderRadius: 10, color: "#10b981", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>🏷️ Solo QR</button>
                     <button onClick={() => deleteItem(eq.id)} style={{ padding: "10px 16px", background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.2)", borderRadius: 10, color: "#ef4444", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>🗑️ Eliminar</button>
                   </div>
@@ -446,7 +446,7 @@ export default function EquipmentPage() {
         {loading ? (
           <div style={{ padding: 60, textAlign: "center", color: "var(--text-muted)" }}>Cargando...</div>
         ) : filteredItems.length === 0 ? (
-          <div style={{ padding: 60, textAlign: "center", background: "var(--bg-card)", borderRadius: 18, border: "1px solid var(--border)" }}>
+          <div style={{ padding: 60, textAlign: "center", background: "var(--bg-card)", borderRadius: 14, border: "1.5px solid #cbd5e8" }}>
             <div style={{ fontSize: 48, marginBottom: 16 }}>💻</div>
             <h3 style={{ fontSize: 17, fontWeight: 700, marginBottom: 6 }}>No hay equipos registrados</h3>
             <p style={{ color: "var(--text-muted)", fontSize: 13, marginBottom: 16 }}>Agrega tu primer equipo de cómputo</p>
@@ -454,42 +454,42 @@ export default function EquipmentPage() {
           </div>
         ) : (
           <div className="eq-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 18 }}>
-            {filteredItems.map((item, i) => {
+            {(filteredItems || []).map((item, i) => {
               const imgs = parseImages(item.image);
               const firstImg = imgs[0] || null;
               const cond = getCondition(item.condition);
               const dName = getDisplayName(item);
               const disks = [item.storage, item.storage2].filter(Boolean);
               return (
-                <div key={item.id} onClick={() => setViewDetail(item)} style={{ background: "var(--bg-card)", borderRadius: 16, border: "1px solid var(--border)", overflow: "hidden", animation: `fadeIn 0.3s ease-out ${i * 0.04}s both`, cursor: "pointer", transition: "all 0.25s", position: "relative" }}>
-                  <div style={{ position: "absolute", top: 10, left: 10, zIndex: 2, padding: "3px 10px", borderRadius: 20, fontSize: 10, fontWeight: 700, background: `${cond.color}20`, color: cond.color, backdropFilter: "blur(8px)" }}>{cond.icon} {cond.label}</div>
+                <div key={item.id} onClick={() => setViewDetail(item)} style={{ background: "var(--bg-card)", borderRadius: 12, border: "1.5px solid #cbd5e8", overflow: "hidden", animation: `fadeIn 0.3s ease-out ${i * 0.04}s both`, cursor: "pointer", transition: "all 0.25s", position: "relative" }}>
+                  <div style={{ position: "absolute", top: 10, left: 10, zIndex: 2, padding: "3px 10px", borderRadius: 12, fontSize: 10, fontWeight: 700, background: `${cond.color}20`, color: cond.color, backdropFilter: "blur(8px)" }}>{cond.icon} {cond.label}</div>
                   <div style={{ position: "absolute", top: 10, right: 10, zIndex: 2, padding: "3px 8px", borderRadius: 6, background: item.type === "laptop" ? "rgba(139,92,246,0.85)" : "rgba(6,182,212,0.85)", color: "#fff", fontSize: 9, fontWeight: 700 }}>{item.type === "laptop" ? "💻 Laptop" : "🖥️ Desktop"}</div>
                   {imgs.length > 1 && <div style={{ position: "absolute", top: 34, right: 10, zIndex: 2, padding: "2px 6px", borderRadius: 5, background: "rgba(0,0,0,0.7)", color: "#fff", fontSize: 9, fontWeight: 700 }}>📷 {imgs.length}</div>}
                   <div onClick={(e) => { e.stopPropagation(); if (firstImg) setViewImage(firstImg); }} style={{ width: "100%", height: 200, background: "var(--bg-tertiary)", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", position: "relative" }}>
                     {firstImg ? (<img src={firstImg} alt={dName} style={{ width: "100%", height: "100%", objectFit: "cover" }} />) : (<div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}><span style={{ fontSize: 48, opacity: 0.15 }}>{item.type === "laptop" ? "💻" : "🖥️"}</span><span style={{ fontSize: 10, color: "var(--text-muted)", opacity: 0.5 }}>Sin imagen</span></div>)}
-                    <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "20px 14px 10px", background: "linear-gradient(transparent, rgba(0,0,0,0.8))" }}><div style={{ fontSize: 18, fontWeight: 800, color: "#fff" }}>Bs. {item.price.toFixed(2)}</div></div>
+                    <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "20px 14px 10px", background: "linear-gradient(transparent, rgba(0,0,0,0.8))" }}><div style={{ fontSize: 18, fontWeight: 800, color: "#fff" }}>Bs. {Math.round(item.price || 0).toLocaleString()}</div></div>
                   </div>
                   <div style={{ padding: "14px 16px" }}>
-                    {item.code && <div style={{ marginBottom: 6 }}><span style={{ fontSize: 10, fontWeight: 800, color: "#06b6d4", padding: "2px 8px", borderRadius: 6, background: "rgba(6,182,212,0.1)", border: "1px solid rgba(6,182,212,0.2)", fontFamily: "monospace", letterSpacing: "0.3px" }}>{item.code}</span></div>}
+                    {item.code && <div style={{ marginBottom: 6 }}><span style={{ fontSize: 10, fontWeight: 800, color: "#0891b2", padding: "2px 8px", borderRadius: 6, background: "rgba(6,182,212,0.1)", border: "1px solid rgba(6,182,212,0.2)", fontFamily: "monospace", letterSpacing: "0.3px" }}>{item.code}</span></div>}
                     <h3 style={{ fontSize: 14, fontWeight: 700, color: "var(--text-primary)", marginBottom: 8, lineHeight: 1.3 }}>{dName}</h3>
                     
                     {/* Specs badges */}
                     <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 10 }}>
-                      {item.processor && <span style={{ padding: "3px 8px", borderRadius: 6, background: "rgba(99,102,241,0.06)", border: "1px solid rgba(99,102,241,0.1)", fontSize: 10, color: "#818cf8", fontWeight: 600 }}>⚡ {item.processor}</span>}
+                      {item.processor && <span style={{ padding: "3px 8px", borderRadius: 6, background: "rgba(26,184,196,0.05)", border: "1px solid rgba(26,184,196,0.06)", fontSize: 10, color: "#2dd4df", fontWeight: 600 }}>⚡ {item.processor}</span>}
                       {item.ram && <span style={{ padding: "3px 8px", borderRadius: 6, background: "rgba(16,185,129,0.06)", border: "1px solid rgba(16,185,129,0.1)", fontSize: 10, color: "#10b981", fontWeight: 600 }}>🧠 {item.ram}</span>}
-                      {disks.map((d, di) => <span key={di} style={{ padding: "3px 8px", borderRadius: 6, background: "rgba(245,158,11,0.06)", border: "1px solid rgba(245,158,11,0.1)", fontSize: 10, color: "#f59e0b", fontWeight: 600 }}>💾 {d}</span>)}
+                      {(disks || []).map((d, di) => <span key={di} style={{ padding: "3px 8px", borderRadius: 6, background: "rgba(245,158,11,0.06)", border: "1px solid rgba(245,158,11,0.1)", fontSize: 10, color: "#f59e0b", fontWeight: 600 }}>💾 {d}</span>)}
                       {item.graphicsCard && <span style={{ padding: "3px 8px", borderRadius: 6, background: "rgba(236,72,153,0.06)", border: "1px solid rgba(236,72,153,0.1)", fontSize: 10, color: "#ec4899", fontWeight: 600 }}>🎮 {item.graphicsCard}</span>}
-                      {item.os && <span style={{ padding: "3px 8px", borderRadius: 6, background: "rgba(6,182,212,0.06)", border: "1px solid rgba(6,182,212,0.1)", fontSize: 10, color: "#06b6d4", fontWeight: 600 }}>🖥️ {item.os}</span>}
+                      {item.os && <span style={{ padding: "3px 8px", borderRadius: 6, background: "rgba(6,182,212,0.06)", border: "1px solid rgba(6,182,212,0.1)", fontSize: 10, color: "#0891b2", fontWeight: 600 }}>🖥️ {item.os}</span>}
                       {item.screenSize && <span style={{ padding: "3px 8px", borderRadius: 6, background: "rgba(168,85,247,0.06)", border: "1px solid rgba(168,85,247,0.1)", fontSize: 10, color: "#a855f7", fontWeight: 600 }}>📐 {item.screenSize}</span>}
-                      {item.cabinet && <span style={{ padding: "3px 8px", borderRadius: 6, background: "rgba(244,63,94,0.06)", border: "1px solid rgba(244,63,94,0.1)", fontSize: 10, color: "#f43f5e", fontWeight: 600 }}>🏗️ {item.cabinet}</span>}
+                      {item.cabinet && <span style={{ padding: "3px 8px", borderRadius: 6, background: "rgba(244,63,94,0.06)", border: "1px solid rgba(244,63,94,0.1)", fontSize: 10, color: "#e11d48", fontWeight: 600 }}>🏗️ {item.cabinet}</span>}
                       {item.motherboard && <span style={{ padding: "3px 8px", borderRadius: 6, background: "rgba(20,184,166,0.06)", border: "1px solid rgba(20,184,166,0.1)", fontSize: 10, color: "#14b8a6", fontWeight: 600 }}>🔌 {item.motherboard}</span>}
-                      {item.powerSupply && <span style={{ padding: "3px 8px", borderRadius: 6, background: "rgba(251,146,60,0.06)", border: "1px solid rgba(251,146,60,0.1)", fontSize: 10, color: "#fb923c", fontWeight: 600 }}>⚡ {item.powerSupply}</span>}
+                      {item.powerSupply && <span style={{ padding: "3px 8px", borderRadius: 6, background: "rgba(251,146,60,0.06)", border: "1px solid rgba(251,146,60,0.1)", fontSize: 10, color: "#ea580c", fontWeight: 600 }}>⚡ {item.powerSupply}</span>}
                       {item.accessories && <span style={{ padding: "3px 8px", borderRadius: 6, background: "rgba(139,92,246,0.06)", border: "1px solid rgba(139,92,246,0.1)", fontSize: 10, color: "#8b5cf6", fontWeight: 600 }}>🎒 {item.accessories.length > 35 ? item.accessories.slice(0, 35) + "..." : item.accessories}</span>}
                     </div>
 
                     <div style={{ display: "flex", gap: 6 }}>
-                      <button onClick={(e) => { e.stopPropagation(); editItem(item); }} style={{ flex: 1, padding: "8px", background: "rgba(99,102,241,0.06)", border: "1px solid rgba(99,102,241,0.15)", borderRadius: 8, color: "#6366f1", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>✏️ Editar</button>
-                      <button onClick={(e) => { e.stopPropagation(); window.open(`/equipment/print/${item.id}`, "_blank"); }} title="Ficha técnica" style={{ padding: "8px 10px", background: "rgba(6,182,212,0.06)", border: "1px solid rgba(6,182,212,0.15)", borderRadius: 8, color: "#06b6d4", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>🏷️</button>
+                      <button onClick={(e) => { e.stopPropagation(); editItem(item); }} style={{ flex: 1, padding: "8px", background: "rgba(26,184,196,0.05)", border: "1px solid rgba(26,184,196,0.08)", borderRadius: 8, color: "#1ab8c4", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>✏️ Editar</button>
+                      <button onClick={(e) => { e.stopPropagation(); window.open(`/equipment/print/${item.id}`, "_blank"); }} title="Ficha técnica" style={{ padding: "8px 10px", background: "rgba(6,182,212,0.06)", border: "1px solid rgba(6,182,212,0.15)", borderRadius: 8, color: "#0891b2", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>🏷️</button>
                       <button onClick={(e) => { e.stopPropagation(); deleteItem(item.id); }} style={{ padding: "8px 12px", background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.15)", borderRadius: 8, color: "#ef4444", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>🗑️</button>
                     </div>
                   </div>

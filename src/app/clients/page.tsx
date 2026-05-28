@@ -35,11 +35,11 @@ export default function ClientsPage() {
   useEffect(() => {
     const token = sessionStorage.getItem("token"); const userData = sessionStorage.getItem("user");
     if (!token || !userData) { router.push("/"); return; }
-    const u = JSON.parse(userData); setUser(u);
+    const u = (() => { try { return JSON.parse(userData); } catch { return null; } })(); setUser(u);
     if (u.role === "tech") { router.push("/asignaciones"); return; }
-    fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings({ companyName: d.companyName, logo: d.logo }); }).catch(() => {});
+    fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings({ companyName: d.companyName, logo: d.logo }).catch(() => {}); }).catch(() => {});
     if (u.role === "superadmin") {
-      apiFetch("/api/branches").then(r => r.json()).then(b => { if (Array.isArray(b)) { setBranches(b); const ab = sessionStorage.getItem("activeBranchId"); if (ab) setActiveBranch(ab); else if (b.length) { setActiveBranch(b[0].id); setActiveBranchId(b[0].id); } } }).catch(() => {});
+      apiFetch("/api/branches").then(r => r.ok ? r.json() : Promise.reject(r.status)).then(b => { if (Array.isArray(b)) { setBranches(b); const ab = sessionStorage.getItem("activeBranchId"); if (ab) setActiveBranch(ab); else if (b.length) { setActiveBranch(b[0].id); setActiveBranchId(b[0].id); } } }).catch(() => {});
     } else { setActiveBranch(u.branchId || ""); }
     load();
   }, []);
@@ -63,10 +63,10 @@ export default function ClientsPage() {
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg-primary)", color: "var(--text-primary)" }}>
       <style>{`
-        .sidebar-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 14px; border-radius: 10px; border: none; font-size: 12px; font-weight: 600; cursor: pointer; background: transparent; color: var(--text-muted); transition: all 0.15s; text-align: left; }
-        .sidebar-btn:hover { background: rgba(99,102,241,0.06); color: var(--text-secondary); }
-        .sidebar-btn.active { background: rgba(99,102,241,0.12); color: #818cf8; }
-        .sidebar-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+        .sidebar-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 14px; border-radius: 10px; border: none; font-size: 12px; font-weight: 600; cursor: pointer; background: transparent; color: var(--sidebar-text); transition: all 0.15s; text-align: left; }
+        .sidebar-btn:hover { background: rgba(26,184,196,0.05); color: var(--text-secondary); }
+        .sidebar-btn.active { background: rgba(26,184,196,0.07); color: #2dd4df; }
+        .sidebar-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; background: var(--sidebar-item); color: var(--sidebar-text); }
         @media(max-width:1024px){
           .sidebar-desktop{transform:translateX(-100%)!important}
           .sidebar-desktop.open{transform:translateX(0)!important}
@@ -77,7 +77,7 @@ export default function ClientsPage() {
 
       <AppSidebar user={user} />
 
-      <div className="main-content" style={{ marginLeft: 200, padding: "24px 28px 60px" }}>
+      <div className="main-content" style={{ marginLeft: 210, padding: "24px 28px 60px" }}>
         <div style={{ marginBottom: 20 }}>
           <h1 style={{ fontSize: 26, fontWeight: 800, marginBottom: 4 }}>👥 Clientes frecuentes</h1>
           <p style={{ fontSize: 13, color: "var(--text-muted)" }}>{clients.length} clientes registrados con historial de compras y reparaciones</p>
@@ -93,12 +93,12 @@ export default function ClientsPage() {
           </div>
         ) : (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 12 }}>
-            {filtered.map((c, idx) => {
+            {(filtered || []).map((c, idx) => {
               const isVip = c.totalSpent >= 1000 || c.totalRepairs >= 5;
               return (
                 <button key={c.phoneKey} onClick={() => setSelected(c)} style={{ textAlign: "left", padding: 16, background: "var(--bg-card)", border: `1px solid ${isVip ? "rgba(245,158,11,0.3)" : "var(--border)"}`, borderRadius: 14, cursor: "pointer", transition: "all 0.2s" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-                    <div style={{ width: 40, height: 40, borderRadius: 10, background: isVip ? "linear-gradient(135deg,#fbbf24,#f59e0b)" : "linear-gradient(135deg,#6366f1,#818cf8)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 14, fontWeight: 800, flexShrink: 0 }}>
+                    <div style={{ width: 40, height: 40, borderRadius: 10, background: isVip ? "linear-gradient(135deg,#fbbf24,#f59e0b)" : "linear-gradient(135deg,#1ab8c4,#2dd4df)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 14, fontWeight: 800, flexShrink: 0 }}>
                       {c.name.split(" ").slice(0, 2).map(w => w[0]?.toUpperCase()).join("") || "?"}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
@@ -111,7 +111,7 @@ export default function ClientsPage() {
                   </div>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, fontSize: 10 }}>
                     <div><div style={{ color: "var(--text-muted)" }}>Total gastado</div><div style={{ fontWeight: 700, color: "#10b981", fontSize: 13 }}>{fmtBs(c.totalSpent)}</div></div>
-                    <div><div style={{ color: "var(--text-muted)" }}>OTs</div><div style={{ fontWeight: 700, color: "#6366f1", fontSize: 13 }}>{c.totalRepairs}</div></div>
+                    <div><div style={{ color: "var(--text-muted)" }}>OTs</div><div style={{ fontWeight: 700, color: "#1ab8c4", fontSize: 13 }}>{c.totalRepairs}</div></div>
                     <div><div style={{ color: "var(--text-muted)" }}>Ventas / COT</div><div style={{ fontWeight: 700, color: "#a855f7", fontSize: 12 }}>{c.totalSales} / {c.totalQuotations}</div></div>
                     <div><div style={{ color: "var(--text-muted)" }}>Última visita</div><div style={{ fontWeight: 700, color: "var(--text-secondary)", fontSize: 11 }}>{fmtDate(c.lastActivity)}</div></div>
                   </div>
@@ -124,10 +124,10 @@ export default function ClientsPage() {
 
       {/* MODAL DETALLE */}
       {selected && (
-        <div onClick={() => setSelected(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", backdropFilter: "blur(6px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 150, padding: 20 }}>
-          <div onClick={(e) => e.stopPropagation()} style={{ width: "100%", maxWidth: 600, maxHeight: "85vh", background: "var(--bg-card)", borderRadius: 16, border: "1px solid var(--border)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
-            <div style={{ padding: "18px 22px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 12 }}>
-              <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg,#6366f1,#818cf8)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 16, fontWeight: 800 }}>{selected.name.split(" ").slice(0, 2).map(w => w[0]?.toUpperCase()).join("") || "?"}</div>
+        <div onClick={() => setSelected(null)} style={{ position: "fixed", inset: 0, background: "rgba(26,29,46,0.45)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 150, padding: 20 }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ width: "100%", maxWidth: 600, maxHeight: "85vh", background: "var(--bg-card)", borderRadius: 12, border: "1.5px solid #cbd5e8", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+            <div style={{ padding: "18px 22px", borderBottom: "1.5px solid #cbd5e8", display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{ width: 44, height: 44, borderRadius: 12, background: "linear-gradient(135deg,#1ab8c4,#2dd4df)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontSize: 16, fontWeight: 800 }}>{selected.name.split(" ").slice(0, 2).map(w => w[0]?.toUpperCase()).join("") || "?"}</div>
               <div style={{ flex: 1 }}>
                 <h3 style={{ fontSize: 16, fontWeight: 800 }}>{selected.name}</h3>
                 <p style={{ fontSize: 11, color: "var(--text-muted)", fontFamily: "monospace" }}>📱 {selected.phone}{selected.email && ` · 📧 ${selected.email}`}</p>
@@ -136,7 +136,7 @@ export default function ClientsPage() {
             </div>
             <div style={{ padding: 22, overflow: "auto", flex: 1 }}>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8, marginBottom: 18 }}>
-                <div style={{ padding: 10, background: "rgba(99,102,241,0.08)", borderRadius: 8, textAlign: "center" }}><div style={{ fontSize: 20, fontWeight: 800, color: "#6366f1" }}>{selected.totalRepairs}</div><div style={{ fontSize: 9, color: "var(--text-muted)" }}>OTs</div></div>
+                <div style={{ padding: 10, background: "rgba(26,184,196,0.05)", borderRadius: 8, textAlign: "center" }}><div style={{ fontSize: 20, fontWeight: 800, color: "#1ab8c4" }}>{selected.totalRepairs}</div><div style={{ fontSize: 9, color: "var(--text-muted)" }}>OTs</div></div>
                 <div style={{ padding: 10, background: "rgba(245,158,11,0.08)", borderRadius: 8, textAlign: "center" }}><div style={{ fontSize: 20, fontWeight: 800, color: "#f59e0b" }}>{selected.totalQuotations}</div><div style={{ fontSize: 9, color: "var(--text-muted)" }}>COT</div></div>
                 <div style={{ padding: 10, background: "rgba(168,85,247,0.08)", borderRadius: 8, textAlign: "center" }}><div style={{ fontSize: 20, fontWeight: 800, color: "#a855f7" }}>{selected.totalSales}</div><div style={{ fontSize: 9, color: "var(--text-muted)" }}>Ventas</div></div>
                 <div style={{ padding: 10, background: "rgba(16,185,129,0.08)", borderRadius: 8, textAlign: "center" }}><div style={{ fontSize: 13, fontWeight: 800, color: "#10b981" }}>{fmtBs(selected.totalSpent)}</div><div style={{ fontSize: 9, color: "var(--text-muted)" }}>Gastado</div></div>
@@ -149,7 +149,7 @@ export default function ClientsPage() {
                       const st = STATUS_LABELS[r.status] || { label: r.status, color: "#94a3b8" };
                       return (
                         <div key={r.code} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 10px", background: "var(--bg-tertiary)", borderRadius: 8 }}>
-                          <span style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, color: "#6366f1" }}>{r.code}</span>
+                          <span style={{ fontFamily: "monospace", fontSize: 11, fontWeight: 700, color: "#1ab8c4" }}>{r.code}</span>
                           <span style={{ flex: 1, fontSize: 11 }}>{r.device}</span>
                           <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 4, background: `${st.color}15`, color: st.color, fontWeight: 700 }}>{st.label}</span>
                           <span style={{ fontSize: 11, fontWeight: 700, color: "#10b981" }}>{fmtBs(r.cost)}</span>

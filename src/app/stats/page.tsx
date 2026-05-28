@@ -27,24 +27,24 @@ interface StatsData {
 
 const STATUS_META: Record<string, { label: string; color: string; icon: string }> = {
   pending: { label: "Pendiente", color: "#f59e0b", icon: "⏳" },
-  diagnosed: { label: "Diagnosticado", color: "#06b6d4", icon: "🔍" },
+  diagnosed: { label: "Diagnosticado", color: "#0891b2", icon: "🔍" },
   waiting_parts: { label: "Esperando Repuestos", color: "#f97316", icon: "📦" },
-  in_progress: { label: "En Progreso", color: "#6366f1", icon: "🔧" },
+  in_progress: { label: "En Progreso", color: "#1ab8c4", icon: "🔧" },
   completed: { label: "Completado", color: "#10b981", icon: "✅" },
   delivered: { label: "Entregado", color: "#8b5cf6", icon: "📬" },
 };
 
 const DOC_TYPE_META: Record<string, { label: string; color: string; icon: string }> = {
-  ot: { label: "OT (Reparación)", color: "#6366f1", icon: "🔧" },
+  ot: { label: "OT (Reparación)", color: "#1ab8c4", icon: "🔧" },
   ce: { label: "CE (Entrega)", color: "#10b981", icon: "📬" },
   cot: { label: "Cotización", color: "#f59e0b", icon: "🧾" },
   nv: { label: "Nota de Venta", color: "#a855f7", icon: "💰" },
   cl: { label: "Certificado", color: "#ec4899", icon: "🏅" },
-  eq: { label: "Equipo", color: "#06b6d4", icon: "💻" },
+  eq: { label: "Equipo", color: "#0891b2", icon: "💻" },
   cn: { label: "Consola", color: "#f97316", icon: "🕹️" },
   vg: { label: "Videojuego", color: "#ef4444", icon: "🎮" },
   sw: { label: "Programa", color: "#8b5cf6", icon: "💿" },
-  track: { label: "Seguimiento", color: "#818cf8", icon: "📋" },
+  track: { label: "Seguimiento", color: "#2dd4df", icon: "📋" },
   quotation: { label: "Documento", color: "#94a3b8", icon: "📄" },
 };
 
@@ -61,9 +61,9 @@ export default function StatsPage() {
   useEffect(() => {
     const token = sessionStorage.getItem("token"); const userData = sessionStorage.getItem("user");
     if (!token || !userData) { router.push("/"); return; }
-    const u = JSON.parse(userData); setUser(u);
+    const u = (() => { try { return JSON.parse(userData); } catch { return null; } })(); setUser(u);
     if (u.role === "tech") { router.push("/asignaciones"); return; }
-    fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings({ companyName: d.companyName, logo: d.logo }); }).catch(() => {});
+    fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings({ companyName: d.companyName, logo: d.logo }).catch(() => {}); }).catch(() => {});
     if (u.role === "superadmin") {
       apiFetch("/api/branches").then(r => r.json()).then(b => { if (Array.isArray(b)) { setBranches(b); const ab = sessionStorage.getItem("activeBranchId"); if (ab) setActiveBranch(ab); else if (b.length > 0) { setActiveBranch(b[0].id); setActiveBranchId(b[0].id); } } }).catch(() => {});
     } else { setActiveBranch(u.branchId || ""); }
@@ -96,12 +96,12 @@ export default function StatsPage() {
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg-primary)", color: "var(--text-primary)" }}>
       <style>{`
-        .sidebar-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 14px; border-radius: 10px; border: none; font-size: 12px; font-weight: 600; cursor: pointer; background: transparent; color: var(--text-muted); transition: all 0.15s; text-align: left; }
-        .sidebar-btn:hover { background: rgba(99,102,241,0.06); color: var(--text-secondary); }
-        .sidebar-btn.active { background: rgba(99,102,241,0.12); color: #818cf8; }
-        .sidebar-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+        .sidebar-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 14px; border-radius: 10px; border: none; font-size: 12px; font-weight: 600; cursor: pointer; background: transparent; color: var(--sidebar-text); transition: all 0.15s; text-align: left; }
+        .sidebar-btn:hover { background: rgba(26,184,196,0.05); color: var(--text-secondary); }
+        .sidebar-btn.active { background: rgba(26,184,196,0.07); color: #2dd4df; }
+        .sidebar-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; background: var(--sidebar-item); color: var(--sidebar-text); }
         .stat-card { padding: 20px; background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border); transition: all 0.2s; }
-        .stat-card:hover { border-color: rgba(99,102,241,0.2); }
+        .stat-card:hover { border-color: rgba(26,184,196,0.10); }
         @media(max-width:1024px){
           .sidebar-desktop{transform:translateX(-100%)!important}
           .sidebar-desktop.open{transform:translateX(0)!important}
@@ -114,7 +114,7 @@ export default function StatsPage() {
       <AppSidebar user={user} />
 
       {/* MAIN */}
-      <div className="main-content" style={{ marginLeft: 200, padding: "24px 28px 60px", maxWidth: "100%" }}>
+      <div className="main-content" style={{ marginLeft: 210, padding: "24px 28px 60px", maxWidth: "100%" }}>
         {/* HEADER */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20, gap: 12, flexWrap: "wrap" }}>
           <div>
@@ -127,7 +127,7 @@ export default function StatsPage() {
         {loading ? (
           <div style={{ textAlign: "center", padding: 80, color: "var(--text-muted)", fontSize: 13 }}>Cargando estadísticas...</div>
         ) : errorMsg ? (
-          <div style={{ padding: 24, background: "rgba(239,68,68,0.08)", borderRadius: 12, border: "1px solid rgba(239,68,68,0.2)" }}>
+          <div style={{ padding: 24, background: "#fff5f5", borderRadius: 12, border: "1.5px solid rgba(239,68,68,0.25)" }}>
             <div style={{ fontSize: 14, fontWeight: 700, color: "#ef4444", marginBottom: 8 }}>⚠️ No se pudieron cargar las estadísticas</div>
             <div style={{ fontSize: 12, color: "var(--text-muted)", fontFamily: "monospace" }}>{errorMsg}</div>
             <button onClick={load} style={{ marginTop: 12, padding: "8px 16px", background: "#ef4444", border: "none", borderRadius: 8, color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>Reintentar</button>
@@ -142,8 +142,8 @@ export default function StatsPage() {
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 12 }}>
                 {[
                   { label: "Hoy", value: data.revenue.combined.today, icon: "🌅", color: "#10b981" },
-                  { label: "Esta semana", value: data.revenue.combined.week, icon: "📆", color: "#06b6d4" },
-                  { label: "Este mes", value: data.revenue.combined.month, icon: "📊", color: "#6366f1" },
+                  { label: "Esta semana", value: data.revenue.combined.week, icon: "📆", color: "#0891b2" },
+                  { label: "Este mes", value: data.revenue.combined.month, icon: "📊", color: "#1ab8c4" },
                   { label: "Este año", value: data.revenue.combined.year, icon: "🏆", color: "#8b5cf6" },
                   { label: "Histórico total", value: data.revenue.combined.all, icon: "💎", color: "#f59e0b" },
                 ].map(c => (
@@ -160,16 +160,16 @@ export default function StatsPage() {
 
             {/* DESGLOSE */}
             <div style={{ marginBottom: 24, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-              <div className="stat-card" style={{ borderTop: "3px solid #6366f1" }}>
+              <div className="stat-card" style={{ borderTop: "3px solid #1ab8c4" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
                   <span style={{ fontSize: 22 }}>🔧</span>
                   <h3 style={{ fontSize: 13, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.3px" }}>Ingresos por reparaciones</h3>
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10, fontSize: 11 }}>
-                  <div><div style={{ color: "var(--text-muted)" }}>Hoy</div><div style={{ fontWeight: 700, color: "#6366f1", fontSize: 14 }}>{fmtBs(data.revenue.repairs.today)}</div></div>
-                  <div><div style={{ color: "var(--text-muted)" }}>Semana</div><div style={{ fontWeight: 700, color: "#6366f1", fontSize: 14 }}>{fmtBs(data.revenue.repairs.week)}</div></div>
-                  <div><div style={{ color: "var(--text-muted)" }}>Mes</div><div style={{ fontWeight: 700, color: "#6366f1", fontSize: 14 }}>{fmtBs(data.revenue.repairs.month)}</div></div>
-                  <div><div style={{ color: "var(--text-muted)" }}>Total</div><div style={{ fontWeight: 700, color: "#6366f1", fontSize: 14 }}>{fmtBs(data.revenue.repairs.all)}</div></div>
+                  <div><div style={{ color: "var(--text-muted)" }}>Hoy</div><div style={{ fontWeight: 700, color: "#1ab8c4", fontSize: 14 }}>{fmtBs(data.revenue.repairs.today)}</div></div>
+                  <div><div style={{ color: "var(--text-muted)" }}>Semana</div><div style={{ fontWeight: 700, color: "#1ab8c4", fontSize: 14 }}>{fmtBs(data.revenue.repairs.week)}</div></div>
+                  <div><div style={{ color: "var(--text-muted)" }}>Mes</div><div style={{ fontWeight: 700, color: "#1ab8c4", fontSize: 14 }}>{fmtBs(data.revenue.repairs.month)}</div></div>
+                  <div><div style={{ color: "var(--text-muted)" }}>Total</div><div style={{ fontWeight: 700, color: "#1ab8c4", fontSize: 14 }}>{fmtBs(data.revenue.repairs.all)}</div></div>
                 </div>
               </div>
               <div className="stat-card" style={{ borderTop: "3px solid #a855f7" }}>
@@ -195,9 +195,9 @@ export default function StatsPage() {
                   const countH = Math.max(6, (t.count / maxTimelineCount) * 140);
                   return (
                     <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
-                      <div style={{ fontSize: 10, fontWeight: 700, color: "#6366f1" }}>{fmtBs(t.revenue)}</div>
+                      <div style={{ fontSize: 10, fontWeight: 700, color: "#1ab8c4" }}>{fmtBs(t.revenue)}</div>
                       <div style={{ width: "100%", display: "flex", gap: 4, alignItems: "flex-end", height: 140 }}>
-                        <div style={{ flex: 1, height: barH, background: "linear-gradient(180deg, #6366f1, #4338ca)", borderRadius: "6px 6px 0 0" }} title={`Ingresos: ${fmtBs(t.revenue)}`} />
+                        <div style={{ flex: 1, height: barH, background: "linear-gradient(180deg, #1ab8c4, #4338ca)", borderRadius: "6px 6px 0 0" }} title={`Ingresos: ${fmtBs(t.revenue)}`} />
                         <div style={{ flex: 1, height: countH, background: "linear-gradient(180deg, #10b981, #047857)", borderRadius: "6px 6px 0 0" }} title={`OTs: ${t.count}`} />
                       </div>
                       <div style={{ fontSize: 10, fontWeight: 600, color: "var(--text-muted)", textTransform: "uppercase" }}>{t.month}</div>
@@ -207,7 +207,7 @@ export default function StatsPage() {
                 })}
               </div>
               <div style={{ display: "flex", gap: 16, marginTop: 14, paddingTop: 12, borderTop: "1px solid var(--border)", fontSize: 10 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 6 }}><div style={{ width: 10, height: 10, borderRadius: 2, background: "#6366f1" }} />Ingresos OT (Bs)</div>
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}><div style={{ width: 10, height: 10, borderRadius: 2, background: "#1ab8c4" }} />Ingresos OT (Bs)</div>
                 <div style={{ display: "flex", alignItems: "center", gap: 6 }}><div style={{ width: 10, height: 10, borderRadius: 2, background: "#10b981" }} />Cantidad OTs</div>
               </div>
             </div>
@@ -237,7 +237,7 @@ export default function StatsPage() {
                   })}
                 </div>
               </div>
-              <div className="stat-card" style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", textAlign: "center", background: "linear-gradient(135deg, rgba(16,185,129,0.1), rgba(6,182,212,0.05))", border: "1px solid rgba(16,185,129,0.2)" }}>
+              <div className="stat-card" style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", textAlign: "center", background: "#ffffff", border: "1px solid var(--border)", borderTop: "4px solid #10b981", boxShadow: "0 4px 18px rgba(30,42,58,0.10), 0 1px 3px rgba(30,42,58,0.05)" }}>
                 <span style={{ fontSize: 38 }}>🎯</span>
                 <div style={{ fontSize: 10, fontWeight: 700, color: "#10b981", textTransform: "uppercase", letterSpacing: "0.5px", marginTop: 8 }}>Ticket Promedio</div>
                 <div style={{ fontSize: 24, fontWeight: 800, color: "#10b981", marginTop: 4 }}>{fmtBs(data.repairs.avgTicket)}</div>
@@ -252,7 +252,7 @@ export default function StatsPage() {
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {data.topTechnicians.map((t, idx) => (
                     <div key={t.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 12px", background: "var(--bg-tertiary)", borderRadius: 10 }}>
-                      <div style={{ width: 34, height: 34, borderRadius: "50%", background: idx === 0 ? "linear-gradient(135deg, #fbbf24, #f59e0b)" : idx === 1 ? "linear-gradient(135deg, #cbd5e1, #94a3b8)" : idx === 2 ? "linear-gradient(135deg, #f97316, #ea580c)" : "linear-gradient(135deg, #6366f1, #818cf8)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 800, fontSize: 13, flexShrink: 0 }}>
+                      <div style={{ width: 34, height: 34, borderRadius: "50%", background: idx === 0 ? "linear-gradient(135deg, #fbbf24, #f59e0b)" : idx === 1 ? "linear-gradient(135deg, #cbd5e1, #94a3b8)" : idx === 2 ? "linear-gradient(135deg, #f97316, #ea580c)" : "linear-gradient(135deg, #1ab8c4, #2dd4df)", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 800, fontSize: 13, flexShrink: 0 }}>
                         {idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `#${idx + 1}`}
                       </div>
                       {t.image ? <img src={t.image} alt="" style={{ width: 32, height: 32, borderRadius: "50%", objectFit: "cover" }} /> : <div style={{ width: 32, height: 32, borderRadius: "50%", background: "var(--bg-hover)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14 }}>👤</div>}
@@ -283,7 +283,7 @@ export default function StatsPage() {
                 <h3 style={{ fontSize: 12, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", marginBottom: 10 }}>🕹️ Consolas</h3>
                 <div style={{ display: "flex", flexDirection: "column", gap: 6, fontSize: 12 }}>
                   <div style={{ display: "flex", justifyContent: "space-between" }}><span>✅ Disponibles</span><strong style={{ color: "#10b981" }}>{data.consoles.disponibles}</strong></div>
-                  <div style={{ display: "flex", justifyContent: "space-between" }}><span>💰 Vendidas</span><strong style={{ color: "#6366f1" }}>{data.consoles.vendidas}</strong></div>
+                  <div style={{ display: "flex", justifyContent: "space-between" }}><span>💰 Vendidas</span><strong style={{ color: "#1ab8c4" }}>{data.consoles.vendidas}</strong></div>
                   <div style={{ display: "flex", justifyContent: "space-between" }}><span>🔖 Reservadas</span><strong style={{ color: "#f59e0b" }}>{data.consoles.reservadas}</strong></div>
                 </div>
               </div>
@@ -298,8 +298,8 @@ export default function StatsPage() {
                 <div style={{ marginBottom: 24, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: 12 }}>
                   {[
                     { label: "Visitas hoy", v: data.traffic.visits.today, u: data.traffic.visits.uniqueToday, color: "#10b981", icon: "🌅" },
-                    { label: "Esta semana", v: data.traffic.visits.week, u: data.traffic.visits.uniqueWeek, color: "#06b6d4", icon: "📆" },
-                    { label: "Este mes", v: data.traffic.visits.month, u: data.traffic.visits.uniqueMonth, color: "#6366f1", icon: "📊" },
+                    { label: "Esta semana", v: data.traffic.visits.week, u: data.traffic.visits.uniqueWeek, color: "#0891b2", icon: "📆" },
+                    { label: "Este mes", v: data.traffic.visits.month, u: data.traffic.visits.uniqueMonth, color: "#1ab8c4", icon: "📊" },
                     { label: "Histórico total", v: data.traffic.visits.all, u: null, color: "#f59e0b", icon: "💎" },
                   ].map(c => (
                     <div key={c.label} className="stat-card" style={{ borderLeft: `4px solid ${c.color}` }}>
@@ -344,7 +344,7 @@ export default function StatsPage() {
                         <>
                           <div style={{ display: "flex", alignItems: "flex-end", gap: 2, height: 100 }}>
                             {data.traffic.byHour.map(h => (
-                              <div key={h.hour} title={`${h.hour}:00 - ${h.count} visitas`} style={{ flex: 1, height: Math.max(3, (h.count / maxH) * 90), background: h.hour === peakHour.hour && peakHour.count > 0 ? "#f59e0b" : "#818cf8", borderRadius: "3px 3px 0 0", opacity: h.count === 0 ? 0.15 : 1 }} />
+                              <div key={h.hour} title={`${h.hour}:00 - ${h.count} visitas`} style={{ flex: 1, height: Math.max(3, (h.count / maxH) * 90), background: h.hour === peakHour.hour && peakHour.count > 0 ? "#f59e0b" : "#2dd4df", borderRadius: "3px 3px 0 0", opacity: h.count === 0 ? 0.15 : 1 }} />
                             ))}
                           </div>
                           <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6, fontSize: 9, color: "var(--text-muted)" }}>

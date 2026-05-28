@@ -52,11 +52,11 @@ export default function ExtractoPage() {
   const [settings, setSettings] = useState<{ companyName: string; logo: string | null }>({ companyName: "RepairTrackQR", logo: null });
 
   useEffect(() => {
-    fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings(d); }).catch(() => {});
+    fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings(d).catch(() => {}); }).catch(() => {});
     const userData = sessionStorage.getItem("user");
     const token = sessionStorage.getItem("token");
     if (!userData || !token) { router.push("/"); return; }
-    const parsed = JSON.parse(userData);
+    const parsed = (() => { try { return JSON.parse(userData); } catch { return null; } })();
     if (parsed.role !== "admin" && parsed.role !== "superadmin") { router.push("/dashboard"); return; }
     setUser(parsed);
     // Load branches for superadmin
@@ -167,7 +167,7 @@ export default function ExtractoPage() {
       const dateStr = new Date(r.createdAt).toLocaleDateString("es-BO", { day: "2-digit", month: "2-digit", year: "2-digit" });
       return `<tr style="background:${idx % 2 === 0 ? "#fff" : "#fafafa"}">
         <td style="padding:10px 14px;font-size:11px;border-bottom:1px solid #f0f0f0;color:#888;font-weight:600;text-align:center">${idx + 1}</td>
-        <td style="padding:10px 12px;font-size:12px;border-bottom:1px solid #f0f0f0;font-family:monospace;font-weight:700;color:#6366f1">${r.code}</td>
+        <td style="padding:10px 12px;font-size:12px;border-bottom:1px solid #f0f0f0;font-family:monospace;font-weight:700;color:#1ab8c4">${r.code}</td>
         <td style="padding:10px 12px;font-size:11px;border-bottom:1px solid #f0f0f0;font-weight:600">${devName}</td>
         <td style="padding:10px 12px;font-size:11px;border-bottom:1px solid #f0f0f0;color:#555">${r.issue}</td>
         <td style="padding:10px 12px;font-size:11px;border-bottom:1px solid #f0f0f0;text-align:center"><span style="padding:2px 8px;border-radius:12px;font-size:9px;font-weight:600;color:${st.color};background:${st.color}15">${st.icon} ${st.label}</span></td>
@@ -180,16 +180,16 @@ export default function ExtractoPage() {
     w.document.write(`<!DOCTYPE html><html><head><title>Extracto — ${client.clientName}</title>
 <style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Segoe UI',Arial,sans-serif;background:#fff;color:#111}@media print{@page{size:A4;margin:12mm}.no-print{display:none!important}body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style>
 </head><body>
-  <div class="no-print" style="position:fixed;top:0;left:0;right:0;padding:12px 24px;background:#111118;display:flex;justify-content:space-between;align-items:center;z-index:100">
+  <div class="no-print" style="position:fixed;top:0;left:0;right:0;padding:12px 24px;background:#ffffff;display:flex;justify-content:space-between;align-items:center;z-index:100">
     <span style="color:#eee;font-size:14px;font-weight:600">📋 Extracto — ${client.clientName}</span>
-    <div style="display:flex;gap:10px"><button onclick="window.print()" style="padding:8px 20px;background:linear-gradient(135deg,#6366f1,#7c3aed);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer">🖨️ Imprimir</button><button onclick="window.close()" style="padding:8px 20px;background:#1e1e2e;border:1px solid #2e2e3e;border-radius:8px;color:#888;font-size:13px;font-weight:600;cursor:pointer">✕ Cerrar</button></div>
+    <div style="display:flex;gap:10px"><button onclick="window.print()" style="padding:8px 20px;background:linear-gradient(135deg,#1ab8c4,#149aa5);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer">🖨️ Imprimir</button><button onclick="window.close()" style="padding:8px 20px;background:#e8ebf2;border:1px solid #2e2e3e;border-radius:8px;color:#888;font-size:13px;font-weight:600;cursor:pointer">✕ Cerrar</button></div>
   </div>
   <div style="max-width:800px;margin:0 auto;padding:80px 40px 40px">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #6366f1;padding-bottom:20px;margin-bottom:24px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #1ab8c4;padding-bottom:20px;margin-bottom:24px">
       <div><h1 style="font-size:28px;font-weight:800">${settings.companyName}</h1><p style="font-size:11px;color:#666;margin-top:4px">EXTRACTO DE CLIENTE</p></div>
       <div style="text-align:right"><p style="font-size:11px;color:#666">Fecha: ${today}</p><p style="font-size:11px;color:#666">Hora: ${time}</p></div>
     </div>
-    <div style="background:#6366f1;color:#fff;padding:14px 20px;border-radius:8px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center">
+    <div style="background:#1ab8c4;color:#fff;padding:14px 20px;border-radius:8px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center">
       <h2 style="font-size:16px;font-weight:700">📋 EXTRACTO DE CLIENTE</h2>
       <span style="font-size:12px;font-weight:600;background:rgba(255,255,255,0.2);padding:4px 14px;border-radius:20px">${clientRepairs.length} equipo${clientRepairs.length !== 1 ? "s" : ""}</span>
     </div>
@@ -230,7 +230,7 @@ export default function ExtractoPage() {
       const dateStr = new Date(r.createdAt).toLocaleDateString("es-BO", { day: "2-digit", month: "2-digit", year: "2-digit" });
       return `<tr style="background:${idx % 2 === 0 ? "#fff" : "#fafafa"}">
         <td style="padding:10px 14px;font-size:11px;border-bottom:1px solid #f0f0f0;color:#888;font-weight:600;text-align:center">${idx + 1}</td>
-        <td style="padding:10px 12px;font-size:12px;border-bottom:1px solid #f0f0f0;font-family:monospace;font-weight:700;color:#6366f1">${r.code}</td>
+        <td style="padding:10px 12px;font-size:12px;border-bottom:1px solid #f0f0f0;font-family:monospace;font-weight:700;color:#1ab8c4">${r.code}</td>
         <td style="padding:10px 12px;font-size:11px;border-bottom:1px solid #f0f0f0;font-weight:600">${devName}</td>
         <td style="padding:10px 12px;font-size:11px;border-bottom:1px solid #f0f0f0;font-weight:600">${r.clientName || "—"}</td>
         <td style="padding:10px 12px;font-size:11px;border-bottom:1px solid #f0f0f0;color:#555">${r.clientPhone || "—"}</td>
@@ -245,16 +245,16 @@ export default function ExtractoPage() {
     w.document.write(`<!DOCTYPE html><html><head><title>Extracto General</title>
 <style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Segoe UI',Arial,sans-serif;background:#fff;color:#111}@media print{@page{size:A4 landscape;margin:10mm}.no-print{display:none!important}body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style>
 </head><body>
-  <div class="no-print" style="position:fixed;top:0;left:0;right:0;padding:12px 24px;background:#111118;display:flex;justify-content:space-between;align-items:center;z-index:100">
+  <div class="no-print" style="position:fixed;top:0;left:0;right:0;padding:12px 24px;background:#ffffff;display:flex;justify-content:space-between;align-items:center;z-index:100">
     <span style="color:#eee;font-size:14px;font-weight:600">📊 Extracto General</span>
-    <div style="display:flex;gap:10px"><button onclick="window.print()" style="padding:8px 20px;background:linear-gradient(135deg,#6366f1,#7c3aed);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer">🖨️ Imprimir</button><button onclick="window.close()" style="padding:8px 20px;background:#1e1e2e;border:1px solid #2e2e3e;border-radius:8px;color:#888;font-size:13px;font-weight:600;cursor:pointer">✕ Cerrar</button></div>
+    <div style="display:flex;gap:10px"><button onclick="window.print()" style="padding:8px 20px;background:linear-gradient(135deg,#1ab8c4,#149aa5);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:700;cursor:pointer">🖨️ Imprimir</button><button onclick="window.close()" style="padding:8px 20px;background:#e8ebf2;border:1px solid #2e2e3e;border-radius:8px;color:#888;font-size:13px;font-weight:600;cursor:pointer">✕ Cerrar</button></div>
   </div>
   <div style="max-width:1100px;margin:0 auto;padding:80px 30px 40px">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #6366f1;padding-bottom:20px;margin-bottom:24px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #1ab8c4;padding-bottom:20px;margin-bottom:24px">
       <div><h1 style="font-size:28px;font-weight:800">${settings.companyName}</h1><p style="font-size:11px;color:#666;margin-top:4px">EXTRACTO GENERAL DE EQUIPOS</p></div>
-      <div style="text-align:right"><p style="font-size:11px;color:#666">Fecha: ${today}</p><p style="font-size:11px;color:#666">Hora: ${time}</p>${dateFrom || dateTo ? `<p style="font-size:11px;color:#6366f1;font-weight:600;margin-top:4px">Rango: ${dateFrom || "inicio"} → ${dateTo || "hoy"}</p>` : ""}</div>
+      <div style="text-align:right"><p style="font-size:11px;color:#666">Fecha: ${today}</p><p style="font-size:11px;color:#666">Hora: ${time}</p>${dateFrom || dateTo ? `<p style="font-size:11px;color:#1ab8c4;font-weight:600;margin-top:4px">Rango: ${dateFrom || "inicio"} → ${dateTo || "hoy"}</p>` : ""}</div>
     </div>
-    <div style="background:#6366f1;color:#fff;padding:14px 20px;border-radius:8px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center">
+    <div style="background:#1ab8c4;color:#fff;padding:14px 20px;border-radius:8px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center">
       <h2 style="font-size:16px;font-weight:700">📊 LISTADO GENERAL DE EQUIPOS</h2>
       <span style="font-size:12px;font-weight:600;background:rgba(255,255,255,0.2);padding:4px 14px;border-radius:20px">${allRepairs.length} equipo${allRepairs.length !== 1 ? "s" : ""} · ${allRepairs.filter(r => r.status !== "delivered").length} en taller</span>
     </div>
@@ -282,15 +282,15 @@ export default function ExtractoPage() {
   if (!user) return <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg-primary)", color: "var(--text-muted)", fontSize: 14 }}>Cargando...</div>;
 
   return (
-    <div className="main-content" style={{ minHeight: "100vh", background: "var(--bg-primary)", paddingLeft: 200, paddingTop: 0 }}>
+    <div className="main-content" style={{ minHeight: "100vh", background: "var(--bg-primary)", paddingLeft: 210, paddingTop: 0 }}>
 <style>{`
         @keyframes slideIn { from { opacity: 0; transform: translateX(80px) scale(0.95); } to { opacity: 1; transform: translateX(0) scale(1); } }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeScale { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
-        .sidebar-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 14px; border-radius: 10px; border: none; font-size: 12px; font-weight: 600; cursor: pointer; background: transparent; color: var(--text-muted); transition: all 0.15s; text-align: left; }
-        .sidebar-btn:hover { background: rgba(99,102,241,0.06); color: var(--text-secondary); }
-        .sidebar-btn.active { background: rgba(99,102,241,0.12); color: #818cf8; }
-        .sidebar-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; }
+        .sidebar-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 14px; border-radius: 10px; border: none; font-size: 12px; font-weight: 600; cursor: pointer; background: transparent; color: var(--sidebar-text); transition: all 0.15s; text-align: left; }
+        .sidebar-btn:hover { background: rgba(26,184,196,0.05); color: var(--text-secondary); }
+        .sidebar-btn.active { background: rgba(26,184,196,0.07); color: #2dd4df; }
+        .sidebar-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; background: var(--sidebar-item); color: var(--sidebar-text); }
         .row-hover:hover { background: rgba(99,102,241,0.03) !important; }
       
         @media(max-width:1024px){
@@ -315,8 +315,8 @@ export default function ExtractoPage() {
       {/* ═══ MODAL: SELECCIONAR CLIENTE ═══ */}
       {showClientPicker && (
         <div onClick={() => { setShowClientPicker(false); setClientSearch(""); }} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 150, padding: 20 }}>
-          <div onClick={(e) => e.stopPropagation()} style={{ width: "100%", maxWidth: 520, maxHeight: "80vh", background: "var(--bg-card)", borderRadius: 20, border: "1px solid rgba(99,102,241,0.2)", boxShadow: "0 20px 60px rgba(0,0,0,0.5)", animation: "fadeScale 0.3s ease-out", overflow: "hidden", display: "flex", flexDirection: "column" }}>
-            <div style={{ padding: "20px 24px 16px", borderBottom: "1px solid var(--border)" }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ width: "100%", maxWidth: 520, maxHeight: "80vh", background: "var(--bg-card)", borderRadius: 12, border: "1px solid rgba(26,184,196,0.10)", boxShadow: "0 20px 60px rgba(26,29,46,0.40)", animation: "fadeScale 0.3s ease-out", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+            <div style={{ padding: "20px 24px 16px", borderBottom: "1.5px solid #cbd5e8" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <div style={{ width: 36, height: 36, borderRadius: 10, background: "rgba(16,185,129,0.1)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 17 }}>👤</div>
@@ -335,15 +335,15 @@ export default function ExtractoPage() {
                 <div style={{ padding: 30, textAlign: "center", color: "var(--text-muted)", fontSize: 13 }}>No se encontraron clientes</div>
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                  {filteredPickerClients.map((c, i) => (
-                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", borderRadius: 12, border: "1px solid var(--border)", background: "var(--bg-tertiary)", cursor: "pointer", transition: "all 0.15s" }} onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#10b981"; e.currentTarget.style.background = "rgba(16,185,129,0.06)"; }} onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.background = "var(--bg-tertiary)"; }}>
+                  {(filteredPickerClients || []).map((c, i) => (
+                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", borderRadius: 12, border: "1.5px solid #cbd5e8", background: "var(--bg-tertiary)", cursor: "pointer", transition: "all 0.15s" }} onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#10b981"; e.currentTarget.style.background = "rgba(16,185,129,0.06)"; }} onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.background = "var(--bg-tertiary)"; }}>
                       <div style={{ width: 38, height: 38, borderRadius: 10, background: "linear-gradient(135deg, rgba(16,185,129,0.12), rgba(16,185,129,0.04))", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, flexShrink: 0 }}>👤</div>
                       <div style={{ flex: 1 }}>
                         <div style={{ fontSize: 13, fontWeight: 700 }}>{c.name}</div>
                         <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>{c.phone && `📱 ${c.phone} · `}💻 {c.count} equipo{c.count > 1 ? "s" : ""}{c.active > 0 ? ` · 🔧 ${c.active} en taller` : ""}</div>
                       </div>
                       <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
-                        <button onClick={(e) => { e.stopPropagation(); openClientDetail(c.name, c.phone); setShowClientPicker(false); setClientSearch(""); }} style={{ padding: "6px 10px", borderRadius: 8, background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.15)", color: "#6366f1", fontSize: 10, fontWeight: 700, cursor: "pointer" }}>📋 Ver</button>
+                        <button onClick={(e) => { e.stopPropagation(); openClientDetail(c.name, c.phone); setShowClientPicker(false); setClientSearch(""); }} style={{ padding: "6px 10px", borderRadius: 8, background: "rgba(26,184,196,0.05)", border: "1px solid rgba(26,184,196,0.08)", color: "#1ab8c4", fontSize: 10, fontWeight: 700, cursor: "pointer" }}>📋 Ver</button>
                         <button onClick={(e) => { e.stopPropagation(); printClientExtracto(c.name); setShowClientPicker(false); setClientSearch(""); }} style={{ padding: "6px 10px", borderRadius: 8, background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.15)", color: "#10b981", fontSize: 10, fontWeight: 700, cursor: "pointer" }}>🖨️ Imprimir</button>
                       </div>
                     </div>
@@ -358,15 +358,15 @@ export default function ExtractoPage() {
       {/* ═══ MODAL: DETALLE DE CLIENTE ═══ */}
       {viewClient && (
         <div onClick={() => setViewClient(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 150, padding: 20 }}>
-          <div onClick={(e) => e.stopPropagation()} style={{ width: "100%", maxWidth: 700, maxHeight: "85vh", background: "var(--bg-card)", borderRadius: 20, border: "1px solid rgba(99,102,241,0.2)", boxShadow: "0 20px 60px rgba(0,0,0,0.5)", animation: "fadeScale 0.3s ease-out", overflow: "hidden", display: "flex", flexDirection: "column" }}>
-            <div style={{ padding: "20px 24px", borderBottom: "1px solid var(--border)", background: "rgba(99,102,241,0.03)" }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ width: "100%", maxWidth: 700, maxHeight: "85vh", background: "var(--bg-card)", borderRadius: 12, border: "1px solid rgba(26,184,196,0.10)", boxShadow: "0 20px 60px rgba(26,29,46,0.40)", animation: "fadeScale 0.3s ease-out", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+            <div style={{ padding: "20px 24px", borderBottom: "1.5px solid #cbd5e8", background: "rgba(99,102,241,0.03)" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                  <div style={{ width: 48, height: 48, borderRadius: 12, background: "linear-gradient(135deg, rgba(99,102,241,0.15), rgba(99,102,241,0.05))", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>👤</div>
+                  <div style={{ width: 48, height: 48, borderRadius: 12, background: "linear-gradient(135deg, rgba(26,184,196,0.08), rgba(26,184,196,0.04))", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22 }}>👤</div>
                   <div>
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                       <h3 style={{ fontSize: 18, fontWeight: 800, margin: 0 }}>{viewClient.name}</h3>
-                      <span style={{ padding: "3px 10px", borderRadius: 20, fontSize: 10, fontWeight: 700, color: "#6366f1", background: "rgba(99,102,241,0.08)" }}>{viewClient.repairs.length} equipo{viewClient.repairs.length > 1 ? "s" : ""}</span>
+                      <span style={{ padding: "3px 10px", borderRadius: 12, fontSize: 10, fontWeight: 700, color: "#1ab8c4", background: "rgba(26,184,196,0.05)" }}>{viewClient.repairs.length} equipo{viewClient.repairs.length > 1 ? "s" : ""}</span>
                     </div>
                     <div style={{ display: "flex", gap: 12, marginTop: 4, fontSize: 12, color: "var(--text-muted)" }}>
                       {viewClient.phone && <span>📱 {viewClient.phone}</span>}
@@ -378,7 +378,7 @@ export default function ExtractoPage() {
               </div>
               <div className="stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginTop: 16 }}>
                 {[
-                  { label: "Total", value: viewClient.repairs.length, color: "#6366f1", bg: "rgba(99,102,241,0.06)" },
+                  { label: "Total", value: viewClient.repairs.length, color: "#1ab8c4", bg: "rgba(26,184,196,0.05)" },
                   { label: "En taller", value: viewClient.repairs.filter(r => !["completed", "delivered"].includes(r.status)).length, color: "#f59e0b", bg: "rgba(245,158,11,0.06)" },
                   { label: "Completados", value: viewClient.repairs.filter(r => r.status === "completed").length, color: "#10b981", bg: "rgba(16,185,129,0.06)" },
                   { label: "Entregados", value: viewClient.repairs.filter(r => r.status === "delivered").length, color: "#6b7280", bg: "rgba(107,114,128,0.06)" },
@@ -398,7 +398,7 @@ export default function ExtractoPage() {
                   const firstImage = parseImages(r.image)[0] || null;
                   const dateStr = new Date(r.createdAt).toLocaleDateString("es-BO", { day: "2-digit", month: "long", year: "numeric" });
                   return (
-                    <div key={r.id} style={{ padding: "14px", borderRadius: 12, border: "1px solid var(--border)", background: "var(--bg-tertiary)", animation: `fadeIn 0.25s ease-out ${ri * 0.04}s both` }}>
+                    <div key={r.id} style={{ padding: "14px", borderRadius: 12, border: "1.5px solid #cbd5e8", background: "var(--bg-tertiary)", animation: `fadeIn 0.25s ease-out ${ri * 0.04}s both` }}>
                       <div style={{ display: "flex", gap: 12 }}>
                         {firstImage ? (
                           <div style={{ width: 50, height: 50, borderRadius: 10, overflow: "hidden", border: `2px solid ${st.color}30`, flexShrink: 0 }}><img src={firstImage} alt={r.device} style={{ width: "100%", height: "100%", objectFit: "cover" }} /></div>
@@ -407,8 +407,8 @@ export default function ExtractoPage() {
                         )}
                         <div style={{ flex: 1 }}>
                           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                            <span style={{ fontFamily: "monospace", fontSize: 12, fontWeight: 700, color: "#6366f1", background: "rgba(99,102,241,0.08)", padding: "2px 8px", borderRadius: 6 }}>{r.code}</span>
-                            <span style={{ padding: "3px 10px", borderRadius: 20, fontSize: 10, fontWeight: 600, color: st.color, background: `${st.color}12`, border: `1px solid ${st.color}20` }}>{st.icon} {st.label}</span>
+                            <span style={{ fontFamily: "monospace", fontSize: 12, fontWeight: 700, color: "#1ab8c4", background: "rgba(26,184,196,0.05)", padding: "2px 8px", borderRadius: 6 }}>{r.code}</span>
+                            <span style={{ padding: "3px 10px", borderRadius: 12, fontSize: 10, fontWeight: 600, color: st.color, background: `${st.color}12`, border: `1px solid ${st.color}20` }}>{st.icon} {st.label}</span>
                           </div>
                           <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 3 }}>💻 {devName}</div>
                           <div style={{ fontSize: 11, color: "var(--text-muted)" }}>🔧 {r.issue}</div>
@@ -433,12 +433,12 @@ export default function ExtractoPage() {
         {/* ═══ ESTADÍSTICAS ═══ */}
         <div className="form-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14, marginBottom: 28 }}>
           {[
-            { label: "Clientes", value: totalClients, icon: "👤", color: "#6366f1", gradient: "linear-gradient(135deg, rgba(99,102,241,0.1), rgba(99,102,241,0.02))" },
-            { label: "Equipos Total", value: totalDevices, icon: "💻", color: "#10b981", gradient: "linear-gradient(135deg, rgba(16,185,129,0.1), rgba(16,185,129,0.02))" },
-            { label: "En Taller", value: activeDevices, icon: "🔧", color: "#f59e0b", gradient: "linear-gradient(135deg, rgba(245,158,11,0.1), rgba(245,158,11,0.02))" },
+            { label: "Clientes", value: totalClients, icon: "👤", color: "#1ab8c4", gradient: "" },
+            { label: "Equipos Total", value: totalDevices, icon: "💻", color: "#10b981", gradient: "" },
+            { label: "En Taller", value: activeDevices, icon: "🔧", color: "#f59e0b", gradient: "" },
           ].map((s, i) => (
-            <div key={i} style={{ padding: "20px 18px", background: s.gradient, borderRadius: 16, border: `1px solid ${s.color}15`, position: "relative", overflow: "hidden", animation: `fadeIn 0.4s ease-out ${i * 0.06}s both` }}>
-              <div style={{ position: "absolute", top: -10, right: -10, fontSize: 48, opacity: 0.06 }}>{s.icon}</div>
+            <div key={i} style={{ padding: "20px 18px", background: "#ffffff", borderRadius: 12, border: "1.5px solid #cbd5e8", borderTop: `4px solid ${s.color}`, boxShadow: "0 4px 18px rgba(30,42,58,0.10), 0 1px 3px rgba(30,42,58,0.05)", position: "relative", overflow: "hidden", animation: `fadeIn 0.4s ease-out ${i * 0.06}s both` }}>
+              <div style={{ position: "absolute", top: 8, right: 12, fontSize: 28, opacity: 0.12 }}>{s.icon}</div>
               <div style={{ fontSize: 11, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.8px", fontWeight: 600 }}>{s.label}</div>
               <div style={{ fontSize: 28, fontWeight: 800, color: s.color, marginTop: 8 }}>{s.value}</div>
             </div>
@@ -454,7 +454,7 @@ export default function ExtractoPage() {
           </div>
           <div style={{ display: "flex", gap: 6 }}>
             {[
-              { key: "all", label: "Todos", icon: "📄", color: "#6366f1" },
+              { key: "all", label: "Todos", icon: "📄", color: "#1ab8c4" },
               { key: "active", label: "En Taller", icon: "🔧", color: "#f59e0b" },
               { key: "delivered", label: "Entregados", icon: "📱", color: "#6b7280" },
             ].map(f => {
@@ -464,7 +464,7 @@ export default function ExtractoPage() {
           </div>
           <div style={{ marginLeft: "auto", display: "flex", gap: 10 }}>
             <button onClick={() => setShowClientPicker(true)} style={{ padding: "10px 20px", background: "linear-gradient(135deg, #10b981, #059669)", border: "none", borderRadius: 12, color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer", boxShadow: "0 4px 16px rgba(16,185,129,0.3)", display: "flex", alignItems: "center", gap: 6 }}>👤 Buscar Cliente</button>
-            <button onClick={printExtractoGeneral} style={{ padding: "10px 20px", background: "linear-gradient(135deg, #6366f1, #7c3aed)", border: "none", borderRadius: 12, color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer", boxShadow: "0 4px 16px rgba(99,102,241,0.3)", display: "flex", alignItems: "center", gap: 6 }}>🖨️ Imprimir Extracto</button>
+            <button onClick={printExtractoGeneral} style={{ padding: "10px 20px", background: "linear-gradient(135deg, #1ab8c4, #149aa5)", border: "none", borderRadius: 12, color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer", boxShadow: "0 4px 16px rgba(26,184,196,0.14)", display: "flex", alignItems: "center", gap: 6 }}>🖨️ Imprimir Extracto</button>
           </div>
         </div>
 
@@ -490,12 +490,12 @@ export default function ExtractoPage() {
 
         {/* ═══ TABLA PLANA POR OT ═══ */}
         {loading ? (
-          <div style={{ background: "var(--bg-card)", borderRadius: 18, border: "1px solid var(--border)", overflow: "hidden" }}>
+          <div style={{ background: "var(--bg-card)", borderRadius: 14, border: "1.5px solid #cbd5e8", overflow: "hidden" }}>
             <div style={{ padding: "12px 16px", background: "var(--bg-tertiary)" }}>
               <div className="skeleton" style={{ height: 12, width: "60%" }} />
             </div>
             {[...Array(6)].map((_, i) => (
-              <div key={i} style={{ display: "flex", gap: 16, padding: "14px 16px", borderBottom: "1px solid var(--border)", animation: `cardIn 0.3s ease-out ${i * 0.06}s both` }}>
+              <div key={i} style={{ display: "flex", gap: 16, padding: "14px 16px", borderBottom: "1.5px solid #cbd5e8", animation: `cardIn 0.3s ease-out ${i * 0.06}s both` }}>
                 <div className="skeleton" style={{ width: 40, height: 14 }} />
                 <div className="skeleton" style={{ width: 50, height: 14 }} />
                 <div className="skeleton" style={{ flex: 1, height: 14 }} />
@@ -507,9 +507,9 @@ export default function ExtractoPage() {
             ))}
           </div>
         ) : displayRepairs.length === 0 ? (
-          <div style={{ padding: 60, textAlign: "center", background: "var(--bg-card)", borderRadius: 18, border: "1px solid var(--border)" }}><div style={{ fontSize: 48, marginBottom: 16 }}>📊</div><h3 style={{ fontSize: 17, fontWeight: 700, marginBottom: 6 }}>Sin resultados</h3><p style={{ color: "var(--text-muted)", fontSize: 13 }}>No se encontraron equipos con los filtros actuales</p></div>
+          <div style={{ padding: 60, textAlign: "center", background: "var(--bg-card)", borderRadius: 14, border: "1.5px solid #cbd5e8" }}><div style={{ fontSize: 48, marginBottom: 16 }}>📊</div><h3 style={{ fontSize: 17, fontWeight: 700, marginBottom: 6 }}>Sin resultados</h3><p style={{ color: "var(--text-muted)", fontSize: 13 }}>No se encontraron equipos con los filtros actuales</p></div>
         ) : (
-          <div style={{ background: "var(--bg-card)", borderRadius: 18, border: "1px solid var(--border)", overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
+          <div style={{ background: "var(--bg-card)", borderRadius: 14, border: "1.5px solid #cbd5e8", overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 700 }}>
               <thead>
                 <tr style={{ background: "var(--bg-tertiary)" }}>
@@ -524,14 +524,14 @@ export default function ExtractoPage() {
                 </tr>
               </thead>
               <tbody>
-                {paginatedRepairs.map((r, idx) => {
+                {(paginatedRepairs || []).map((r, idx) => {
                   const st = STATUS[r.status] || { label: r.status, color: "#666", icon: "❓" };
                   const devName = [r.device, r.brand, r.model].filter(Boolean).join(" ");
                   return (
-                    <tr key={r.id} className="row-hover" style={{ borderBottom: "1px solid var(--border)", transition: "background 0.15s", cursor: "pointer" }} onClick={() => openClientDetail(r.clientName || "", r.clientPhone || "")}>
+                    <tr key={r.id} className="row-hover" style={{ borderBottom: "1.5px solid #cbd5e8", transition: "background 0.15s", cursor: "pointer" }} onClick={() => openClientDetail(r.clientName || "", r.clientPhone || "")}>
                       <td style={{ padding: "14px 16px", textAlign: "center", fontSize: 12, color: "var(--text-muted)", fontWeight: 600 }}>{(extPage - 1) * EXT_PAGE_SIZE + idx + 1}</td>
                       <td style={{ padding: "14px 16px" }}>
-                        <span style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#6366f1", background: "rgba(99,102,241,0.08)", padding: "3px 10px", borderRadius: 6 }}>{r.code}</span>
+                        <span style={{ fontFamily: "monospace", fontSize: 13, fontWeight: 700, color: "#1ab8c4", background: "rgba(26,184,196,0.05)", padding: "3px 10px", borderRadius: 6 }}>{r.code}</span>
                       </td>
                       <td style={{ padding: "14px 16px", fontSize: 13, fontWeight: 600 }}>💻 {devName}</td>
                       <td style={{ padding: "14px 16px", fontSize: 13, fontWeight: 600 }}>👤 {r.clientName || "—"}</td>
@@ -540,7 +540,7 @@ export default function ExtractoPage() {
                         <div style={{ fontSize: 12, color: "var(--text-muted)", maxWidth: 220, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>🔧 {r.issue}</div>
                       </td>
                       <td style={{ padding: "14px 16px", textAlign: "center" }}>
-                        <span style={{ padding: "4px 12px", borderRadius: 20, fontSize: 10, fontWeight: 600, color: st.color, background: `${st.color}12`, border: `1px solid ${st.color}20` }}>{st.icon} {st.label}</span>
+                        <span style={{ padding: "4px 12px", borderRadius: 12, fontSize: 10, fontWeight: 600, color: st.color, background: `${st.color}12`, border: `1px solid ${st.color}20` }}>{st.icon} {st.label}</span>
                       </td>
                       <td style={{ padding: "14px 16px", textAlign: "center", fontSize: 12, color: "var(--text-muted)" }}>
                         {new Date(r.createdAt).toLocaleDateString("es-BO", { day: "2-digit", month: "2-digit", year: "2-digit" })}
@@ -564,7 +564,7 @@ export default function ExtractoPage() {
               .map((p, i) => typeof p === "string" ? (
                 <span key={`d-${i}`} style={{ padding: "8px 6px", fontSize: 12, color: "var(--text-muted)" }}>...</span>
               ) : (
-                <button key={p} onClick={() => goExtPage(p as number)} style={{ padding: "8px 14px", borderRadius: 8, border: p === extPage ? "1.5px solid #6366f1" : "1px solid var(--border)", background: p === extPage ? "rgba(99,102,241,0.15)" : "var(--bg-card)", color: p === extPage ? "#818cf8" : "var(--text-secondary)", fontSize: 12, fontWeight: p === extPage ? 800 : 600, cursor: "pointer", minWidth: 38 }}>{p}</button>
+                <button key={p} onClick={() => goExtPage(p as number)} style={{ padding: "8px 14px", borderRadius: 8, border: p === extPage ? "1.5px solid #1ab8c4" : "1px solid var(--border)", background: p === extPage ? "rgba(26,184,196,0.08)" : "var(--bg-card)", color: p === extPage ? "#2dd4df" : "var(--text-secondary)", fontSize: 12, fontWeight: p === extPage ? 800 : 600, cursor: "pointer", minWidth: 38 }}>{p}</button>
               ))}
             <button onClick={() => goExtPage(extPage + 1)} disabled={extPage === extTotalPages} style={{ padding: "8px 12px", borderRadius: 8, border: "1px solid var(--border)", background: extPage === extTotalPages ? "var(--bg-tertiary)" : "var(--bg-card)", color: extPage === extTotalPages ? "var(--text-muted)" : "var(--text-secondary)", fontSize: 12, fontWeight: 600, cursor: extPage === extTotalPages ? "default" : "pointer", opacity: extPage === extTotalPages ? 0.5 : 1 }}>›</button>
             <button onClick={() => goExtPage(extTotalPages)} disabled={extPage === extTotalPages} style={{ padding: "8px 12px", borderRadius: 8, border: "1px solid var(--border)", background: extPage === extTotalPages ? "var(--bg-tertiary)" : "var(--bg-card)", color: extPage === extTotalPages ? "var(--text-muted)" : "var(--text-secondary)", fontSize: 12, fontWeight: 600, cursor: extPage === extTotalPages ? "default" : "pointer", opacity: extPage === extTotalPages ? 0.5 : 1 }}>»</button>

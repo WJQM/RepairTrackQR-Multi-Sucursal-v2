@@ -38,7 +38,7 @@ export async function GET(request: Request) {
     ];
   }
 
-  // Non-paginated: return plain array (extracto, asignaciones, messages)
+  // Non-paginated: return plain array (extracto, asignaciones)
   if (!paginated) {
     const repairs = await prisma.repair.findMany({
       where, include: { technician: { select: { id: true, name: true } }, branch: { select: { id: true, name: true } } },

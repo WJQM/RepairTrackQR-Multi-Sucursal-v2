@@ -28,7 +28,7 @@ function getDisplayName(eq: Equipment): string {
 
 const CONDITIONS: Record<string, { label: string; color: string; icon: string }> = {
   disponible: { label: "DISPONIBLE", color: "#10b981", icon: "✅" },
-  vendido: { label: "VENDIDO", color: "#6366f1", icon: "💰" },
+  vendido: { label: "VENDIDO", color: "#1ab8c4", icon: "💰" },
   en_reparacion: { label: "EN REPARACIÓN", color: "#f59e0b", icon: "🔧" },
 };
 
@@ -49,7 +49,7 @@ export default function EquipmentFichaPrintPage() {
     setBaseUrl(window.location.origin);
     const m = new URLSearchParams(window.location.search).get("mode");
     if (m === "sticker") setMode("sticker");
-    fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings(d); }).catch(() => {});
+    fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings(d).catch(() => {}); }).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -83,18 +83,18 @@ export default function EquipmentFichaPrintPage() {
 
   // Build specs list
   const specs: { icon: string; label: string; value: string; color: string }[] = [];
-  if (eq.brand) specs.push({ icon: "🏷️", label: "Marca", value: eq.brand, color: "#6366f1" });
-  if (eq.model) specs.push({ icon: "📦", label: "Modelo", value: eq.model, color: "#6366f1" });
-  if (eq.processor) specs.push({ icon: "⚡", label: "Procesador", value: eq.processor, color: "#6366f1" });
+  if (eq.brand) specs.push({ icon: "🏷️", label: "Marca", value: eq.brand, color: "#1ab8c4" });
+  if (eq.model) specs.push({ icon: "📦", label: "Modelo", value: eq.model, color: "#1ab8c4" });
+  if (eq.processor) specs.push({ icon: "⚡", label: "Procesador", value: eq.processor, color: "#1ab8c4" });
   if (eq.ram) specs.push({ icon: "🧠", label: "Memoria RAM", value: eq.ram, color: "#10b981" });
   if (eq.storage) specs.push({ icon: "💾", label: "Disco Principal", value: eq.storage, color: "#f59e0b" });
   if (eq.storage2) specs.push({ icon: "💾", label: "Disco Secundario", value: eq.storage2, color: "#f59e0b" });
   if (eq.graphicsCard) specs.push({ icon: "🎮", label: "Tarjeta Gráfica", value: eq.graphicsCard, color: "#ec4899" });
   if (eq.screenSize) specs.push({ icon: "📐", label: "Pantalla", value: eq.screenSize, color: "#a855f7" });
-  if (eq.os) specs.push({ icon: "🖥️", label: "Sistema Operativo", value: eq.os, color: "#06b6d4" });
-  if (eq.cabinet) specs.push({ icon: "🏗️", label: "Gabinete", value: eq.cabinet, color: "#f43f5e" });
+  if (eq.os) specs.push({ icon: "🖥️", label: "Sistema Operativo", value: eq.os, color: "#0891b2" });
+  if (eq.cabinet) specs.push({ icon: "🏗️", label: "Gabinete", value: eq.cabinet, color: "#e11d48" });
   if (eq.motherboard) specs.push({ icon: "🔌", label: "Placa Madre", value: eq.motherboard, color: "#14b8a6" });
-  if (eq.powerSupply) specs.push({ icon: "⚡", label: "Fuente de Poder", value: eq.powerSupply, color: "#fb923c" });
+  if (eq.powerSupply) specs.push({ icon: "⚡", label: "Fuente de Poder", value: eq.powerSupply, color: "#ea580c" });
 
   return (
     <div style={{ background: "#fff", minHeight: "100vh", fontFamily: "'Segoe UI', Arial, sans-serif", color: "#111" }}>
@@ -111,28 +111,28 @@ export default function EquipmentFichaPrintPage() {
       `}</style>
 
       {/* Top bar (not printed) */}
-      <div className="no-print" style={{ position: "sticky", top: 0, padding: "12px 24px", background: "#111118", display: "flex", justifyContent: "space-between", alignItems: "center", zIndex: 100, flexWrap: "wrap", gap: 8 }}>
+      <div className="no-print" style={{ position: "sticky", top: 0, padding: "12px 24px", background: "#ffffff", display: "flex", justifyContent: "space-between", alignItems: "center", zIndex: 100, flexWrap: "wrap", gap: 8 }}>
         <span style={{ color: "#eee", fontSize: 14, fontWeight: 600 }}>
           {mode === "sticker" ? "🏷️ Sticker QR" : "🏷️ Ficha Técnica"} · {shortCode}
         </span>
         <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
           {/* Mode toggle */}
-          <div style={{ display: "flex", gap: 0, background: "#1e1e2e", border: "1px solid #333", borderRadius: 6, overflow: "hidden" }}>
+          <div style={{ display: "flex", gap: 0, background: "#e8ebf2", border: "1px solid #333", borderRadius: 6, overflow: "hidden" }}>
             <button onClick={() => { setMode("full"); const u = new URL(window.location.href); u.searchParams.delete("mode"); window.history.replaceState({}, "", u.toString()); }} style={{ padding: "7px 12px", background: mode === "full" ? "#3b82f6" : "transparent", border: "none", color: mode === "full" ? "#fff" : "#888", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>📄 Ficha completa</button>
-            <button onClick={() => { setMode("sticker"); const u = new URL(window.location.href); u.searchParams.set("mode", "sticker"); window.history.replaceState({}, "", u.toString()); }} style={{ padding: "7px 12px", background: mode === "sticker" ? "#06b6d4" : "transparent", border: "none", color: mode === "sticker" ? "#fff" : "#888", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>🏷️ Solo QR</button>
+            <button onClick={() => { setMode("sticker"); const u = new URL(window.location.href); u.searchParams.set("mode", "sticker"); window.history.replaceState({}, "", u.toString()); }} style={{ padding: "7px 12px", background: mode === "sticker" ? "#0891b2" : "transparent", border: "none", color: mode === "sticker" ? "#fff" : "#888", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>🏷️ Solo QR</button>
           </div>
           {/* Sticker size (only visible in sticker mode) */}
           {mode === "sticker" && (
-            <div style={{ display: "flex", gap: 0, background: "#1e1e2e", border: "1px solid #333", borderRadius: 6, overflow: "hidden" }}>
-              <button onClick={() => setStickerSize("small")} style={{ padding: "7px 10px", background: stickerSize === "small" ? "#06b6d4" : "transparent", border: "none", color: stickerSize === "small" ? "#fff" : "#888", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>S</button>
-              <button onClick={() => setStickerSize("medium")} style={{ padding: "7px 10px", background: stickerSize === "medium" ? "#06b6d4" : "transparent", border: "none", color: stickerSize === "medium" ? "#fff" : "#888", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>M</button>
-              <button onClick={() => setStickerSize("large")} style={{ padding: "7px 10px", background: stickerSize === "large" ? "#06b6d4" : "transparent", border: "none", color: stickerSize === "large" ? "#fff" : "#888", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>L</button>
+            <div style={{ display: "flex", gap: 0, background: "#e8ebf2", border: "1px solid #333", borderRadius: 6, overflow: "hidden" }}>
+              <button onClick={() => setStickerSize("small")} style={{ padding: "7px 10px", background: stickerSize === "small" ? "#0891b2" : "transparent", border: "none", color: stickerSize === "small" ? "#fff" : "#888", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>S</button>
+              <button onClick={() => setStickerSize("medium")} style={{ padding: "7px 10px", background: stickerSize === "medium" ? "#0891b2" : "transparent", border: "none", color: stickerSize === "medium" ? "#fff" : "#888", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>M</button>
+              <button onClick={() => setStickerSize("large")} style={{ padding: "7px 10px", background: stickerSize === "large" ? "#0891b2" : "transparent", border: "none", color: stickerSize === "large" ? "#fff" : "#888", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>L</button>
             </div>
           )}
-          <button onClick={() => { navigator.clipboard.writeText(portalUrl); }} style={{ padding: "7px 14px", background: "#1e1e2e", border: "1px solid #333", borderRadius: 6, color: "#eee", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>🔗 Copiar link</button>
-          <button onClick={() => window.open(portalUrl, "_blank")} style={{ padding: "7px 14px", background: "#1e1e2e", border: "1px solid #333", borderRadius: 6, color: "#eee", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>👁️ Ver en portal</button>
+          <button onClick={() => { navigator.clipboard.writeText(portalUrl); }} style={{ padding: "7px 14px", background: "#e8ebf2", border: "1px solid #333", borderRadius: 6, color: "#eee", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>🔗 Copiar link</button>
+          <button onClick={() => window.open(portalUrl, "_blank")} style={{ padding: "7px 14px", background: "#e8ebf2", border: "1px solid #333", borderRadius: 6, color: "#eee", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>👁️ Ver en portal</button>
           <button onClick={() => window.print()} style={{ padding: "7px 18px", background: "#3b82f6", border: "none", borderRadius: 6, color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>🖨️ Imprimir</button>
-          <button onClick={() => window.close()} style={{ padding: "7px 14px", background: "#1e1e2e", border: "1px solid #333", borderRadius: 6, color: "#888", fontSize: 12, cursor: "pointer" }}>✕</button>
+          <button onClick={() => window.close()} style={{ padding: "7px 14px", background: "#e8ebf2", border: "1px solid #333", borderRadius: 6, color: "#888", fontSize: 12, cursor: "pointer" }}>✕</button>
         </div>
       </div>
 
@@ -145,7 +145,7 @@ export default function EquipmentFichaPrintPage() {
         };
         const sz = sizeMap[stickerSize];
         const qrImgBig = portalUrl ? `https://api.qrserver.com/v1/create-qr-code/?size=${sz.qr * 2}x${sz.qr * 2}&data=${encodeURIComponent(portalUrl)}&color=000000&margin=2` : "";
-        const eqColor = "#06b6d4";
+        const eqColor = "#0891b2";
         const eqAccent = "#0e7490";
         return (
           <div className="sticker-wrap" style={{ display: "flex", justifyContent: "center", padding: "28px 16px", minHeight: "calc(100vh - 60px)" }}>
@@ -184,7 +184,7 @@ export default function EquipmentFichaPrintPage() {
 
               {/* Price */}
               <div style={{ fontSize: sz.title + 1, fontWeight: 800, color: "#10b981", marginBottom: 10 }}>
-                Bs. {eq.price.toFixed(2)}
+                Bs. {Math.round(eq.price || 0).toLocaleString()}
               </div>
 
               {/* QR */}
@@ -231,7 +231,7 @@ export default function EquipmentFichaPrintPage() {
               <p style={{ fontSize: 8, color: "#888" }}>{today}</p>
             </div>
           </div>
-          <div style={{ height: 3, background: `linear-gradient(90deg, ${accent}, #6366f1, #a5b4fc, transparent)`, borderRadius: 2, marginBottom: 12 }} />
+          <div style={{ height: 3, background: `linear-gradient(90deg, ${accent}, #1ab8c4, #a5b4fc, transparent)`, borderRadius: 2, marginBottom: 12 }} />
 
           {/* Company contact line */}
           {(settings.phone || settings.email || settings.address) && (
@@ -239,20 +239,20 @@ export default function EquipmentFichaPrintPage() {
               {settings.phone && <span>📞 {settings.phone}</span>}
               {settings.email && <span>✉️ {settings.email}</span>}
               {settings.address && <span>📍 {settings.address}</span>}
-              {eq.branch && <span style={{ color: "#6366f1", fontWeight: 700 }}>🏢 {eq.branch.name}</span>}
+              {eq.branch && <span style={{ color: "#1ab8c4", fontWeight: 700 }}>🏢 {eq.branch.name}</span>}
             </div>
           )}
 
           {/* Title + condition + type */}
           <div style={{ padding: "10px 14px", background: "#f8f9ff", border: "1px solid #e5e7fa", borderRadius: 6, marginBottom: 12, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
             <div>
-              <div style={{ fontSize: 8, fontWeight: 700, color: "#6366f1", textTransform: "uppercase", letterSpacing: "0.6px", marginBottom: 2 }}>
+              <div style={{ fontSize: 8, fontWeight: 700, color: "#1ab8c4", textTransform: "uppercase", letterSpacing: "0.6px", marginBottom: 2 }}>
                 {eq.type === "laptop" ? "💻 Laptop" : "🖥️ PC de Escritorio"}
               </div>
               <h2 style={{ fontSize: 18, fontWeight: 800, color: "#111" }}>{dName}</h2>
             </div>
             <div style={{ display: "flex", gap: 6 }}>
-              <span style={{ padding: "4px 12px", borderRadius: 16, fontSize: 9, fontWeight: 700, color: cond.color, background: `${cond.color}10`, border: `1px solid ${cond.color}30` }}>
+              <span style={{ padding: "4px 12px", borderRadius: 12, fontSize: 9, fontWeight: 700, color: cond.color, background: `${cond.color}10`, border: `1px solid ${cond.color}30` }}>
                 {cond.icon} {cond.label}
               </span>
             </div>
@@ -280,7 +280,7 @@ export default function EquipmentFichaPrintPage() {
               {/* Price big */}
               <div style={{ padding: "12px 16px", background: "linear-gradient(135deg, #10b98108, #10b98103)", border: "2px solid #10b98140", borderRadius: 6, textAlign: "center" }}>
                 <div style={{ fontSize: 9, fontWeight: 700, color: "#10b981", textTransform: "uppercase", letterSpacing: "0.8px", marginBottom: 2 }}>💰 Precio</div>
-                <div style={{ fontSize: 28, fontWeight: 800, color: "#10b981", lineHeight: 1.1 }}>Bs. {eq.price.toFixed(2)}</div>
+                <div style={{ fontSize: 28, fontWeight: 800, color: "#10b981", lineHeight: 1.1 }}>Bs. {Math.round(eq.price || 0).toLocaleString()}</div>
               </div>
 
               {/* QR code */}

@@ -17,7 +17,7 @@ export default function MonthlyReportPage() {
   const [companyName, setCompanyName] = useState("RepairTrackQR");
 
   useEffect(() => {
-    fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d?.companyName) setCompanyName(d.companyName); }).catch(() => {});
+    fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d?.companyName) setCompanyName(d.companyName).catch(() => {}); }).catch(() => {});
 
     const url = `/api/reports/monthly?year=${params.year}&month=${params.month}${branchId ? `&branchId=${branchId}` : ""}`;
     apiFetch(url)
@@ -52,16 +52,16 @@ export default function MonthlyReportPage() {
       <div className="no-print" style={{ padding: 16, background: "#f1f5f9", borderBottom: "1px solid #cbd5e1", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <span style={{ fontSize: 13, color: "#334155", fontWeight: 600 }}>Reporte mensual — se imprimirá automáticamente</span>
         <div style={{ display: "flex", gap: 8 }}>
-          <button onClick={() => window.print()} style={{ padding: "8px 16px", background: "#6366f1", color: "#fff", border: "none", borderRadius: 8, fontWeight: 700, cursor: "pointer" }}>🖨️ Imprimir / Guardar PDF</button>
+          <button onClick={() => window.print()} style={{ padding: "8px 16px", background: "#1ab8c4", color: "#fff", border: "none", borderRadius: 8, fontWeight: 700, cursor: "pointer" }}>🖨️ Imprimir / Guardar PDF</button>
           <button onClick={() => window.close()} style={{ padding: "8px 16px", background: "#fff", color: "#334155", border: "1px solid #cbd5e1", borderRadius: 8, fontWeight: 600, cursor: "pointer" }}>Cerrar</button>
         </div>
       </div>
 
       <div style={{ maxWidth: 900, margin: "0 auto", padding: "20px 24px" }}>
         {/* Header */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "3px solid #6366f1", paddingBottom: 14, marginBottom: 18 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "3px solid #1ab8c4", paddingBottom: 14, marginBottom: 18 }}>
           <div>
-            <h1 style={{ fontSize: 22, fontWeight: 800, color: "#6366f1", margin: 0 }}>{companyName}</h1>
+            <h1 style={{ fontSize: 22, fontWeight: 800, color: "#1ab8c4", margin: 0 }}>{companyName}</h1>
             <p style={{ fontSize: 11, color: "#64748b", margin: "3px 0 0" }}>{data.branchName}</p>
           </div>
           <div style={{ textAlign: "right" }}>
@@ -76,7 +76,7 @@ export default function MonthlyReportPage() {
           <h2 style={{ fontSize: 12, fontWeight: 700, color: "#334155", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 10 }}>📊 Resumen Ejecutivo</h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
             {[
-              { label: "OTs creadas", value: data.summary.totalRepairs, color: "#6366f1" },
+              { label: "OTs creadas", value: data.summary.totalRepairs, color: "#1ab8c4" },
               { label: "OTs entregadas", value: data.summary.deliveredCount, color: "#10b981" },
               { label: "Ventas", value: data.summary.salesCount, color: "#a855f7" },
               { label: "Cotizaciones", value: data.summary.quotationsCount, color: "#f59e0b" },

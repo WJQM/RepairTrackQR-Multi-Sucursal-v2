@@ -10,7 +10,7 @@ interface Branch { id: string; name: string; }
 
 const ROLE_LABELS: Record<string, { label: string; color: string; icon: string }> = {
   superadmin: { label: "Super Admin", color: "#f59e0b", icon: "⭐" },
-  admin: { label: "Administrador", color: "#6366f1", icon: "👤" },
+  admin: { label: "Administrador", color: "#1ab8c4", icon: "👤" },
   tech: { label: "Técnico", color: "#10b981", icon: "🔧" },
 };
 
@@ -43,10 +43,10 @@ export default function AdminUsersPage() {
   const [settings, setSettings] = useState<{ companyName: string; logo: string | null }>({ companyName: "RepairTrackQR", logo: null });
 
   useEffect(() => {
-    fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings({ companyName: d.companyName, logo: d.logo }); }).catch(() => {});
+    fetch("/api/settings").then(r => r.ok ? r.json() : null).then(d => { if (d) setSettings({ companyName: d.companyName, logo: d.logo }).catch(() => {}); }).catch(() => {});
     const userData = sessionStorage.getItem("user"); const token = sessionStorage.getItem("token");
     if (!userData || !token) { router.push("/"); return; }
-    const parsed = JSON.parse(userData);
+    const parsed = (() => { try { return JSON.parse(userData); } catch { return null; } })();
     if (parsed.role !== "superadmin") { router.push("/dashboard"); return; }
     setUser(parsed);
     loadData();
@@ -96,7 +96,7 @@ export default function AdminUsersPage() {
     const r = ROLE_LABELS[u.role] || { label: u.role, color: "#888", icon: "❓" };
     const isSuspended = u.status === "suspended";
     return (
-      <div style={{ background: "var(--bg-card)", borderRadius: 16, border: isPending ? "2px solid rgba(245,158,11,0.3)" : isSuspended ? "1px solid rgba(239,68,68,0.2)" : "1px solid var(--border)", display: "flex", overflow: "hidden", opacity: isSuspended ? 0.6 : 1 }}>
+      <div style={{ background: "var(--bg-card)", borderRadius: 12, border: isPending ? "2px solid rgba(245,158,11,0.3)" : isSuspended ? "1px solid rgba(239,68,68,0.2)" : "1px solid var(--border)", display: "flex", overflow: "hidden", opacity: isSuspended ? 0.6 : 1 }}>
         {/* Photo */}
         <div style={{ width: 100, minWidth: 100, background: u.image ? "#000" : `linear-gradient(135deg, ${r.color}18, ${r.color}06)`, display: "flex", alignItems: "center", justifyContent: "center", borderRight: "1px solid var(--border)" }}>
           {u.image
@@ -119,7 +119,7 @@ export default function AdminUsersPage() {
               </div>
             ) : (
               <div style={{ display: "flex", gap: 4, flexShrink: 0 }}>
-                <button onClick={() => startEdit(u)} title="Editar" style={btnStyle("#6366f1")}>✏️</button>
+                <button onClick={() => startEdit(u)} title="Editar" style={btnStyle("#1ab8c4")}>✏️</button>
                 {u.role !== "superadmin" && <button onClick={() => { setShowTransfer(u); setTransferBranchId(""); }} title="Transferir" style={btnStyle("#10b981")}>🔄</button>}
                 {u.role !== "superadmin" && <button onClick={() => handleSuspend(u)} title={isSuspended ? "Reactivar" : "Suspender"} style={btnStyle(isSuspended ? "#10b981" : "#f59e0b")}>{isSuspended ? "✅" : "⛔"}</button>}
                 <button onClick={() => handleDelete(u)} title="Eliminar" style={btnStyle("#ef4444")}>🗑️</button>
@@ -146,10 +146,10 @@ export default function AdminUsersPage() {
       <style>{`
         .sidebar-btn{display:flex;align-items:center;gap:10px;width:100%;padding:10px 14px;border-radius:10px;border:none;font-size:12px;font-weight:600;cursor:pointer;background:transparent;color:var(--text-muted);transition:all .15s;text-align:left}
         .sidebar-btn:hover{background:rgba(99,102,241,.06);color:var(--text-secondary)}
-        .sidebar-btn.active{background:rgba(99,102,241,.12);color:#818cf8}
+        .sidebar-btn.active{background:rgba(99,102,241,.12);color:#2dd4df}
         .sidebar-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
-        .form-input{width:100%;padding:10px 14px;background:rgba(22,22,31,.8);border:1px solid var(--border);border-radius:10px;color:var(--text-primary);font-size:13px;outline:none}
-        .form-input:focus{border-color:#6366f1}
+        .form-input{width:100%;padding:10px 14px;background:#ffffff;border:1px solid var(--border);border-radius:10px;color:#1e2a3a;font-size:13px;outline:none}
+        .form-input:focus{border-color:#1ab8c4;box-shadow:0 0 0 3px rgba(26,184,196,0.12);background:#ffffff}
         @media(max-width:768px){
           .sidebar-desktop{transform:translateX(-100%)!important}
           .sidebar-desktop.open{transform:translateX(0)!important}
@@ -163,7 +163,7 @@ export default function AdminUsersPage() {
       <AppSidebar user={user} />
 
       {/* MAIN */}
-      <main className="main-content" style={{ marginLeft: 200, padding: "24px 28px", minHeight: "100vh" }}>
+      <main className="main-content" style={{ marginLeft: 210, padding: "24px 28px", minHeight: "100vh" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24, flexWrap: "wrap", gap: 12 }}>
           <div>
             <h1 style={{ fontSize: 22, fontWeight: 800 }}>👥 Gestión de Usuarios</h1>
@@ -171,14 +171,14 @@ export default function AdminUsersPage() {
               {users.length} usuarios{pendingUsers.length > 0 && <span style={{ color: "#f59e0b", fontWeight: 700 }}> • {pendingUsers.length} pendiente{pendingUsers.length > 1 ? "s" : ""}</span>}
             </p>
           </div>
-          <button onClick={() => { resetForm(); setShowForm(true); }} style={{ padding: "10px 20px", background: "linear-gradient(135deg, #6366f1, #7c3aed)", border: "none", borderRadius: 12, color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer", boxShadow: "0 4px 16px rgba(99,102,241,0.3)" }}>＋ Nuevo Usuario</button>
+          <button onClick={() => { resetForm(); setShowForm(true); }} style={{ padding: "10px 20px", background: "linear-gradient(135deg, #1ab8c4, #149aa5)", border: "none", borderRadius: 12, color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer", boxShadow: "0 4px 16px rgba(26,184,196,0.14)" }}>＋ Nuevo Usuario</button>
         </div>
 
         {/* Filters */}
         <div style={{ display: "flex", gap: 10, marginBottom: 20, flexWrap: "wrap" }}>
           <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="🔍 Buscar..." style={{ flex: 1, minWidth: 180, padding: "10px 14px", background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 10, color: "var(--text-primary)", fontSize: 13, outline: "none" }} />
           {["all", "superadmin", "admin", "tech"].map(r => (
-            <button key={r} onClick={() => setFilterRole(r)} style={{ padding: "8px 14px", borderRadius: 10, border: "1px solid", borderColor: filterRole === r ? "#6366f1" : "var(--border)", background: filterRole === r ? "rgba(99,102,241,0.12)" : "var(--bg-card)", color: filterRole === r ? "#818cf8" : "var(--text-muted)", fontSize: 12, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}>
+            <button key={r} onClick={() => setFilterRole(r)} style={{ padding: "8px 14px", borderRadius: 10, border: "1px solid", borderColor: filterRole === r ? "#1ab8c4" : "var(--border)", background: filterRole === r ? "rgba(26,184,196,0.07)" : "var(--bg-card)", color: filterRole === r ? "#2dd4df" : "var(--text-muted)", fontSize: 12, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}>
               {r === "all" ? "Todos" : ROLE_LABELS[r]?.label || r}
             </button>
           ))}
@@ -190,10 +190,10 @@ export default function AdminUsersPage() {
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
               <span style={{ fontSize: 18 }}>⏳</span>
               <h2 style={{ fontSize: 16, fontWeight: 800, color: "#f59e0b" }}>Solicitudes Pendientes</h2>
-              <span style={{ padding: "2px 10px", borderRadius: 20, background: "rgba(245,158,11,0.15)", color: "#f59e0b", fontSize: 12, fontWeight: 700 }}>{pendingUsers.length}</span>
+              <span style={{ padding: "2px 10px", borderRadius: 12, background: "rgba(245,158,11,0.15)", color: "#f59e0b", fontSize: 12, fontWeight: 700 }}>{pendingUsers.length}</span>
             </div>
             <div className="users-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(420px, 1fr))", gap: 14 }}>
-              {pendingUsers.map(u => <UserCard key={u.id} u={u} isPending />)}
+              {(pendingUsers || []).map(u => <UserCard key={u.id} u={u} isPending />)}
             </div>
           </div>
         )}
@@ -203,7 +203,7 @@ export default function AdminUsersPage() {
           <div style={{ textAlign: "center", padding: 60, color: "var(--text-muted)" }}>Cargando...</div>
         ) : (
           <div className="users-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(420px, 1fr))", gap: 14 }}>
-            {activeUsers.map(u => <UserCard key={u.id} u={u} />)}
+            {(activeUsers || []).map(u => <UserCard key={u.id} u={u} />)}
           </div>
         )}
       </main>
@@ -211,7 +211,7 @@ export default function AdminUsersPage() {
       {/* Form Modal */}
       {showForm && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }} onClick={() => { setShowForm(false); resetForm(); }}>
-          <div onClick={e => e.stopPropagation()} style={{ maxWidth: 460, width: "100%", background: "var(--bg-card)", borderRadius: 20, border: "1px solid var(--border)", padding: "28px 24px", maxHeight: "90vh", overflow: "auto" }}>
+          <div onClick={e => e.stopPropagation()} style={{ maxWidth: 460, width: "100%", background: "var(--bg-card)", borderRadius: 12, border: "1.5px solid #cbd5e8", padding: "28px 24px", maxHeight: "90vh", overflow: "auto" }}>
             <h3 style={{ fontSize: 18, fontWeight: 800, marginBottom: 20 }}>{editId ? "✏️ Editar Usuario" : "➕ Nuevo Usuario"}</h3>
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               <div>
@@ -233,10 +233,10 @@ export default function AdminUsersPage() {
               <div>
                 <label style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)", marginBottom: 4, display: "block" }}>📸 Foto</label>
                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <div style={{ width: 50, height: 50, borderRadius: 12, background: formImagePreview ? "#000" : "rgba(99,102,241,0.08)", border: "2px dashed rgba(99,102,241,0.2)", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", flexShrink: 0 }}>
+                  <div style={{ width: 50, height: 50, borderRadius: 12, background: formImagePreview ? "#000" : "rgba(26,184,196,0.05)", border: "2px dashed rgba(26,184,196,0.10)", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", flexShrink: 0 }}>
                     {formImagePreview ? <img src={formImagePreview} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <span style={{ fontSize: 18 }}>👤</span>}
                   </div>
-                  <label style={{ padding: "7px 14px", background: "rgba(99,102,241,0.08)", border: "1px solid rgba(99,102,241,0.15)", borderRadius: 8, color: "#818cf8", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>
+                  <label style={{ padding: "7px 14px", background: "rgba(26,184,196,0.05)", border: "1px solid rgba(26,184,196,0.08)", borderRadius: 8, color: "#2dd4df", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>
                     {uploadingImg ? "..." : formImagePreview ? "Cambiar" : "Subir"}
                     <input type="file" accept="image/*" onChange={(e) => { if (e.target.files?.[0]) handleImageUpload(e.target.files[0]); }} style={{ display: "none" }} />
                   </label>
@@ -262,8 +262,8 @@ export default function AdminUsersPage() {
               )}
             </div>
             <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
-              <button onClick={() => { setShowForm(false); resetForm(); }} style={{ flex: 1, padding: "12px", background: "var(--bg-tertiary)", border: "1px solid var(--border)", borderRadius: 12, color: "var(--text-muted)", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>Cancelar</button>
-              <button onClick={handleSubmit} style={{ flex: 1, padding: "12px", background: "linear-gradient(135deg, #6366f1, #7c3aed)", border: "none", borderRadius: 12, color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>{editId ? "Guardar" : "Crear"}</button>
+              <button onClick={() => { setShowForm(false); resetForm(); }} style={{ flex: 1, padding: "12px", background: "#f5f7fc", border: "1.5px solid #cbd5e8", borderRadius: 12, color: "var(--text-secondary)", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>Cancelar</button>
+              <button onClick={handleSubmit} style={{ flex: 1, padding: "12px", background: "linear-gradient(135deg, #1ab8c4, #149aa5)", border: "none", borderRadius: 12, color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>{editId ? "Guardar" : "Crear"}</button>
             </div>
           </div>
         </div>
@@ -272,12 +272,12 @@ export default function AdminUsersPage() {
       {/* Transfer Modal */}
       {showTransfer && (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }} onClick={() => setShowTransfer(null)}>
-          <div onClick={e => e.stopPropagation()} style={{ maxWidth: 400, width: "100%", background: "var(--bg-card)", borderRadius: 20, border: "1px solid var(--border)", padding: "28px 24px" }}>
+          <div onClick={e => e.stopPropagation()} style={{ maxWidth: 400, width: "100%", background: "var(--bg-card)", borderRadius: 12, border: "1.5px solid #cbd5e8", padding: "28px 24px" }}>
             <h3 style={{ fontSize: 18, fontWeight: 800, marginBottom: 6 }}>🔄 Transferir Usuario</h3>
             <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 20 }}>Mover a <strong style={{ color: "var(--text-primary)" }}>{showTransfer.name}</strong> a otra sucursal</p>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20, padding: "12px 14px", background: "var(--bg-tertiary)", borderRadius: 12 }}>
-              <div style={{ width: 40, height: 40, borderRadius: 10, overflow: "hidden", background: "rgba(99,102,241,0.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                {showTransfer.image ? <img src={showTransfer.image} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <span style={{ fontSize: 16, fontWeight: 800, color: "#818cf8" }}>{showTransfer.name.split(" ").slice(0, 2).map(w => w[0]).join("").toUpperCase()}</span>}
+              <div style={{ width: 40, height: 40, borderRadius: 10, overflow: "hidden", background: "rgba(26,184,196,0.06)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                {showTransfer.image ? <img src={showTransfer.image} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <span style={{ fontSize: 16, fontWeight: 800, color: "#2dd4df" }}>{showTransfer.name.split(" ").slice(0, 2).map(w => w[0]).join("").toUpperCase()}</span>}
               </div>
               <div>
                 <div style={{ fontSize: 13, fontWeight: 700 }}>{showTransfer.name}</div>
@@ -290,7 +290,7 @@ export default function AdminUsersPage() {
               {branches.filter(b => b.id !== showTransfer.branchId).map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
             </select>
             <div style={{ display: "flex", gap: 10 }}>
-              <button onClick={() => setShowTransfer(null)} style={{ flex: 1, padding: "12px", background: "var(--bg-tertiary)", border: "1px solid var(--border)", borderRadius: 12, color: "var(--text-muted)", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>Cancelar</button>
+              <button onClick={() => setShowTransfer(null)} style={{ flex: 1, padding: "12px", background: "#f5f7fc", border: "1.5px solid #cbd5e8", borderRadius: 12, color: "var(--text-secondary)", fontWeight: 600, fontSize: 13, cursor: "pointer" }}>Cancelar</button>
               <button onClick={handleTransfer} disabled={!transferBranchId} style={{ flex: 1, padding: "12px", background: transferBranchId ? "linear-gradient(135deg, #10b981, #059669)" : "var(--bg-tertiary)", border: "none", borderRadius: 12, color: "#fff", fontWeight: 700, fontSize: 13, cursor: transferBranchId ? "pointer" : "not-allowed", opacity: transferBranchId ? 1 : 0.5 }}>🔄 Transferir</button>
             </div>
           </div>
