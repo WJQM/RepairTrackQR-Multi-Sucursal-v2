@@ -2,7 +2,7 @@
 export const dynamic = 'force-dynamic'
 import { sileo } from "@/lib/toast";
 import { apiFetch, getStoredAuth, getActiveBranchId, setActiveBranchId } from "@/lib/api";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import { StatusTimeline } from "@/components/StatusTimeline";
@@ -70,7 +70,7 @@ function getGreeting(): string { const h = new Date().getHours(); if (h < 12) re
 function formatClock(date: Date): { time: string; period: string } { const h = date.getHours(); const m = String(date.getMinutes()).padStart(2, "0"); const s = String(date.getSeconds()).padStart(2, "0"); const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h; return { time: `${String(h12).padStart(2, "0")}:${m}:${s}`, period: h >= 12 ? "PM" : "AM" }; }
 function formatDate(date: Date): string { return date.toLocaleDateString("es-BO", { weekday: "long", day: "numeric", month: "long", year: "numeric" }); }
 
-export default function DashboardPage() {
+function DashboardPage() {
   const router = useRouter();
   const [branches, setBranches] = useState<{id:string;name:string}[]>([]);
   const [activeBranch, setActiveBranch] = useState<string>("");
@@ -1008,3 +1008,10 @@ function FormField({ label, value, onChange, placeholder, type = "text" }: { lab
 
 const labelStyle: React.CSSProperties = { display: "block", fontSize: 11, fontWeight: 600, color: "var(--text-muted)", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.5px" };
 const fieldStyle: React.CSSProperties = { width: "100%", padding: "11px 14px", background: "var(--bg-primary)", border: "1.5px solid #cbd5e8", borderRadius: 10, color: "var(--text-primary)", fontSize: 13, outline: "none" };
+export default function Dashboard() {
+  return (
+    <Suspense fallback={<div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", color: "#1ab8c4", fontSize: 16 }}>Cargando...</div>}>
+      <DashboardPage />
+    </Suspense>
+  );
+}
